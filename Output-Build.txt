@@ -1,0 +1,30 @@
+﻿Build started...
+1>------ Build started: Project: SGHMobileApi, Configuration: Debug Any CPU ------
+1>  Restoring NuGet packages...
+1>  To prevent NuGet from downloading packages during build, open the Visual Studio Options dialog, click on the NuGet Package Manager node and uncheck 'Allow NuGet to download missing packages'.
+1>  Feeds used:
+1>    C:\Users\mahsan\.nuget\packages\
+1>    https://api.nuget.org/v3/index.json
+1>    C:\Program Files (x86)\Microsoft SDKs\NuGetPackages\
+1>  
+1>  All packages listed in D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\packages.config are already installed.
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Provider\SimpleAuthorizationServerProvider.cs(18,36,18,64): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Areas\HelpPage\App_Start\HelpPageConfig.cs(38,38,38,53): warning CS0618: 'XmlDataDocument' is obsolete: 'XmlDataDocument class will be removed in a future release.'
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Areas\HelpPage\App_Start\HelpPageConfig.cs(41,44,41,59): warning CS0618: 'XmlDataDocument' is obsolete: 'XmlDataDocument class will be removed in a future release.'
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Extension\IdentityBasicAuthenticationAttribute.cs(18,51,18,68): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\ClientApi\PatientApiCaller.cs(63,52,63,74): warning CS0472: The result of the expression is always 'true' since a value of type 'int' is never equal to 'null' of type 'int?'
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Provider\SimpleAuthorizationServerProvider.cs(90,36,90,65): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\PatientController.cs(369,36,369,42): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Logging\CustomLogHandler.cs(128,34,128,43): warning CS1998: This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Common\Util.cs(541,38,541,40): warning CS0168: The variable 'er' is declared but never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Common\Util.cs(509,22,509,31): warning CS0219: The variable 'SentEmail' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\Login2Controller.cs(61,28,61,34): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\PatientController.cs(644,36,644,42): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\Login2Controller.cs(167,32,167,38): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\Login2Controller.cs(299,32,299,38): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\Login2Controller.cs(434,36,434,42): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\PatientController.cs(1096,25,1096,28): warning CS0219: The variable 'OTP' is assigned but its value is never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\PatientController.cs(1147,30,1147,32): warning CS0168: The variable 'ex' is declared but never used
+1>D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\Controllers\Login2Controller.cs(816,32,816,38): warning CS0219: The variable 'smsRes' is assigned but its value is never used
+1>  SGHMobileApi -> D:\Deployments\NEWUpdatedFromYasir - Copy\SGHMobileApi\SGHMobileApi\bin\SmartBookingService.dll
+========== Build: 1 succeeded, 0 failed, 4 up-to-date, 0 skipped ==========

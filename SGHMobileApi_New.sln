@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30611.23
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataLayer", "DataLayer\DataLayer.csproj", "{EFD02C6C-AE1F-4F0D-B33C-5A3F25C87A6D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGHMobileApi", "SGHMobileApi\SGHMobileApi.csproj", "{CF6A012D-E40A-4593-9D75-2D1EE44DC7EC}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C5D5CCE9-B75B-4AAE-9C13-78E8726ACC17}"
+	ProjectSection(SolutionItems) = preProject
+		.nuget\NuGet.Config = .nuget\NuGet.Config
+		.nuget\NuGet.exe = .nuget\NuGet.exe
+		.nuget\NuGet.pdb = .nuget\NuGet.pdb
+		.nuget\NuGet.targets = .nuget\NuGet.targets
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otsdc.API", "Otsdc.API\Otsdc.API.csproj", "{DBA26C2E-CE25-4764-8264-0B023B47AB33}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Otsdc.API.Net40", "Otsdc.API.Net40\Otsdc.API.Net40.csproj", "{953F6282-57B8-4313-8D2E-620AC8EBB316}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SGHMedicalApi", "SGHMedicalApi\SGHMedicalApi.csproj", "{2A9A20D0-9B28-4999-A0D2-26FD34B1262C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2C081889-EE49-4242-AAE1-4C2D30D5AEE4}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EFD02C6C-AE1F-4F0D-B33C-5A3F25C87A6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFD02C6C-AE1F-4F0D-B33C-5A3F25C87A6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFD02C6C-AE1F-4F0D-B33C-5A3F25C87A6D}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{EFD02C6C-AE1F-4F0D-B33C-5A3F25C87A6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFD02C6C-AE1F-4F0D-B33C-5A3F25C87A6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CF6A012D-E40A-4593-9D75-2D1EE44DC7EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CF6A012D-E40A-4593-9D75-2D1EE44DC7EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CF6A012D-E40A-4593-9D75-2D1EE44DC7EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CF6A012D-E40A-4593-9D75-2D1EE44DC7EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBA26C2E-CE25-4764-8264-0B023B47AB33}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBA26C2E-CE25-4764-8264-0B023B47AB33}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBA26C2E-CE25-4764-8264-0B023B47AB33}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBA26C2E-CE25-4764-8264-0B023B47AB33}.Release|Any CPU.Build.0 = Release|Any CPU
+		{953F6282-57B8-4313-8D2E-620AC8EBB316}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{953F6282-57B8-4313-8D2E-620AC8EBB316}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{953F6282-57B8-4313-8D2E-620AC8EBB316}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{953F6282-57B8-4313-8D2E-620AC8EBB316}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2A9A20D0-9B28-4999-A0D2-26FD34B1262C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2A9A20D0-9B28-4999-A0D2-26FD34B1262C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2A9A20D0-9B28-4999-A0D2-26FD34B1262C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2A9A20D0-9B28-4999-A0D2-26FD34B1262C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {28E2CBC8-A1CC-40FF-BC82-59F8C4D666B5}
+	EndGlobalSection
+EndGlobal
