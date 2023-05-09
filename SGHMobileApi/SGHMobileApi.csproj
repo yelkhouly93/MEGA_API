@@ -264,6 +264,7 @@
     <Compile Include="Common\TripleDESImp.cs" />
     <Compile Include="Common\Util.cs" />
     <Compile Include="Configuration\WebApiConfig.cs" />
+    <Compile Include="Controllers\AppConfigController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
     <Compile Include="Controllers\ClientApi\AvailableSlotsApiCaller.cs" />
     <Compile Include="Controllers\ClientApi\ClinicApiCaller.cs" />
@@ -349,6 +350,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Views\AppConfig\" />
     <Folder Include="Views\Home\" />
     <Folder Include="Views\Media\" />
     <Folder Include="Views\PatientDigitalID_EXT_\" />

@@ -1929,5 +1929,44 @@ namespace DataLayer.Data
             DB.ExecuteSP("[dbo].[Update_VideoCall_Join_SP]");
         }
 
+        public DataTable GET_FoodAllergyList_ByPatient (string Lang, int PatientMRN, int BranchID, string Source)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", Lang),
+                    new SqlParameter("@RegistrationNo", PatientMRN),
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@Source", Source)
+                };
+            
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_AllergyList_Food_Patient_SP]");
+            return ReturnDataTable;
+        }
+
+        public void Save_FoodAllergyList_ByPatient(int PatientMRN, int BranchID,string FoodIDs, string Source, ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+                {                    
+                    new SqlParameter("@RegistrationNo", PatientMRN),
+                    new SqlParameter("@BranchID", BranchID),                    
+                    new SqlParameter("@FoodIds", FoodIDs),
+                    new SqlParameter("@Source", Source),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 1000)
+                };
+
+            DB.param[4].Direction = ParameterDirection.Output;
+            DB.param[5].Direction = ParameterDirection.Output;
+
+            DB.ExecuteNonQuerySP("[dbo].[Save_PatientFoodAllergy_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[4].Value);
+            errMessage = DB.param[5].Value.ToString();
+
+            return ;
+        }
+
+
+
     }
 }

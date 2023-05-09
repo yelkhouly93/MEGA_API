@@ -1866,5 +1866,118 @@ namespace SmartBookingService.Controllers
         //var PWDmsg = "";
         //patientDb.Save_PatientPwd(lang, registerPatient.HospitaId, registrationNo, registerPatient.PatientNationalId, Patient_Pwd, ref PWDstatus, ref PWDmsg);
 
+
+        [HttpPost]
+        [Route("v2/Food-AllergyList-Patient-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetAllergyListBy_Patient(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            try
+            {
+                if (!string.IsNullOrEmpty(col["patient_reg_no"]) 
+                    && !string.IsNullOrEmpty(col["Sources"])
+                    && !string.IsNullOrEmpty(col["hospital_id"])
+                    )
+                {
+                    var Lang = "EN";
+                    if (!string.IsNullOrEmpty(col["lang"]))
+                        Lang = col["lang"];
+
+                    var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                    var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                    var Source = col["Sources"].ToString();
+                    int errStatus = 0;
+                    string errMessage = "";
+
+                    string consentMessage = string.Empty;
+                    var _FoodAllergyList = _patientDb.GET_FoodAllergyList_ByPatient(Lang ,registrationNo, hospitaId, Source);
+
+                    if (_FoodAllergyList != null && _FoodAllergyList.Rows.Count > 0)
+                    {
+                        resp.status = errStatus;
+                        resp.msg = errMessage;
+                        resp.response = _FoodAllergyList;
+                    }
+                    else
+                    {
+                        resp.status = errStatus;
+                        resp.msg = errMessage;
+                        resp.response = null;
+                    }
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Missing Parameter!";
+                }
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                //log.Error(ex);
+
+            }
+            return Ok();
+        }
+
+        //Save_FoodAllergyList_ByPatient
+        [HttpPost]
+        [Route("v2/PatientFood-AllergyList-save")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientFood_AllergyList_Save(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            try
+            {
+                if (!string.IsNullOrEmpty(col["patient_reg_no"])
+                    && !string.IsNullOrEmpty(col["Sources"])
+                    && !string.IsNullOrEmpty(col["hospital_id"])
+                    && !string.IsNullOrEmpty(col["FoodIds"])
+                    )
+                {
+                    var Lang = "EN";
+                    if (!string.IsNullOrEmpty(col["lang"]))
+                        Lang = col["lang"];
+     //               try
+					//{
+                        var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                        var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                        var Source = col["Sources"].ToString();
+                        var FoodIds = col["FoodIds"].ToString();
+                        int errStatus = 0;
+                        string errMessage = "Fail to Update";
+
+                        string consentMessage = string.Empty;
+                        _patientDb.Save_FoodAllergyList_ByPatient(registrationNo, hospitaId, FoodIds, Source, ref errStatus, ref errMessage);
+
+                        resp.status = errStatus;
+                        resp.msg = errMessage;
+     //               }
+     //               catch(Exception ex)
+					//{
+     //                   resp.status = 0;
+     //                   resp.msg = "Wrong Parameter!";
+     //               }
+                    resp.response = null;
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Missing Parameter!";
+                }
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                //log.Error(ex);
+
+            }
+            return Ok();
+        }
+
+
     }
 }

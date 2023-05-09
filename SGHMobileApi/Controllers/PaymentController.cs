@@ -227,7 +227,7 @@ namespace SGHMobileApi.Controllers
 
                 var OnlineTrasactionID = "";
                 var PaidAmount = "0";
-                // New Logic tracking ID on 08-03-2023 TRACKING ID
+                // New Logic tracking ID on 08-05-2023 TRACKING ID
                 var TrackID = 0;
 
                 var PaymentMethod = "V2/API";
@@ -256,7 +256,7 @@ namespace SGHMobileApi.Controllers
 
                 SaveBillReturn ReturnObj;
                 
-                ReturnObj = _paymentDb.PaymentConfirmation_GenerateBill(hospitalID,appointment_id, BillType, 1, OnlineTrasactionID , PaidAmount, PaymentMethod, ref Status, ref Msg);
+                ReturnObj = _paymentDb.PaymentConfirmation_GenerateBill(hospitalID,appointment_id, BillType, 1, OnlineTrasactionID , PaidAmount, PaymentMethod,TrackID, ref Status, ref Msg);
                 
                 //if (Status == 1 && datatableAmount.Rows.Count > 0)
                 if (Status == 1 && ReturnObj != null)
@@ -288,6 +288,98 @@ namespace SGHMobileApi.Controllers
             return Ok(_resp);
 
         }
+
+        // Genrated Payment Tracking ID
+        [HttpPost]
+        [Route("v2/payment-TrackingID-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PaymentTrackingIdGenerate(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["bill_type"]) && 
+                !string.IsNullOrEmpty(col["hospital_id"]) &&
+                !string.IsNullOrEmpty(col["patient_reg_no"]) &&
+                !string.IsNullOrEmpty(col["TotalAmount"]) &&
+                !string.IsNullOrEmpty(col["PaymentFor"]) &&
+                !string.IsNullOrEmpty(col["Sources"]) &&
+                !string.IsNullOrEmpty(col["Payment_Method"])
+                )
+            {
+                var BillType = col["bill_type"].ToString();
+                var hospitalID = col["hospital_id"].ToString();
+                var PatientMRN = col["patient_reg_no"].ToString();
+                var TotalAmount = col["TotalAmount"].ToString();
+                var PaymentMethod = col["Payment_Method"].ToString(); 
+                var PaymentFor = col["PaymentFor"].ToString(); 
+                var Sources = col["Sources"].ToString();
+
+                var VisitTypeId = "";
+                
+                var Visit_id = "";
+                var Service_Ids = "";
+                var Department_Ids = "";
+                var Item_Ids = "";
+                var AppoitmentID = "";
+
+                if (!string.IsNullOrEmpty(col["Visit_id"]))
+                    Visit_id = col["Visit_id"];
+
+                if (!string.IsNullOrEmpty(col["Service_Ids"]))
+                    Service_Ids = col["Service_Ids"];
+
+                if (!string.IsNullOrEmpty(col["Department_Ids"]))
+                    Department_Ids = col["Department_Ids"];
+
+                if (!string.IsNullOrEmpty(col["Item_Ids"]))
+                    Item_Ids = col["Item_Ids"];
+
+                if (!string.IsNullOrEmpty(col["appointment_id"]))
+                    AppoitmentID = col["appointment_id"];
+
+                if (!string.IsNullOrEmpty(col["VisitType_id"]))
+                    VisitTypeId = col["VisitType_id"].ToString();
+
+                if (BillType != "I" && BillType != "C")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Wrong BillType Format- It should be 'C' For Cash and 'I' for insurance";
+                    return Ok(_resp);
+                }
+                
+                var Status = 0;
+                var Msg = "";
+
+                var ReturnObj = _paymentDb.PaymentTracking_Generate(Sources , PaymentFor, hospitalID, BillType,PatientMRN,TotalAmount,PaymentMethod, AppoitmentID
+                    ,Visit_id,VisitTypeId,Service_Ids,Department_Ids,Item_Ids, ref Status, ref Msg);
+
+
+                if (Status == 1 && ReturnObj != null)
+                {
+                    _resp.status = 1;
+                    _resp.msg = Msg;
+                    _resp.response = ReturnObj;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = Msg;
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
+
 
         // GET: Payment
         [HttpPost]
@@ -419,10 +511,15 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["Payment_Method"]))
                     PaymentMethod = col["Payment_Method"];
 
+                var TrackID = 0;
+                if (!string.IsNullOrEmpty(col["TracK_ID"]))
+                    TrackID = Convert.ToInt32(col["TracK_ID"].ToString());
+
+
                 var Status = 0;
                 var Msg = "";
 
-                var ReturnObj = _paymentDb.PaymentServicesConfirmation_GenerateBill(hospitalID, Visit_id, VisitTypeId, BillType,Service_Ids,Department_Ids,Item_Ids, 1,OnlineTrasactionID,PaidAmount, PaymentMethod, ref Status, ref Msg);                
+                var ReturnObj = _paymentDb.PaymentServicesConfirmation_GenerateBill(hospitalID, Visit_id, VisitTypeId, BillType,Service_Ids,Department_Ids,Item_Ids, 1,OnlineTrasactionID,PaidAmount, PaymentMethod,TrackID, ref Status, ref Msg);                
                 
                 
                 if (Status == 1 && ReturnObj != null)

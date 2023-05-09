@@ -61,7 +61,7 @@ namespace DataLayer.Data
         //    return dataTable;
         //}
 
-        public SaveBillReturn PaymentConfirmation_GenerateBill(int BranchId, int AppointmentID, string BillType, int OperatorID, string OnlineTrasactionID, string PaidAmount, string PaymentMethod, ref int errStatus, ref string errMessage)
+        public SaveBillReturn PaymentConfirmation_GenerateBill(int BranchId, int AppointmentID, string BillType, int OperatorID, string OnlineTrasactionID, string PaidAmount, string PaymentMethod,int TrackID, ref int errStatus, ref string errMessage)
         {
             DB.param = new SqlParameter[]
             {
@@ -71,9 +71,10 @@ namespace DataLayer.Data
                 new SqlParameter("@OperatorID", OperatorID),
                 new SqlParameter("@OnlineTransactionId", OnlineTrasactionID),
                 new SqlParameter("@PaidAmount", PaidAmount),
-                new SqlParameter("@PaymentMethod", PaymentMethod),
+                new SqlParameter("@PaymentMethod", PaymentMethod),                
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@msg", SqlDbType.VarChar, 100),
+                new SqlParameter("@TrackId", TrackID)
             };
             DB.param[7].Direction = ParameterDirection.Output;
             DB.param[8].Direction = ParameterDirection.Output;
@@ -110,7 +111,7 @@ namespace DataLayer.Data
             return dataTable;
         }
 
-        public List<SaveBillReturn> PaymentServicesConfirmation_GenerateBill(int BranchId, int VisitID,int VisitTypeId, string BillType,string ServiceIds,string DepartmentIds,string ItemIds, int OperatorID, string OnlineTrasactionID, string PaidAmount, string PaymentMethod, ref int errStatus, ref string errMessage)
+        public List<SaveBillReturn> PaymentServicesConfirmation_GenerateBill(int BranchId, int VisitID,int VisitTypeId, string BillType,string ServiceIds,string DepartmentIds,string ItemIds, int OperatorID, string OnlineTrasactionID, string PaidAmount, string PaymentMethod,int TrackID, ref int errStatus, ref string errMessage)
         {
             DB.param = new SqlParameter[]
             {
@@ -126,7 +127,8 @@ namespace DataLayer.Data
                 new SqlParameter("@PaidAmount", PaidAmount),
                 new SqlParameter("@PaymentMethod", PaymentMethod),
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.NVarChar, 1000)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 1000),
+                new SqlParameter("@TrackId", TrackID)
             };
             DB.param[11].Direction = ParameterDirection.Output;
             DB.param[12].Direction = ParameterDirection.Output;
@@ -168,6 +170,42 @@ namespace DataLayer.Data
                 new SqlParameter("@InvoiceType", InvoiceType)                
             };
             var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Get_Patient_BillList_SP");            
+            return dataTable;
+        }
+
+
+        public DataTable PaymentTracking_Generate(string Sources,string PaymentFor, string BranchId, string BillType,string PatientMRN, string TotalAmount, string PaymentMethod,
+            string appointmentID ,  string VisitID, string VisitTypeId,
+             string ServiceIds, string DepartmentIds, string ItemIds,
+            ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@PaymentFor", PaymentFor),
+                new SqlParameter("@BranchId", BranchId),
+                new SqlParameter("@BillType", BillType),
+                new SqlParameter("@PatientMRN", PatientMRN),
+                new SqlParameter("@Amount", TotalAmount),
+                new SqlParameter("@PaymentMethod", PaymentMethod),
+                new SqlParameter("@AppointmentID", appointmentID),
+                new SqlParameter("@VisitID", VisitID),
+                new SqlParameter("@VisitTypeId", VisitTypeId),                
+                new SqlParameter("@ServiceIds", ServiceIds),
+                new SqlParameter("@DepartmentIds", DepartmentIds),
+                new SqlParameter("@ItemIds", ItemIds),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 1000),
+                new SqlParameter("@Sources", Sources)                
+            };
+            DB.param[12].Direction = ParameterDirection.Output;
+            DB.param[13].Direction = ParameterDirection.Output;
+
+            //var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Save_ServicesCashBill_SP");
+            var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Save_Generate_PaymentTracking_SP");
+
+            errStatus = Convert.ToInt32(DB.param[12].Value);
+            errMessage = DB.param[13].Value.ToString();
+
             return dataTable;
         }
 
