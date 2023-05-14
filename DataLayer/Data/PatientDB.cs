@@ -1431,7 +1431,7 @@ namespace DataLayer.Data
                 DB.param = new SqlParameter[]
                 {
                     new SqlParameter("@BranchId", hospitalId),
-                    new SqlParameter("@RegistrationNo ", resgistrationNo),
+                    new SqlParameter("@RegistrationNo", resgistrationNo),
                     new SqlParameter("@status", SqlDbType.Int),
                     new SqlParameter("@msg", SqlDbType.NVarChar, 200)
                 };

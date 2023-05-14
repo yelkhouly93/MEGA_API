@@ -13,21 +13,36 @@ using System.Globalization;
 namespace DataLayer.Data
 {
 	
-	class AppConfigDB
+	public class AppConfigDB
 	{
         private readonly CustomDBHelper _db = new CustomDBHelper("RECEPTION");
-        public AppConfigModule GetClientModuleList (string CKey){
+   //     public List<AppConfigModule> GetClintModuleList (string CKey)
+   //     {
+			//var _AppConfigModule = new List<AppConfigModule>();
 
-			AppConfigModule _AppConfigModule = new AppConfigModule();
+   //         _db.param = new SqlParameter[]
+   //         {
+   //             new SqlParameter("@ClientKey", CKey)                
+   //         };
+
+   //         _AppConfigModule = _db.ExecuteSPAndReturnDataTable("AppConfig.Get_Client_App_Modules").ToListObject<AppConfigModule>();
+
+   //         return _AppConfigModule;
+   //     }
+
+        public DataTable GetClintModuleList(string CKey)
+        {
+            //var _AppConfigModule = new List<AppConfigModule>();
 
             _db.param = new SqlParameter[]
             {
-                new SqlParameter("@BranchId", CKey)                
-            };            
+                new SqlParameter("@ClientKey", CKey)
+            };
 
-            var flag = _db.ExecuteSP("AppConfig.[Get_Client_App_Modules]");
+            var _AppConfigModule = _db.ExecuteSPAndReturnDataTable("AppConfig.Get_Client_App_Modules");
 
             return _AppConfigModule;
         }
-	}
+
+    }
 }

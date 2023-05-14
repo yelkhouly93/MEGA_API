@@ -5,9 +5,17 @@ using System.Text;
 
 namespace DataLayer.Model
 {
-	class AppConfigModule
+	public class AppConfigModule
 	{
 		public string ModuleName { get; set; }
 		public bool	IsEnable { get; set; }
+	}
+
+	public class AppConfigModuleMapper
+	{		
+		public bool VideoConsult { get; set; }
+		public bool VitalSigns { get; set; }
+		public bool MicCough { get; set; }
+		public bool VoiceRecognition { get; set; }
 	}
 }
