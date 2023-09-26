@@ -218,7 +218,9 @@ namespace SGHMobileApi.Controllers
             _resp = new GenericResponse();
             CommonDB CDB = new CommonDB();
 
-            if (!string.IsNullOrEmpty(col["appointment_id"]) && !string.IsNullOrEmpty(col["bill_type"]) && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["OnlineTransaction_id"]) && !string.IsNullOrEmpty(col["Payment_Method"]))
+            if (!string.IsNullOrEmpty(col["appointment_id"]) && !string.IsNullOrEmpty(col["bill_type"]) && !string.IsNullOrEmpty(col["hospital_id"]) 
+                && !string.IsNullOrEmpty(col["OnlineTransaction_id"]) 
+                && !string.IsNullOrEmpty(col["Payment_Method"]))
             {
 
                 var appointment_id = Convert.ToInt32(col["appointment_id"]);
@@ -341,10 +343,10 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["VisitType_id"]))
                     VisitTypeId = col["VisitType_id"].ToString();
 
-                if (BillType != "I" && BillType != "C")
+                if (BillType != "I" && BillType != "C" && BillType != "W")
                 {
                     _resp.status = 0;
-                    _resp.msg = "Failed : Wrong BillType Format- It should be 'C' For Cash and 'I' for insurance";
+                    _resp.msg = "Failed : Wrong BillType Format.";
                     return Ok(_resp);
                 }
                 
@@ -563,12 +565,21 @@ namespace SGHMobileApi.Controllers
         }
         public EInvoiceReturn GenerateInovice_HIS(int BranchId, string billNo, bool isCancellation)
         {
-            var ObjList = _paymentDb.GetInvoiceInfo(BranchId, billNo, isCancellation);
-            if (ObjList.Count > 0)
-            {
-               var temp =  GeneratingInvoice(ObjList , BranchId);
-                return temp;
+			try
+			{
+                var ObjList = _paymentDb.GetInvoiceInfo(BranchId, billNo, isCancellation);
+                if (ObjList.Count > 0)
+                {
+                    var temp = GeneratingInvoice(ObjList, BranchId);
+                    return temp;
+                }
             }
+            catch( Exception x)
+			{
+
+			}
+            
+            
             return null;
         }
 
@@ -637,7 +648,7 @@ namespace SGHMobileApi.Controllers
 
         public void TESTENVOICES ()
         {
-            var tempReturnHIS = GenerateInovice_HIS(1, "CR5643", false);
+            var tempReturnHIS = GenerateInovice_HIS(1, "CR6913", false);
         }
     }
 }

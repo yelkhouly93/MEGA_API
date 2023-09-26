@@ -1346,6 +1346,10 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["Sources"]))
                     Sources = col["Sources"];
 
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    Sources = col["Source"];
+
+
                 DateTime PDateOfBirth;
                 if (!DateTime.TryParse(patient_DOB, out PDateOfBirth))
                 {

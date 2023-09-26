@@ -357,7 +357,7 @@ namespace DataLayer.Data
                 new SqlParameter("@BillType", billType),
                 new SqlParameter("@DoctorScheduleId", doctorScheduleId),
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
             };
 
             DB.param[5].Direction = ParameterDirection.Output;
@@ -391,7 +391,7 @@ namespace DataLayer.Data
                 new SqlParameter("@BillType", billType),
                 new SqlParameter("@DoctorScheduleId", doctorScheduleId),
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
             };
 
             DB.param[5].Direction = ParameterDirection.Output;

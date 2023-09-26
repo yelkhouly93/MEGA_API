@@ -252,6 +252,9 @@ namespace SmartBookingService.Controllers
                 if (!string.IsNullOrEmpty(col["Sources"]))
                     ApiSource = col["Sources"].ToString();
 
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"];
+
                 DataTable allDataTable;
                 /**/
 

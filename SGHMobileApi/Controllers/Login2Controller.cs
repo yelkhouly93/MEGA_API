@@ -419,6 +419,8 @@ namespace SGHMobileApi.Controllers
                         IsEncrypt = false;
                 }
 
+
+                
                     
 
 
@@ -471,20 +473,54 @@ namespace SGHMobileApi.Controllers
                         }
                     }
 
-                    var userInfo = loginDb.ValidateLoginUser_List(lang, hospitalId, PCell, PatientNationId, patientMrn, Source , ref errStatus, ref errMessage, ref OTP , IsEncrypt);
+
+                // For Damamam Intregaration 
+                bool CheckInDammam = true;
+                bool OnlyDammam = false;
+
+                    //checked IF PATIENT SELECT ANY OTHER BRANCH
+                if (hospitalId > 0 && hospitalId != 9)
+                    CheckInDammam = false;
+
+                // Check Damam MRN Provided
+                if (patientMrn > 0 && hospitalId == 9)
+                    OnlyDammam = true;
+
+
+
+
+
+                // For Damamam Intregaration 
+
+                // Ahsan New Chjange for Dammam
+
+                var userInfo = new List<login_check_modal>();                                
+                if (CheckInDammam)
+				{
+                    // Call dammam API Function fill list
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    UserInfo _userInfo;
+                    //_userInfo = _loginApiCaller.ValidateLoginUserByApi_NewDam(lang, hospitalId, null, pregno, pnationalid, ref activationNo, ref errStatus, ref errMessage);
+                }
+
+                if (!OnlyDammam)
+                    userInfo = loginDb.login_check(lang, hospitalId, PCell, PatientNationId, patientMrn, Source, ref errStatus, ref errMessage, ref OTP, IsEncrypt);
+                
 
                     if (errStatus != 1)
                     {
                         resp.status = errStatus;
                         if (errStatus == 0)
                         {
-
                             resp.status = 1;
                             //string smsRes = "";
-                            DataRow dr = userInfo.Rows[0];
-                            var PhoneNumber = dr["PatientCellNo2"].ToString();
-                            userInfo.Rows[0]["PatientCellNo2"] = "";
+                            //DataRow dr = userInfo.Rows[0];
+                            //var PhoneNumber = dr["PatientCellNo2"].ToString();
+                        //userInfo.Rows[0]["PatientCellNo2"] = "";
 
+                            var PhoneNumber = userInfo[0].PatientCellNo2;
+                            userInfo[0].PatientCellNo2 = "";
+                            
                             //PhoneNumber = "0592285955";
 
                             string MsgContent = "";
@@ -494,15 +530,16 @@ namespace SGHMobileApi.Controllers
                                 MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
                                 MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
 
-                                if (hospitalId != 201 && !Util.UaeBranches.Contains(hospitalId))
-                                    Util.SendTestSMS(PhoneNumber, MsgContent);
-                                else if (hospitalId == 201)
-                                    Util.SendSMS_Cairo(PhoneNumber, MsgContent);
-                                else if (Util.UaeBranches.Contains(hospitalId))
-                                {
-                                    string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                                    log.Info("UAE SMS Reponse: " + response);
-                                }
+                                Util.SendTestSMS(PhoneNumber, MsgContent);
+                                //if (hospitalId != 201 && !Util.UaeBranches.Contains(hospitalId))
+                                //    Util.SendTestSMS(PhoneNumber, MsgContent);
+                                //else if (hospitalId == 201)
+                                //    Util.SendSMS_Cairo(PhoneNumber, MsgContent);
+                                //else if (Util.UaeBranches.Contains(hospitalId))
+                                //{
+                                //    string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                                //    log.Info("UAE SMS Reponse: " + response);
+                                //}
                             }
                            
                         }
@@ -678,14 +715,7 @@ namespace SGHMobileApi.Controllers
                 }
 
                 var userInfo = loginDb.ValidatePatientPassword (lang, PatientPwd, PatientNationId,  ref errStatus, ref errMessage);
-
-
-                
-
-
-
-
-
+                           
                 if (errStatus != 0)
                 {
                     resp.status = errStatus;

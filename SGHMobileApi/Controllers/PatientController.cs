@@ -759,7 +759,20 @@ namespace SmartBookingService.Controllers
                     if (!string.IsNullOrEmpty(col["Sources"]))
                         ApiSource = col["Sources"].ToString();
 
-                    var userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, col["patient_reg_no"].ToString(), null, ref errStatus, ref errMessage , ApiSource);
+
+                    UserInfo_New userInfo = new UserInfo_New();
+
+                    if (!Util.OasisBranches.Contains(hospitalId))
+                    {
+                        var apiCaller = new PatientApiCaller();
+                        //var tempdata = apiCaller.CheckPatientData(lang, hospitalId, patientId, patientPhone, null, ref errStatus, ref errMessage);
+                    }
+                    else
+                    {   
+                        userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, col["patient_reg_no"].ToString(), null, ref errStatus, ref errMessage, ApiSource);
+                    }
+
+                    
 
 
                     if (errStatus == 0)
@@ -889,6 +902,9 @@ namespace SmartBookingService.Controllers
                 var errorType = "";
 
                 var patientDb = new PatientDB();
+
+
+
                 registerPatientResFailure = patientDb.RegisterNewPatient_V2(registerPatient, ref status, ref msg, ref errorType, ref successType, ref registrationNo, ref activationNo , Sources);
 
 
@@ -1625,7 +1641,7 @@ namespace SmartBookingService.Controllers
                     
                     PatientDB _patientDB = new PatientDB();
                     var PatientFamilyDT = _patientDB.GetBookingPatientFamily_List(lang, hospitalId,patientMrn, BookinghospitalId, ref errStatus, ref errMessage);
-
+                    
                     if (errStatus == 1)
                     {
                         resp.status = 0;

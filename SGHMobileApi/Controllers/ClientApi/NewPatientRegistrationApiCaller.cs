@@ -58,7 +58,7 @@ namespace SmartBookingService.Controllers.ClientApi
                 new SqlParameter("@PatientId", response != null ? Convert.ToInt32(response) : 0),
                 new SqlParameter("@ACtivationNo", SqlDbType.Int),
                 new SqlParameter("@Er_Status", status == HttpStatusCode.OK ? 0 : 1),
-                new SqlParameter("@Msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500)
                     };
                 DB.param[5].Direction = ParameterDirection.Output;
                 DB.param[6].Direction = ParameterDirection.InputOutput;

@@ -42,9 +42,23 @@ namespace SGHMobileApi.Controllers
             {
                 if (!string.IsNullOrEmpty(col["ClientKey"]) )
                 {
+
+                    int hospitalId = 0;
+                    try
+                    {
+                        if (!string.IsNullOrEmpty(col["hospital_id"]))
+                            hospitalId = Convert.ToInt32(col["hospital_id"]);
+                    }
+                    catch (Exception e)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Branch Parameter in Wrong Format : -- " + e.Message;
+                        return Ok(_resp);
+                    }
+
                     var ClientKey = col["ClientKey"].ToString();
 
-                    var _ReturnModal = _AppconfigDb.GetClintModuleList (ClientKey);
+                    var _ReturnModal = _AppconfigDb.GetClintModuleList (ClientKey, hospitalId);
                     if (_ReturnModal != null)
                     {
                         resp.status = 1;

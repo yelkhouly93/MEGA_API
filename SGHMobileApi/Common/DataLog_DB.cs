@@ -69,7 +69,7 @@ namespace SGHMobileApi.Common
                 new SqlParameter("@ApiName", ApiName),
                 new SqlParameter("@UserID", UserID),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
-                new SqlParameter("@Msg", SqlDbType.VarChar,100)
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500)
             };
             DB.param[2].Direction = ParameterDirection.Output;
             DB.param[3].Direction = ParameterDirection.Output;

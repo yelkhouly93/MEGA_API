@@ -30,13 +30,14 @@ namespace DataLayer.Data
    //         return _AppConfigModule;
    //     }
 
-        public DataTable GetClintModuleList(string CKey)
+        public DataTable GetClintModuleList(string CKey , int hospitalId)
         {
             //var _AppConfigModule = new List<AppConfigModule>();
 
             _db.param = new SqlParameter[]
             {
-                new SqlParameter("@ClientKey", CKey)
+                new SqlParameter("@ClientKey", CKey),
+                new SqlParameter("@branchID", hospitalId)
             };
 
             var _AppConfigModule = _db.ExecuteSPAndReturnDataTable("AppConfig.Get_Client_App_Modules");

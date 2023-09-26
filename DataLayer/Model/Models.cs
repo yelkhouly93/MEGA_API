@@ -64,6 +64,15 @@ namespace DataLayer.Model
 
     }
 
+    public class GenericResponse_Report
+    {
+        public int status { get; set; }
+        public string msg { get; set; }
+        public object response { get; set; }
+        public string error_type { get; set; }
+
+    }
+
     public class RegisterPatientResponse
     {
         public int activation_num { get; set; }
@@ -1080,6 +1089,29 @@ namespace DataLayer.Model
     public class MedicalPrescriptions
     {
         public string PdfURL { get; set; }
+    }
+
+
+    //****************   Login Controller **************************/
+
+    public class login_check_modal
+    {
+        public string Branch_EN { get; set; }
+        public string Branch_AR { get; set; }
+        public string PatientId { get; set; }
+        public string PatientName_EN { get; set; }
+        public string PatientName_AR { get; set; }
+        public string PatientCellNo { get; set; }
+        public string PEMail { get; set; }
+        public string Registrationno { get; set; }
+        public string BranchId { get; set; }
+        public string PatientCellNo2 { get; set; }
+        
+        public string PatientFullName { get; set; }
+        public string DOB { get; set; }
+        public string image_url { get; set; }
+        
+
     }
 
 

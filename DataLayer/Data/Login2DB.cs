@@ -189,12 +189,46 @@ namespace DataLayer.Data
             return userInfo;
         }
 
-        
-        public DataTable ValidateLoginUser_List(string Lang , int hospitalId, string pCellNo, string nationalId, int registrationNo,string Source, ref int erStatus, ref string msg, ref string ACtivationNo , bool IsEncrypt = true)
+
+		public DataTable ValidateLoginUser_List(string Lang, int hospitalId, string pCellNo, string nationalId, int registrationNo, string Source, ref int erStatus, ref string msg, ref string ACtivationNo, bool IsEncrypt = true)
+		{
+			//var temp = util.Encrypt("Megamind", true);
+			//var temp1 = util.Encrypt("Megamind", false);
+			//GetDependentPatientDataTable
+
+			_db.param = new SqlParameter[]
+			{
+				new SqlParameter("@Lang", Lang),
+				new SqlParameter("@BranchId", hospitalId),
+				new SqlParameter("@PcellNo", pCellNo),
+				new SqlParameter("@NationalId", nationalId),
+				new SqlParameter("@RegistrationNo", registrationNo),
+				new SqlParameter("@Er_Status", SqlDbType.Int),
+				new SqlParameter("@Msg", SqlDbType.NVarChar, 500),
+				new SqlParameter("@ACtivationNo", SqlDbType.VarChar, 100),
+				new SqlParameter("@Source", Source)
+			};
+			_db.param[5].Direction = ParameterDirection.Output;
+			_db.param[6].Direction = ParameterDirection.Output;
+			_db.param[7].Direction = ParameterDirection.Output;
+
+			var dt = _db.ExecuteSPAndReturnDataTable("DBO.[Validate_User3_SP]");
+
+			erStatus = Convert.ToInt32(_db.param[5].Value);
+			msg = _db.param[6].Value.ToString();
+			ACtivationNo = _db.param[7].Value.ToString();
+
+			if (erStatus != 1 && IsEncrypt)
+			{
+				dt = Encrpt_LoginUserList_dt(dt);
+			}
+
+			return dt;
+		}
+		// New Copy Changes Due to Dammam
+		public List<login_check_modal>  login_check(string Lang, int hospitalId, string pCellNo, string nationalId, int registrationNo, string Source, ref int erStatus, ref string msg, ref string ACtivationNo, bool IsEncrypt = true)
         {
-            //var temp = util.Encrypt("Megamind", true);
-            //var temp1 = util.Encrypt("Megamind", false);
-            //GetDependentPatientDataTable
+            //login_check_modal
 
             _db.param = new SqlParameter[]
             {
@@ -204,7 +238,7 @@ namespace DataLayer.Data
                 new SqlParameter("@NationalId", nationalId),
                 new SqlParameter("@RegistrationNo", registrationNo),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
-                new SqlParameter("@Msg", SqlDbType.NVarChar, 200),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500),
                 new SqlParameter("@ACtivationNo", SqlDbType.VarChar, 100),
                 new SqlParameter("@Source", Source)
             };
@@ -212,17 +246,17 @@ namespace DataLayer.Data
             _db.param[6].Direction = ParameterDirection.Output;
             _db.param[7].Direction = ParameterDirection.Output;
 
-            var dt = _db.ExecuteSPAndReturnDataTable("DBO.[Validate_User3_SP]");
-            
+            var dt = _db.ExecuteSPAndReturnDataTable("DBO.[Validate_User3_SP]").ToListObject<login_check_modal>();
+
             erStatus = Convert.ToInt32(_db.param[5].Value);
             msg = _db.param[6].Value.ToString();
             ACtivationNo = _db.param[7].Value.ToString();
 
-            if (erStatus != 1 && IsEncrypt)
-            {
-                dt = Encrpt_LoginUserList_dt(dt);
-            }
-
+            //if (erStatus != 1 && IsEncrypt)
+            //{
+            //    dt = Encrpt_LoginUserList_dt(dt);
+            //}
+            //List < login_check_modal >
             return dt;
         }
 
@@ -239,7 +273,7 @@ namespace DataLayer.Data
                 new SqlParameter("@NationalId", nationalId),
                 new SqlParameter("@RegistrationNo", registrationNo),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
-                new SqlParameter("@Msg", SqlDbType.NVarChar, 200),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500),
                 new SqlParameter("@ACtivationNo", SqlDbType.VarChar, 100)
             };
             _db.param[5].Direction = ParameterDirection.Output;

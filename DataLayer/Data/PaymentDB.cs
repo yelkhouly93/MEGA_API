@@ -23,7 +23,7 @@ namespace DataLayer.Data
                 new SqlParameter("@BillType", BillType),
                 new SqlParameter("@OperatorID", OperatorID),                
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
             };
             DB.param[4].Direction = ParameterDirection.Output;
             DB.param[5].Direction = ParameterDirection.Output;
@@ -73,7 +73,7 @@ namespace DataLayer.Data
                 new SqlParameter("@PaidAmount", PaidAmount),
                 new SqlParameter("@PaymentMethod", PaymentMethod),                
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500),
                 new SqlParameter("@TrackId", TrackID)
             };
             DB.param[7].Direction = ParameterDirection.Output;
@@ -98,7 +98,7 @@ namespace DataLayer.Data
                 new SqlParameter("@DepartmentIds", department_ids),
                 new SqlParameter("@ItemIds", item_Ids),
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
             };
             DB.param[7].Direction = ParameterDirection.Output;
             DB.param[8].Direction = ParameterDirection.Output;

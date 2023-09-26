@@ -53,7 +53,7 @@ namespace SmartBookingService.Controllers.ClientApi
                 new SqlParameter("@PatientId", _data != null ? _data.PATIENT_ID : 0),
                 new SqlParameter("@ACtivationNo", SqlDbType.Int),
                 new SqlParameter("@Er_Status", status == HttpStatusCode.OK ? 0 : 1),
-                new SqlParameter("@Msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500)
                 };
             DB.param[5].Direction = ParameterDirection.Output;
             DB.param[6].Direction = ParameterDirection.InputOutput;
@@ -101,6 +101,74 @@ namespace SmartBookingService.Controllers.ClientApi
 
             return _userInfo;
         }
+
+
+
+        public UserInfo ValidateLoginUserByApi_NewDam(string lang, string PCellNo, string RegistrationNo, string NationalId, ref int activationNo, ref int Er_Status, ref string Msg)
+        {
+
+            ////HttpStatusCode status;
+            ////UserInfo _userInfo = new UserInfo();
+            //accountData _accData = new accountData();
+            ////string apiBasic = ConfigurationManager.AppSettings["MobileWebApi_BasicURL_"]; ;
+            ////string RegistrationUrl = apiBasic + ConfigurationManager.AppSettings["MobileWebApi_RetreivePatientInfo_"];
+            //string RegistrationUrl = "";
+            ////var apiUserName = ConfigurationManager.AppSettings["MobileWebApi_UserName"].ToString();
+            ////var apiPassword = ConfigurationManager.AppSettings["MobileWebApi_Password"].ToString();
+            ////var apiFixedPatientId = ConfigurationManager.AppSettings["MobileWebApi_FixedPatientId"].ToString();
+
+            ////         if (RegistrationNo != "" && RegistrationNo != null)
+            ////         {
+            ////             _accData = new accountData() { idNumber = RegistrationNo, idType = "MRN" };
+            ////         }
+            ////         else if (PCellNo != "" && PCellNo!= null)
+            ////{
+            ////             _accData = new accountData() { idNumber = RegistrationNo, idType = "MRN" };
+            ////         }
+            ////         else
+            ////         {
+            ////             _accData = new accountData() { idNumber = NationalId, idType = "ID" };
+            ////         }
+
+            //_accData = new accountData() { idNumber = RegistrationNo, idType = "MRN" };
+
+            //var _data = RestUtility.CallService<List<patientData_Dam>>(RegistrationUrl, null, _accData, "POST", null, null, out status) as List<patientData_Dam>;
+
+            //var _userInfoModel = new List<UserInfo2Model>();
+
+            //DB.param = new SqlParameter[]
+            //    {
+            //    //new SqlParameter("@BranchId", hospitalID),
+            //    //new SqlParameter("@PCellNo", _data != null ? _data.MOBILE_NO : ""),
+            //    //new SqlParameter("@RegistrationNo", _data != null ? _data.MRN.ToString() : "0"),
+            //    new SqlParameter("@NationalId", NationalId),
+            //    //new SqlParameter("@PatientId", _data != null ? _data.PATIENT_ID : 0),
+            //    new SqlParameter("@ACtivationNo", SqlDbType.Int),
+            //    //new SqlParameter("@Er_Status", status == HttpStatusCode.OK ? 0 : 1),
+            //    new SqlParameter("@Msg", SqlDbType.NVarChar, 500)
+            //    };
+            //DB.param[5].Direction = ParameterDirection.Output;
+            //DB.param[6].Direction = ParameterDirection.InputOutput;
+            //DB.param[7].Direction = ParameterDirection.Output;
+
+            //_userInfoModel = DB.ExecuteSPAndReturnDataTable("dbo.Generate_OTP").ToListObject<UserInfo2Model>();
+
+            //Er_Status = Convert.ToInt32(DB.param[6].Value);
+            //Msg = DB.param[7].Value.ToString();
+
+            //if (Er_Status == 0)
+            //    activationNo = Convert.ToInt32(DB.param[5].Value);
+
+            ////if (status == HttpStatusCode.OK)
+            ////{
+            ////    _userInfo = MapUserInfoModelToUserInf(_data);
+            ////}
+
+            ////return _userInfo;
+            return null;
+
+        }
+
 
     }
 }

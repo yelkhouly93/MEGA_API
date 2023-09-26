@@ -17,6 +17,7 @@ namespace SGHMobileApi.Provider
     {
         public override async Task ValidateClientAuthentication(OAuthValidateClientAuthenticationContext context)
         {
+            
             string clientId = string.Empty;
             if (context.Parameters.Where(f => f.Key == "clientid").Select(f => f.Value).SingleOrDefault() != null)
                 clientId = context.Parameters.Where(f => f.Key == "clientid").Select(f => f.Value).SingleOrDefault()[0];

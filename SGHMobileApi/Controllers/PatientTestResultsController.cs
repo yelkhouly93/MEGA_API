@@ -268,8 +268,6 @@ namespace SGHMobileApi.Controllers
 
                 var patientDb = new PatientDB();
 
-
-
                 var ApiSource = "MobileApp";
                 if (!string.IsNullOrEmpty(col["Sources"]))
                     ApiSource = col["Sources"].ToString();
@@ -278,9 +276,20 @@ namespace SGHMobileApi.Controllers
 
                 if (allPatientDiagnosis != null && allPatientDiagnosis.Count > 0)
                 {
-                    resp.status = 1;
-                    resp.msg = errMessage;
-                    resp.response = allPatientDiagnosis;
+                    if (ApiSource.ToLower() == "saleforce")
+					{
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = allPatientDiagnosis;
+                    }
+                    else
+					{
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = allPatientDiagnosis;
+                    }
+
+                    
 
                 }
                 else

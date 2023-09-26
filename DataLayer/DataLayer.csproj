@@ -56,6 +56,7 @@
     <Compile Include="Common\CustomDBHelper.cs" />
     <Compile Include="Common\CustomExtensions.cs" />
     <Compile Include="Common\EncryptDecrypt.cs" />
+    <Compile Include="Data\AgrementDB.cs" />
     <Compile Include="Data\AppConfigDB.cs" />
     <Compile Include="Data\ApplicationDB.cs" />
     <Compile Include="Data\ClinicDB.cs" />
@@ -68,16 +69,21 @@
     <Compile Include="Data\LoginDB.cs" />
     <Compile Include="Data\MediaDB.cs" />
     <Compile Include="Data\NationalityDB.cs" />
+    <Compile Include="Data\NotificationDB.cs" />
     <Compile Include="Data\PatientDB.cs" />
     <Compile Include="Data\PaymentDB.cs" />
     <Compile Include="Data\PhysicianDB.cs" />
     <Compile Include="Data\RatingDB.cs" />
     <Compile Include="Data\SGHMedicalDAL\LoginDAL.cs" />
+    <Compile Include="Data\SurveyDB.cs" />
+    <Compile Include="Data\WalletDB.cs" />
+    <Compile Include="Data\WaterReminder.cs" />
     <Compile Include="Model\AppConfigModal.cs" />
     <Compile Include="Model\ModelApi.cs" />
     <Compile Include="Model\Models.cs" />
     <Compile Include="Model\CancelledAppointment.cs" />
     <Compile Include="Model\LogMetaData.cs" />
+    <Compile Include="Model\NewDammamModel.cs" />
     <Compile Include="Model\Response.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

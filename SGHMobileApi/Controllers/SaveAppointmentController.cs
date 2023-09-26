@@ -109,20 +109,32 @@ namespace SGHMobileApi.Controllers
             try
             {
 
-                if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["physician_id"]) && !string.IsNullOrEmpty(col["date"]) && !string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["doc_slotID"]) && !string.IsNullOrEmpty(col["time_from"]) && !string.IsNullOrEmpty(col["time_to"]))
+                if (!string.IsNullOrEmpty(col["hospital_id"]) 
+                    && !string.IsNullOrEmpty(col["physician_id"]) 
+                    && !string.IsNullOrEmpty(col["date"]) 
+                    && !string.IsNullOrEmpty(col["patient_reg_no"]) 
+                    && !string.IsNullOrEmpty(col["doc_slotID"]) 
+                    && !string.IsNullOrEmpty(col["time_from"]) 
+                    && !string.IsNullOrEmpty(col["time_to"]))
                 {
                     var EarlyReminder = 0;
                     var HeardAboutUs = 0;
                     var clinicId = 0;
+                    var SlotType = 1;
                     var lang = col["lang"];
                     var sources = ConfigurationManager.AppSettings["API_SOURCE_KEY"].ToString();
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
 
 
+                    if (!string.IsNullOrEmpty(col["Sources"]))
+                        sources = col["Sources"];
+
                     if (!string.IsNullOrEmpty(col["Source"]))
                         sources = col["Source"];
 
+                    if (!string.IsNullOrEmpty(col["SlotType"]))
+                        SlotType = Convert.ToInt32(col["SlotType"]);
 
                     if (!string.IsNullOrEmpty(col["clinic_id"]))
                         clinicId = Convert.ToInt32(col["clinic_id"]);
@@ -164,7 +176,7 @@ namespace SGHMobileApi.Controllers
 
                     var patientDb = new PatientDB();
                     //patientDb.SaveAppointment(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, EarlyReminder, HeardAboutUs, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
-                    patientDb.SaveAppointment_V2(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, EarlyReminder, HeardAboutUs, sources, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
+                    patientDb.SaveAppointment_V2(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, EarlyReminder, HeardAboutUs, sources, SlotType, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
                     
 
 
@@ -201,12 +213,12 @@ namespace SGHMobileApi.Controllers
                             var ENDtDateTimeTemp = System.DateTime.Now;
 
 
-                            //DateTime StartDateTime = timeFrom.AddMinutes(Convert.ToInt32(ConfigurationManager.AppSettings["Agora_StartTime"].ToString()));
-                            //DateTime EndDateTime = timeTo.AddMinutes(Convert.ToInt32(ConfigurationManager.AppSettings["Agora_EndTime"].ToString()));
+                            DateTime StartDateTime = timeFrom.AddMinutes(Convert.ToInt32(ConfigurationManager.AppSettings["Agora_StartTime"].ToString()));
+                            DateTime EndDateTime = timeTo.AddMinutes(Convert.ToInt32(ConfigurationManager.AppSettings["Agora_EndTime"].ToString()));
 
                             // This is For Test to Call now 
-                            DateTime StartDateTime = System.DateTime.Now;
-                            DateTime EndDateTime = ENDtDateTimeTemp.AddMinutes(Convert.ToInt32("120"));
+                            //DateTime StartDateTime = System.DateTime.Now;
+                            //DateTime EndDateTime = ENDtDateTimeTemp.AddMinutes(Convert.ToInt32("120"));
 
                             var StartTime = (int)StartDateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
                             var EndTime = (int)EndDateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
@@ -222,7 +234,7 @@ namespace SGHMobileApi.Controllers
 
                         resp.status = 1;
                         resp.msg = errMessage;
-                        resp.response = errStatus;
+                        resp.response = errStatus.ToString();
                     }
                     else
                     {
@@ -270,6 +282,9 @@ namespace SGHMobileApi.Controllers
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
 
+
+                    if (!string.IsNullOrEmpty(col["Sources"]))
+                        sources = col["Sources"];
 
                     if (!string.IsNullOrEmpty(col["Source"]))
                         sources = col["Source"];
@@ -371,15 +386,22 @@ namespace SGHMobileApi.Controllers
                         HeardAboutUs = Convert.ToInt32(col["HeardAboutUsID"]);
 
 
+
                     var Sources = "";
+                    if (!string.IsNullOrEmpty(col["Source"]))
+                        Sources = col["Source"];
+
                     if (!string.IsNullOrEmpty(col["Sources"]))
                         Sources = col["Sources"];
 
+                    var BookType = 1;
+                    if (!string.IsNullOrEmpty(col["SlotType"]))
+                        BookType = Convert.ToInt32(col["SlotType"]);
 
                     var patientDb = new PatientDB();
                     try
                     {
-                        patientDb.RescheduleAppointment(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, AppointmentID, EarlyReminder, HeardAboutUs, Sources, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
+                        patientDb.RescheduleAppointment(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, AppointmentID, EarlyReminder, HeardAboutUs, Sources, BookType, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
 
 
                         if (errStatus != 0)
@@ -709,7 +731,7 @@ namespace SGHMobileApi.Controllers
         }
 
 
-        // Mainly Developed FOR SaleForces
+        // Mainly Developed FOR Genesys
         [HttpPost]
         [Route("v2/Future-appointments-list-get")]
         [ResponseType(typeof(List<GenericResponse>))]
@@ -851,6 +873,103 @@ namespace SGHMobileApi.Controllers
             }
 
             return Ok(resp);
+        }
+
+        [HttpPost]
+        [Route("v2/VideoCall-Postponed-byDoctor")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult VideoCall_Postponed_byDoctor(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+
+            if (
+                !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Doctor_Name"])
+                && !string.IsNullOrEmpty(col["Appointment_id"]) && !string.IsNullOrEmpty(col["Department_Name"])
+                && !string.IsNullOrEmpty(col["Patient_MRN"]) && !string.IsNullOrEmpty(col["Appointment_Date"])
+                && !string.IsNullOrEmpty(col["postponed_min"]) && !string.IsNullOrEmpty(col["Source"])
+                && !string.IsNullOrEmpty(col["Doctor_ID"])
+                )
+            {
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var Appointmentid = Convert.ToInt32(col["Appointment_id"]);
+                var PatientMRN = Convert.ToInt32(col["Patient_MRN"]);
+                var postponedmin = Convert.ToInt32(col["postponed_min"]);
+                var DoctorId = Convert.ToInt32(col["Doctor_ID"]);
+
+                var DoctorName = col["Doctor_Name"].ToString();
+                var DepartmentName = col["Department_Name"].ToString();
+                var AppointmentDate = col["Appointment_Date"].ToString();
+                var Source = col["Source"].ToString();
+
+                var errStatus = 0;
+                var errMessage = "";
+
+                var patientDb = new PatientDB();
+                patientDb.Save_VideoCall_Postponed_byDoctor(hospitaId, Appointmentid, PatientMRN, postponedmin, DoctorId, DoctorName, DepartmentName, AppointmentDate, Source, ref errStatus, ref errMessage);
+
+                resp.status = errStatus;
+                //resp.msg = "Record has been Updated.";
+                resp.msg = errMessage;
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v2/Doctor-VideoCall-Join-Msg-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetDoctor_JoinStatus_Message(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            var patientDb = new PatientDB();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Appointment_ID"])  && !string.IsNullOrEmpty(col["patient_reg_no"]) && col["patient_reg_no"] != "0")
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                var AppoitmentID = Convert.ToInt32(col["Appointment_ID"]);
+
+
+
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"].ToString();
+
+                var DataTableReturn = patientDb.GetVidoCallDoctorStatusMsg(lang, hospitalId, registrationNo, AppoitmentID , ApiSource);
+
+
+                if (DataTableReturn != null && DataTableReturn.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Record(s) Found";
+                    _resp.response = DataTableReturn;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found";
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
         }
 
 

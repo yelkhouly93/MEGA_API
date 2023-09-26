@@ -16,11 +16,6 @@ using System.Net.Http.Formatting;
 using System.Web;
 using System.Web.Http.Description;
 
-
-
-
-
-
 namespace SGHMobileApi.Controllers
 {
     [Authorize]
@@ -98,7 +93,7 @@ namespace SGHMobileApi.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                //Log.Error(ex);
                 resp.status = 0;
             }
 
@@ -131,7 +126,7 @@ namespace SGHMobileApi.Controllers
                     
                     var DTList = _RatingDB.GetUserRating_List(lang, hospitalId, patientMrn);
 
-                    if (DTList != null && DTList.Rows.Count > 1)
+                    if (DTList != null && DTList.Rows.Count > 0)
                     {
                         resp.status = 1;
                         resp.msg = "Record Found";
@@ -156,7 +151,7 @@ namespace SGHMobileApi.Controllers
             catch (Exception ex)
             {
 
-                Log.Error(ex);
+                //Log.Error(ex);
             }
 
             return Ok();
@@ -199,7 +194,7 @@ namespace SGHMobileApi.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex);
+                //Log.Error(ex);
                 resp.status = 0;
             }
 

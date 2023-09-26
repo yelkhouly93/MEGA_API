@@ -73,7 +73,7 @@ namespace DataLayer.Data
                 new SqlParameter("@StarRate", StarRate),
                 new SqlParameter("@Comments", Comments),                
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.VarChar, 100)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
             };
 
             _db.param[3].Direction = ParameterDirection.Output;

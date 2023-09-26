@@ -645,7 +645,7 @@ namespace DataLayer.Data
 
         }
 
-        public void SaveAppointment_V2(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId, int EarlyReminder, int HeardAboutUsId,string sources, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName)
+        public void SaveAppointment_V2(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId, int EarlyReminder, int HeardAboutUsId,string sources,int SlotType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName)
         {
 
             DB.param = new SqlParameter[]
@@ -666,7 +666,8 @@ namespace DataLayer.Data
                 new SqlParameter("@ReturnFlag", SqlDbType.Int),
                 new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
                 new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
-                new SqlParameter("@Source", sources)
+                new SqlParameter("@Source", sources),
+                new SqlParameter("@BookingType", SlotType)
             };
 
             DB.param[12].Direction = ParameterDirection.Output;
@@ -787,7 +788,7 @@ namespace DataLayer.Data
 
 
 
-        public void RescheduleAppointment(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId,int AppointmentID, int EarlyReminder, int HeardAboutUsId,string Sources, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName)
+        public void RescheduleAppointment(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId,int AppointmentID, int EarlyReminder, int HeardAboutUsId,string Sources,int BookType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName)
         {
 
             DB.param = new SqlParameter[]
@@ -809,7 +810,9 @@ namespace DataLayer.Data
                 new SqlParameter("@ReturnFlag", SqlDbType.Int),
                 new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
                 new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
-                new SqlParameter("@Sources", Sources)
+                new SqlParameter("@Sources", Sources),
+                new SqlParameter("@BookingType", BookType),
+                
             };
             
             DB.param[13].Direction = ParameterDirection.Output;
@@ -1739,6 +1742,29 @@ namespace DataLayer.Data
         }
 
 
+        public DataTable GetPatientFamilyProfile_List(string Lang, int hospitalId, int registrationNo,string Source, ref int erStatus, ref string msg)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@BranchId", hospitalId),
+                new SqlParameter("@RegistrationNo", registrationNo),
+                new SqlParameter("@Source", Source),
+                new SqlParameter("@Er_Status", SqlDbType.Int),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 1000),
+            };
+            DB.param[4].Direction = ParameterDirection.Output;
+            DB.param[5].Direction = ParameterDirection.Output;
+
+
+            var dt = DB.ExecuteSPAndReturnDataTable("DBO.[FamilyProfile_Switch_List_SP]");
+
+            erStatus = Convert.ToInt32(DB.param[4].Value);
+            msg = DB.param[5].Value.ToString();
+            return dt;
+        }
+
+
         public DataTable Get_Patient_List_By_DateRange(string Lang, int hospitalId, DateTime StartDate, DateTime EndDate, ref int erStatus, ref string msg,string ApiSources="MobileApp")
         {
             DB.param = new SqlParameter[]
@@ -1764,6 +1790,46 @@ namespace DataLayer.Data
             erStatus = Convert.ToInt32(DB.param[4].Value);
             msg = DB.param[5].Value.ToString();
             return dt;
+        }
+
+        public DataTable Get_Patient_Updated_List_By_DateRange(string Lang, int hospitalId, DateTime StartDate, DateTime EndDate,DateTime UpdatedDate, ref int erStatus, ref string msg, string ApiSources = "MobileApp")
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@BranchId", hospitalId),
+                new SqlParameter("@StartDate", StartDate),
+                new SqlParameter("@EndDate", EndDate),
+                new SqlParameter("@Er_Status", SqlDbType.Int),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 200),
+                new SqlParameter("@UpdatedDate", UpdatedDate)
+                
+            };
+            DB.param[4].Direction = ParameterDirection.Output;
+            DB.param[5].Direction = ParameterDirection.Output;
+
+
+            string DB_SP_Name = "DBO.[Get_ALLPatientList_Updated_ByDateRange_SP]";
+
+            if (ApiSources.ToLower() == "saleforce")
+                DB_SP_Name = "SF.[Get_ALLPatientList_Updated_ByDateRange_SP]";
+
+            try
+			{
+                var dt = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+                erStatus = Convert.ToInt32(DB.param[4].Value);
+                msg = DB.param[5].Value.ToString();
+                return dt;
+            }
+            catch (Exception e)
+			{
+                erStatus = 0;
+                msg = "Crashing";
+                return null;
+            }
+            
+            
         }
 
 
@@ -1967,6 +2033,57 @@ namespace DataLayer.Data
         }
 
 
+        public void Save_VideoCall_Postponed_byDoctor
+            (int BranchID, int Appointmentid , int PatientMRN,int postponedmin 
+            , int DoctorId,string DoctorName,string DepartmentName,string AppointmentDate
+            ,string Source, ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@AppointmentID", Appointmentid),
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@DoctorId", DoctorId),
+                    new SqlParameter("@DoctorName", DoctorName),
+                    new SqlParameter("@DepartmentName", DepartmentName),
+                    new SqlParameter("@PatientMRN", PatientMRN),
+                    new SqlParameter("@AppointmentDate", AppointmentDate),
+                    new SqlParameter("@postponed", postponedmin),
+                    new SqlParameter("@Source", Source),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 1000)
+                    
+
+                };
+
+            DB.param[9].Direction = ParameterDirection.Output;
+            DB.param[10].Direction = ParameterDirection.Output;
+
+            DB.ExecuteNonQuerySP("[dbo].[SAVE_Appointment_Postponed_FCM_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[9].Value);
+            errMessage = DB.param[10].Value.ToString();
+        }
+
+
+        public DataTable GetVidoCallDoctorStatusMsg(string lang, int hospitalID, int RegistrationNo,int AppointmentID, string ApiSources)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@RegistrationNo", RegistrationNo),
+                    new SqlParameter("@AppointmentID", AppointmentID)
+                };
+
+
+            string DB_SP_Name = "DBO.Get_Doctor_VideoCall_Status_MSG_SP";
+
+            var allDt
+                = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+            return allDt;
+
+        }
 
     }
 }

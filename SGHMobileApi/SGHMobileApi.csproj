@@ -264,6 +264,7 @@
     <Compile Include="Common\TripleDESImp.cs" />
     <Compile Include="Common\Util.cs" />
     <Compile Include="Configuration\WebApiConfig.cs" />
+    <Compile Include="Controllers\AgrementController.cs" />
     <Compile Include="Controllers\AppConfigController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
     <Compile Include="Controllers\ClientApi\AvailableSlotsApiCaller.cs" />
@@ -282,7 +283,10 @@
     <Compile Include="Controllers\DoctorsController.cs" />
     <Compile Include="Controllers\HospitalController.cs" />
     <Compile Include="Controllers\Login2Controller.cs" />
+    <Compile Include="Controllers\Login_V3Controller.cs" />
     <Compile Include="Controllers\MediaController.cs" />
+    <Compile Include="Controllers\NotificationController.cs" />
+    <Compile Include="Controllers\NotificationReminderController.cs" />
     <Compile Include="Controllers\PatientController.cs" />
     <Compile Include="Controllers\PatientDigitalID_EXT_Controller.cs" />
     <Compile Include="Controllers\PatientListController.cs" />
@@ -291,6 +295,8 @@
     <Compile Include="Controllers\RatingController.cs" />
     <Compile Include="Controllers\SaveAppointmentController.cs" />
     <Compile Include="Controllers\SGHERPController.cs" />
+    <Compile Include="Controllers\SurveyController.cs" />
+    <Compile Include="Controllers\WalletController.cs" />
     <Compile Include="Extension\AddChallengeOnUnauthorizedResult.cs" />
     <Compile Include="Extension\AuthenticationFailureResult.cs" />
     <Compile Include="Extension\AuthenticationFilter.cs" />
@@ -353,12 +359,14 @@
     <Folder Include="Views\AppConfig\" />
     <Folder Include="Views\Home\" />
     <Folder Include="Views\Media\" />
+    <Folder Include="Views\NotificationReminder\" />
     <Folder Include="Views\PatientDigitalID_EXT_\" />
     <Folder Include="Views\Payment\" />
     <Folder Include="Views\RefillMedication\" />
     <Folder Include="Views\SGHERP\" />
     <Folder Include="Views\VideoCallConsultation\" />
     <Folder Include="Views\VideoConsultationUrl\" />
+    <Folder Include="Views\Wallet\" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
