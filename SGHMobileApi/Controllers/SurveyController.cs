@@ -44,6 +44,13 @@ namespace SGHMobileApi.Controllers
                 var SurveyId = Convert.ToInt32(col["SurveyId"]);
 
 
+                var ServiceID = 0;
+                if (!string.IsNullOrEmpty(col["ServiceId"]))
+                    ServiceID = Convert.ToInt32(col["ServiceId"]);
+
+
+
+
                 var allData = _SurveyDb.GetSurveyQuestions(lang, SurveyId);
 
 

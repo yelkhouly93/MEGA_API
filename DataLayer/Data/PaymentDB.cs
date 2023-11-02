@@ -158,7 +158,7 @@ namespace DataLayer.Data
         }
 
 
-        public DataTable GetPatientBillList(string lang , int BranchId, int MRN, string fromdate, string todate, string InvoiceType)
+        public DataTable GetPatientBillList(string lang , int BranchId, int MRN, string fromdate, string todate, string InvoiceType,string EpisodeType = "OP", int EpisodeId = 0)
         {
             DB.param = new SqlParameter[]
             {
@@ -167,7 +167,9 @@ namespace DataLayer.Data
                 new SqlParameter("@BranchID", BranchId),
                 new SqlParameter("@fromdate", fromdate),
                 new SqlParameter("@todate", todate),
-                new SqlParameter("@InvoiceType", InvoiceType)                
+                new SqlParameter("@InvoiceType", InvoiceType),
+                new SqlParameter("@EpisodeType", EpisodeType),
+                new SqlParameter("@EpisodeId", EpisodeId)
             };
             var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Get_Patient_BillList_SP");            
             return dataTable;

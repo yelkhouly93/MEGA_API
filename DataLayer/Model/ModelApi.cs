@@ -12,6 +12,12 @@ namespace DataLayer.Model
         public string idType { get; set; }
     }
 
+    public class accountData_dam
+    {
+        public string idValue { get; set; }
+        public string idType { get; set; }
+    }
+
     public class patientData
     {
         public int PATIENT_ID { get; set; }

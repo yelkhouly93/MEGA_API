@@ -835,6 +835,61 @@ namespace SGHMobileApi.Controllers
 
         }
 
+        [HttpPost]
+        [Route("v3/IncApprovalStatus-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetInSuranceApprovalStatus_V3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+            {
+                var lang = "EN";
+                var CMRN = Convert.ToInt32(col["patient_reg_no"]);
+                var BranchID = Convert.ToInt32(col["hospital_id"]);
+
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var status = 0;
+                var msg = "";
+
+                if (BranchID == 9)
+				{
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found";
+                    return Ok(_resp);
+
+                }
+
+                var DTList = CDB.GetPatientInSuranceApprovalStatus_DT(lang, BranchID, CMRN, ref status, ref msg);
+
+
+                if (DTList != null && DTList.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Record(s) Found";
+                    _resp.response = DTList;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found";
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
 
         //[HttpPost]
         //[Route("api/GetData")]

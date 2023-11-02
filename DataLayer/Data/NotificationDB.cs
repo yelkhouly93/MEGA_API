@@ -115,5 +115,50 @@ namespace DataLayer.Data
 
         /**** ///////// END Patient Perscription NOTIFICATION AREA /////// ***/
 
+
+        public DataTable Get_Notification_MissAppointment_DT(string lang, int hospitaId, int PatintMRN, string Source, ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@BranchId", hospitaId),
+                new SqlParameter("@PatientMRN", PatintMRN),                
+                new SqlParameter("@Source", Source),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
+            };
+
+            DB.param[3].Direction = ParameterDirection.Output;
+            DB.param[4].Direction = ParameterDirection.Output;
+
+            var dt = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_Notification_MissAppoitment_List_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[3].Value);
+            errMessage = DB.param[4].Value.ToString();
+
+            return dt;
+        }
+
+        public DataTable Get_Notification_PatientSuggestion_DT(string lang, int hospitaId, int PatintMRN, string Source, ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@BranchId", hospitaId),
+                new SqlParameter("@PatientMRN", PatintMRN),
+                new SqlParameter("@Source", Source),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)
+            };
+
+            DB.param[3].Direction = ParameterDirection.Output;
+            DB.param[4].Direction = ParameterDirection.Output;
+
+            var dt = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_Notification_PatientSuggestions_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[3].Value);
+            errMessage = DB.param[4].Value.ToString();
+
+            return dt;
+        }
+
     }
 }

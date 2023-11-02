@@ -15,12 +15,13 @@ namespace DataLayer.Data
 		CustomDBHelper DB = new CustomDBHelper("RECEPTION");
 
 
-        public DataTable GetSurveyQuestions(string lang, int SurveyID)
+        public DataTable GetSurveyQuestions(string lang, int SurveyID,int ServiceID = 0)
         {
             DB.param = new SqlParameter[]
             {
                 new SqlParameter("@Lang", lang),
-                new SqlParameter("@SurveyId", SurveyID)                
+                new SqlParameter("@SurveyId", SurveyID),
+                new SqlParameter("@ServiceID", ServiceID)
             };
             var dataTable = DB.ExecuteSPAndReturnDataTable("Survey.Get_Survey_Questions_SP");
             return dataTable;

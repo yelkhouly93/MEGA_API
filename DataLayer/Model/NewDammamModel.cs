@@ -36,4 +36,79 @@ namespace DataLayer.Model
 
     }
 
+    public class Medical_Perscription_Dam
+    {
+
+        public string prescriptionNo { get; set; }
+        public string fileNumber { get; set; }
+        public string requester { get; set; }
+        public string opip { get; set; }
+        public List<orders>  orders { get; set; }
+    }
+    public class orders
+	{
+        public string orderNo { get; set; }
+        public string quantity { get; set; }
+        public string requestDate { get; set; }
+        public string drugCode { get; set; }
+        public string drugName { get; set; }
+        public string drugLocation { get; set; }
+        public string dose { get; set; }
+        public string dispensingUnit { get; set; }
+        public string scheduleOfAdmin { get; set; }
+        public string frequency { get; set; }
+        public string frequencyDoses { get; set; }
+        public string frequencyUom { get; set; }
+        public string duration { get; set; }
+        public string durationUom { get; set; }
+
+
+        // For Lab and Rediology
+        public string procedureNumber { get; set; }
+        public string procedureName { get; set; }
+        public string procedureLoc { get; set; }
+        
+
+    }
+
+    public class PostResponse
+    {
+        public  string errorCode { get; set; }
+        public string errorMessage { get; set; }
+
+    }
+
+
+    public class PatientVisit_Dam
+	{
+        public string id { get; set; }
+        public string appointmentNo { get; set; }
+        public string registrationNo { get; set; }
+        public string clinicName { get; set; }
+        public string appDate { get; set; }
+        public string appTime { get; set; }
+        public string patientVisited { get; set; }
+        public string patientName { get; set; }
+        public string appointmentType { get; set; }
+        public string doctorId { get; set; }
+        public string doctorName { get; set; }
+        public string videoCallUrl { get; set; }
+        public string paid { get; set; }
+
+    }
+    
+
+    public class PatientInsurance_Dam
+    {
+        public string contractNo { get; set; }
+        public string contractDesc { get; set; }
+        public string purchaserCode { get; set; }
+        public string purchaserDesc { get; set; }
+        public string policyNo { get; set; }
+        public string policyDesc { get; set; }
+        public string accountNo { get; set; }
+        public string insuranceId { get; set; }
+        public string idExpiryDate { get; set; }
+
+    }
 }

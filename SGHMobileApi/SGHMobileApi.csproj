@@ -283,7 +283,9 @@
     <Compile Include="Controllers\DoctorsController.cs" />
     <Compile Include="Controllers\HospitalController.cs" />
     <Compile Include="Controllers\Login2Controller.cs" />
-    <Compile Include="Controllers\Login_V3Controller.cs" />
+    <Compile Include="Controllers\V3_Dammam\Appointment_V3Controller.cs" />
+    <Compile Include="Controllers\V3_Dammam\Doctors_V3Controller.cs" />
+    <Compile Include="Controllers\V3_Dammam\Login_V3Controller.cs" />
     <Compile Include="Controllers\MediaController.cs" />
     <Compile Include="Controllers\NotificationController.cs" />
     <Compile Include="Controllers\NotificationReminderController.cs" />
@@ -291,11 +293,15 @@
     <Compile Include="Controllers\PatientDigitalID_EXT_Controller.cs" />
     <Compile Include="Controllers\PatientListController.cs" />
     <Compile Include="Controllers\PatientTestResultsController.cs" />
+    <Compile Include="Controllers\V3_Dammam\PatientListing_Family_V3_Controller.cs" />
+    <Compile Include="Controllers\V3_Dammam\PatientTestResults_V3Controller.cs" />
+    <Compile Include="Controllers\V3_Dammam\Patient_V3Controller.cs" />
     <Compile Include="Controllers\PaymentController.cs" />
     <Compile Include="Controllers\RatingController.cs" />
     <Compile Include="Controllers\SaveAppointmentController.cs" />
     <Compile Include="Controllers\SGHERPController.cs" />
     <Compile Include="Controllers\SurveyController.cs" />
+    <Compile Include="Controllers\VitalSignGraphController.cs" />
     <Compile Include="Controllers\WalletController.cs" />
     <Compile Include="Extension\AddChallengeOnUnauthorizedResult.cs" />
     <Compile Include="Extension\AuthenticationFailureResult.cs" />

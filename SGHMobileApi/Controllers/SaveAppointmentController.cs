@@ -126,6 +126,13 @@ namespace SGHMobileApi.Controllers
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
 
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
 
                     if (!string.IsNullOrEmpty(col["Sources"]))
                         sources = col["Sources"];
@@ -281,7 +288,12 @@ namespace SGHMobileApi.Controllers
                     var sources = ConfigurationManager.AppSettings["API_SOURCE_KEY"].ToString();
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
-
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
 
                     if (!string.IsNullOrEmpty(col["Sources"]))
                         sources = col["Sources"];
@@ -358,7 +370,12 @@ namespace SGHMobileApi.Controllers
                     var clinicId = 0;
                     var lang = col["lang"];
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
-
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
 
                     if (!string.IsNullOrEmpty(col["clinic_id"]))
                         clinicId = Convert.ToInt32(col["clinic_id"]);
@@ -465,6 +482,12 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["lang"]))
                     lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                 var AppointmentID = Convert.ToInt32(col["Appointment_Id"]);
                 int errStatus = 0;
@@ -529,6 +552,12 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["lang"]))
                     lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                 var AppointmentID = Convert.ToInt32(col["Appointment_Id"]);
                 int errStatus = 0;
@@ -586,7 +615,12 @@ namespace SGHMobileApi.Controllers
 
                 var hospitalId = Convert.ToInt32(col["hospital_id"]);
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
-
+                if (hospitalId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
                 var ApiSource = "MobileApp";
@@ -638,7 +672,12 @@ namespace SGHMobileApi.Controllers
 
                 var hospitalId = Convert.ToInt32(col["hospital_id"]);
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
-
+                if (hospitalId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
                 var allAppointmnetList = patientDb.GetPatientCancelledAppointmentList(lang, hospitalId, registrationNo);
 
@@ -697,8 +736,13 @@ namespace SGHMobileApi.Controllers
                     ResgistrationID = Convert.ToInt32(col["patient_reg_no"]);
 
 
-                var hospitaId = Convert.ToInt32(col["hospital_id"]);                
-                
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
                 var patientDb = new PatientDB();
                 var dtTable = patientDb.GetAllAppointmentList(lang, hospitaId, ToDate,FromDate, ResgistrationID);
@@ -760,6 +804,12 @@ namespace SGHMobileApi.Controllers
 
 
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
                 var patientDb = new PatientDB();
@@ -809,7 +859,14 @@ namespace SGHMobileApi.Controllers
                     var errStatus = 0;
                     var errMessage = "";
 
-                    if (!string.IsNullOrEmpty(col["lang"]))
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
+                if (!string.IsNullOrEmpty(col["lang"]))
                         lang = col["lang"];
 
                     var patientDb = new PatientDB();
@@ -849,6 +906,13 @@ namespace SGHMobileApi.Controllers
             if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Appointment_id"]))
             {
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
                 var Appointmentid = col["Appointment_id"].ToString();
                 //var patient_reg_no = col["patient_reg_no"].ToString();
                 var errStatus = 0;
@@ -891,6 +955,13 @@ namespace SGHMobileApi.Controllers
                 )
             {
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
                 var Appointmentid = Convert.ToInt32(col["Appointment_id"]);
                 var PatientMRN = Convert.ToInt32(col["Patient_MRN"]);
                 var postponedmin = Convert.ToInt32(col["postponed_min"]);
@@ -936,6 +1007,12 @@ namespace SGHMobileApi.Controllers
                     lang = col["lang"];
 
                 var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitalId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                 var AppoitmentID = Convert.ToInt32(col["Appointment_ID"]);
 

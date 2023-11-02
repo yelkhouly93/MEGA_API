@@ -390,28 +390,206 @@ namespace SGHMobileApi.Controllers
 
 
 
+        //    [HttpPost]
+        //    [Route("v2/login-check")]
+        //    [ResponseType(typeof(List<GenericResponse>))]
+        //    public IHttpActionResult PatientList_Request_V2(FormDataCollection col)
+        //    {
+        //        var resp = new GenericResponse();
+
+        //            var lang = "EN";
+        //            var hospitalId = 0;
+        //            var patientMrn = 0;
+
+        //        var IsEncrypt = true;
+
+        //            if (!string.IsNullOrEmpty(col["patient_reg_no"]) || !string.IsNullOrEmpty(col["patient_national_id"]) || !string.IsNullOrEmpty(col["patient_phone"]))
+        //            {
+        //            var Source = "";
+
+        //            if (!string.IsNullOrEmpty(col["Source"]))
+        //                Source = col["Source"];
+
+        //            if (!string.IsNullOrEmpty(col["lang"]))
+        //                    lang = col["lang"];
+
+        //            if (!string.IsNullOrEmpty(col["IsEncrypt"]))
+        //            {
+        //                if (col["IsEncrypt"] == "0")
+        //                    IsEncrypt = false;
+        //            }
+
+
+
+
+
+
+        //                try
+        //                {
+        //                    if (string.IsNullOrEmpty(col["hospital_id"]))
+        //                        hospitalId = 0;
+        //                    else
+        //                        hospitalId = Convert.ToInt32(col["hospital_id"]);
+
+        //                    patientMrn = Convert.ToInt32(col["patient_reg_no"]);
+        //                }
+        //                catch(Exception ex)
+        //                {
+        //                    resp.status = 0;
+        //                    resp.msg = "Wrong Prameter. Please Enter the Valid Input.";                    
+        //                    return Ok(resp);
+        //                }
+
+
+        //                var PatientNationId = col["patient_national_id"];
+        //                var PCell = col["patient_phone"];
+
+        //                var loginDb = new Login2DB();                    
+        //                var errStatus = 0;
+        //                var errMessage = "";
+        //                var OTP = "";
+
+        //                if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+        //                {
+        //                    if (string.IsNullOrEmpty(col["hospital_id"]))
+        //                    {
+
+        //                        resp.status = 0;
+        //                        resp.msg = "Missing Prameter. With MRN Please Provide Hospital ID";
+        //                        resp.error_type = errStatus.ToString();
+        //                        return Ok(resp);
+
+        //                    }
+        //                }
+
+        //                if (!string.IsNullOrEmpty(col["patient_national_id"]))
+        //                {
+        //                    if (PatientNationId.Length != 10)
+        //                    {
+        //                        resp.status = 0;
+        //                        resp.msg = "Wrong input! Invalid National ID";
+        //                        resp.error_type = errStatus.ToString();
+        //                        return Ok(resp);
+        //                    }
+        //                }
+
+
+        //            //// For Damamam Intregaration 
+        //            //bool CheckInDammam = true;
+        //            //bool OnlyDammam = false;
+
+        //            //    //checked IF PATIENT SELECT ANY OTHER BRANCH
+        //            //if (hospitalId > 0 && hospitalId != 9)
+        //            //    CheckInDammam = false;
+
+        //            //// Check Damam MRN Provided
+        //            //if (patientMrn > 0 && hospitalId == 9)
+        //            //    OnlyDammam = true;
+
+
+
+
+
+        //            // For Damamam Intregaration 
+
+        //            // Ahsan New Chjange for Dammam
+
+        //            //var userInfo = new List<login_check_modal>();                                
+        ////            if (CheckInDammam)
+        ////{
+        ////                // Call dammam API Function fill list
+        ////                LoginApiCaller _loginApiCaller = new LoginApiCaller();
+        ////                UserInfo _userInfo;
+        ////                //_userInfo = _loginApiCaller.ValidateLoginUserByApi_NewDam(lang, hospitalId, null, pregno, pnationalid, ref activationNo, ref errStatus, ref errMessage);
+        ////            }
+
+        //            //if (!OnlyDammam)
+        //                //userInfo = loginDb.login_check(lang, hospitalId, PCell, PatientNationId, patientMrn, Source, ref errStatus, ref errMessage, ref OTP, IsEncrypt);
+        //            var userInfo = loginDb.ValidateLoginUser_List(lang, hospitalId, PCell, PatientNationId, patientMrn, Source, ref errStatus, ref errMessage, ref OTP, IsEncrypt);
+
+
+
+        //            if (errStatus != 1)
+        //                {
+        //                    resp.status = errStatus;
+        //                    if (errStatus == 0)
+        //                    {
+        //                        resp.status = 1;
+        //                        //string smsRes = "";
+        //                        //DataRow dr = userInfo.Rows[0];
+        //                        //var PhoneNumber = dr["PatientCellNo2"].ToString();
+        //                    //userInfo.Rows[0]["PatientCellNo2"] = "";
+
+        //                        var PhoneNumber = userInfo[0].PatientCellNo2;
+        //                        userInfo[0].PatientCellNo2 = "";
+
+        //                        //PhoneNumber = "0592285955";
+
+        //                        string MsgContent = "";
+        //                        if (OTP != "6465")
+        //                        {
+        //                            //MsgContent = "<#> SGHC OTP Code " + OTP + " ";
+        //                            MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
+        //                            MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+
+        //                            Util.SendTestSMS(PhoneNumber, MsgContent);
+        //                            //if (hospitalId != 201 && !Util.UaeBranches.Contains(hospitalId))
+        //                            //    Util.SendTestSMS(PhoneNumber, MsgContent);
+        //                            //else if (hospitalId == 201)
+        //                            //    Util.SendSMS_Cairo(PhoneNumber, MsgContent);
+        //                            //else if (Util.UaeBranches.Contains(hospitalId))
+        //                            //{
+        //                            //    string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+        //                            //    log.Info("UAE SMS Reponse: " + response);
+        //                            //}
+        //                        }
+
+        //                    }
+
+
+        //                    resp.msg = errMessage;
+        //                    resp.response = userInfo;
+        //                }
+        //                else
+        //                {
+        //                    resp.status = 0;
+        //                    resp.msg = errMessage;
+        //                    resp.error_type = errStatus.ToString();
+        //                }
+        //            }
+        //            else
+        //            {
+        //                resp.status = 0;
+        //                resp.msg = "Missing Parameter!";                    
+        //            }
+
+
+        //            return Ok(resp);
+        //    }
+
+
         [HttpPost]
         [Route("v2/login-check")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult PatientList_Request_V2(FormDataCollection col)
         {
             var resp = new GenericResponse();
-            
-                var lang = "EN";
-                var hospitalId = 0;
-                var patientMrn = 0;
+
+            var lang = "EN";
+            var hospitalId = 0;
+            var patientMrn = 0;
 
             var IsEncrypt = true;
 
-                if (!string.IsNullOrEmpty(col["patient_reg_no"]) || !string.IsNullOrEmpty(col["patient_national_id"]) || !string.IsNullOrEmpty(col["patient_phone"]))
-                {
+            if (!string.IsNullOrEmpty(col["patient_reg_no"]) || !string.IsNullOrEmpty(col["patient_national_id"]) || !string.IsNullOrEmpty(col["patient_phone"]))
+            {
                 var Source = "";
-                
+
                 if (!string.IsNullOrEmpty(col["Source"]))
                     Source = col["Source"];
 
                 if (!string.IsNullOrEmpty(col["lang"]))
-                        lang = col["lang"];
+                    lang = col["lang"];
 
                 if (!string.IsNullOrEmpty(col["IsEncrypt"]))
                 {
@@ -420,150 +598,114 @@ namespace SGHMobileApi.Controllers
                 }
 
 
-                
-                    
 
 
-                    try
-                    {
-                        if (string.IsNullOrEmpty(col["hospital_id"]))
-                            hospitalId = 0;
-                        else
-                            hospitalId = Convert.ToInt32(col["hospital_id"]);
+                try
+                {
+                    if (string.IsNullOrEmpty(col["hospital_id"]))
+                        hospitalId = 0;
+                    else
+                        hospitalId = Convert.ToInt32(col["hospital_id"]);
 
-                        patientMrn = Convert.ToInt32(col["patient_reg_no"]);
-                    }
-                    catch(Exception ex)
-                    {
-                        resp.status = 0;
-                        resp.msg = "Wrong Prameter. Please Enter the Valid Input.";                    
-                        return Ok(resp);
-                    }
-
-
-                    var PatientNationId = col["patient_national_id"];
-                    var PCell = col["patient_phone"];
-
-                    var loginDb = new Login2DB();                    
-                    var errStatus = 0;
-                    var errMessage = "";
-                    var OTP = "";
-
-                    if (!string.IsNullOrEmpty(col["patient_reg_no"]))
-                    {
-                        if (string.IsNullOrEmpty(col["hospital_id"]))
-                        {
-
-                            resp.status = 0;
-                            resp.msg = "Missing Prameter. With MRN Please Provide Hospital ID";
-                            resp.error_type = errStatus.ToString();
-                            return Ok(resp);
-
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(col["patient_national_id"]))
-                    {
-                        if (PatientNationId.Length != 10)
-                        {
-                            resp.status = 0;
-                            resp.msg = "Wrong input! Invalid National ID";
-                            resp.error_type = errStatus.ToString();
-                            return Ok(resp);
-                        }
-                    }
-
-
-                // For Damamam Intregaration 
-                bool CheckInDammam = true;
-                bool OnlyDammam = false;
-
-                    //checked IF PATIENT SELECT ANY OTHER BRANCH
-                if (hospitalId > 0 && hospitalId != 9)
-                    CheckInDammam = false;
-
-                // Check Damam MRN Provided
-                if (patientMrn > 0 && hospitalId == 9)
-                    OnlyDammam = true;
-
-
-
-
-
-                // For Damamam Intregaration 
-
-                // Ahsan New Chjange for Dammam
-
-                var userInfo = new List<login_check_modal>();                                
-                if (CheckInDammam)
-				{
-                    // Call dammam API Function fill list
-                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                    UserInfo _userInfo;
-                    //_userInfo = _loginApiCaller.ValidateLoginUserByApi_NewDam(lang, hospitalId, null, pregno, pnationalid, ref activationNo, ref errStatus, ref errMessage);
+                    patientMrn = Convert.ToInt32(col["patient_reg_no"]);
+                }
+                catch (Exception ex)
+                {
+                    resp.status = 0;
+                    resp.msg = "Wrong Prameter. Please Enter the Valid Input.";
+                    return Ok(resp);
                 }
 
-                if (!OnlyDammam)
-                    userInfo = loginDb.login_check(lang, hospitalId, PCell, PatientNationId, patientMrn, Source, ref errStatus, ref errMessage, ref OTP, IsEncrypt);
-                
 
-                    if (errStatus != 1)
+                var PatientNationId = col["patient_national_id"];
+                var PCell = col["patient_phone"];
+
+                var loginDb = new Login2DB();
+                var errStatus = 0;
+                var errMessage = "";
+                var OTP = "";
+
+                if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+                {
+                    if (string.IsNullOrEmpty(col["hospital_id"]))
                     {
-                        resp.status = errStatus;
-                        if (errStatus == 0)
-                        {
-                            resp.status = 1;
-                            //string smsRes = "";
-                            //DataRow dr = userInfo.Rows[0];
-                            //var PhoneNumber = dr["PatientCellNo2"].ToString();
-                        //userInfo.Rows[0]["PatientCellNo2"] = "";
 
-                            var PhoneNumber = userInfo[0].PatientCellNo2;
-                            userInfo[0].PatientCellNo2 = "";
-                            
-                            //PhoneNumber = "0592285955";
+                        resp.status = 0;
+                        resp.msg = "Missing Prameter. With MRN Please Provide Hospital ID";
+                        resp.error_type = errStatus.ToString();
+                        return Ok(resp);
 
-                            string MsgContent = "";
-                            if (OTP != "6465")
-                            {
-                                //MsgContent = "<#> SGHC OTP Code " + OTP + " ";
-                                MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
-                                MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
-
-                                Util.SendTestSMS(PhoneNumber, MsgContent);
-                                //if (hospitalId != 201 && !Util.UaeBranches.Contains(hospitalId))
-                                //    Util.SendTestSMS(PhoneNumber, MsgContent);
-                                //else if (hospitalId == 201)
-                                //    Util.SendSMS_Cairo(PhoneNumber, MsgContent);
-                                //else if (Util.UaeBranches.Contains(hospitalId))
-                                //{
-                                //    string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                                //    log.Info("UAE SMS Reponse: " + response);
-                                //}
-                            }
-                           
-                        }
-
-
-                        resp.msg = errMessage;
-                        resp.response = userInfo;
                     }
-                    else
+                }
+
+                if (!string.IsNullOrEmpty(col["patient_national_id"]))
+                {
+                    if (PatientNationId.Length != 10)
                     {
                         resp.status = 0;
-                        resp.msg = errMessage;
+                        resp.msg = "Wrong input! Invalid National ID";
                         resp.error_type = errStatus.ToString();
+                        return Ok(resp);
                     }
+                }
+
+                var userInfo = loginDb.ValidateLoginUser_List(lang, hospitalId, PCell, PatientNationId, patientMrn, Source, ref errStatus, ref errMessage, ref OTP, IsEncrypt);
+
+                if (errStatus != 1)
+                {
+                    resp.status = errStatus;
+                    if (errStatus == 0)
+                    {
+
+                        resp.status = 1;
+                        //string smsRes = "";
+                        DataRow dr = userInfo.Rows[0];
+                        var PhoneNumber = dr["PatientCellNo2"].ToString();
+                        userInfo.Rows[0]["PatientCellNo2"] = "";
+
+                        //PhoneNumber = "0592285955";
+
+                        string MsgContent = "";
+                        if (OTP != "6465")
+                        {
+                            //MsgContent = "<#> SGHC OTP Code " + OTP + " ";
+                            MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
+                            MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+
+                            if (hospitalId != 201 && !Util.UaeBranches.Contains(hospitalId))
+                                Util.SendTestSMS(PhoneNumber, MsgContent);
+                            else if (hospitalId == 201)
+                                Util.SendSMS_Cairo(PhoneNumber, MsgContent);
+                            else if (Util.UaeBranches.Contains(hospitalId))
+                            {
+                                string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                                log.Info("UAE SMS Reponse: " + response);
+                            }
+                        }
+
+                    }
+
+
+                    resp.msg = errMessage;
+                    resp.response = userInfo;
                 }
                 else
                 {
                     resp.status = 0;
-                    resp.msg = "Missing Parameter!";                    
+                    resp.msg = errMessage;
+                    resp.error_type = errStatus.ToString();
                 }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter!";
+            }
 
-                
-                return Ok(resp);
+
+            return Ok(resp);
         }
+
 
 
 
@@ -820,7 +962,22 @@ namespace SGHMobileApi.Controllers
 
                 var lang = "EN";
                 var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                
+                try
+				{
+                    var tempRegid = Convert.ToInt32(col["patient_reg_no"]);
+                }
+                catch(Exception ex)
+				{
+                    resp.status = 0;
+                    resp.msg = "Wrong Prameter. Please Enter the Valid Input.";
+                    return Ok(resp);
+                }
+                
+
+
                 var patientMrn = col["patient_reg_no"];
+
                 var patientPhone = col["patient_phone"];
                 var patientNationalId = col["patient_national_id"];
                 var verificationCode = col["verification_code"];

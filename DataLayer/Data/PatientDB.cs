@@ -662,7 +662,7 @@ namespace DataLayer.Data
                 new SqlParameter("@PatientId", patientID),
                 new SqlParameter("@InformEarlierAvailability", EarlyReminder),
                 new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
-                new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 100),
+                new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 500),
                 new SqlParameter("@ReturnFlag", SqlDbType.Int),
                 new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
                 new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
@@ -1247,7 +1247,7 @@ namespace DataLayer.Data
             }
         }
 
-        public List<PateintTests> GetPatientTestResultsNew(string lang, int hospitalId, int resgistrationNo, ref int Er_Status, ref string Msg,string ApiSources = "MobileApp")
+        public List<PateintTests> GetPatientTestResultsNew(string lang, int hospitalId, int resgistrationNo, ref int Er_Status, ref string Msg,string ApiSources = "MobileApp" , string EpisodeType = "OP" , int EpisodeID = 0)
         {
             try
             {
@@ -1257,7 +1257,9 @@ namespace DataLayer.Data
                     new SqlParameter("@BranchId", hospitalId),
                     new SqlParameter("@RegistrationNo ", resgistrationNo),
                     new SqlParameter("@status", SqlDbType.Int),
-                    new SqlParameter("@msg", SqlDbType.NVarChar, 200)
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 500),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeID)
                 };
                 DB.param[2].Direction = ParameterDirection.Output;
                 DB.param[3].Direction = ParameterDirection.Output;
@@ -1427,7 +1429,7 @@ namespace DataLayer.Data
             return allClinicsDt;
 
         }
-        public DataTable GetPatientPrescriptionDT(string lang, int hospitalId, int resgistrationNo, ref int Er_Status, ref string Msg , string ApiSources = "MobileApp")
+        public DataTable GetPatientPrescriptionDT(string lang, int hospitalId, int resgistrationNo, ref int Er_Status, ref string Msg , string ApiSources = "MobileApp" , int EpisodeId = 0, string EpisodeType = "OP")
         {
             try
             {                
@@ -1436,7 +1438,10 @@ namespace DataLayer.Data
                     new SqlParameter("@BranchId", hospitalId),
                     new SqlParameter("@RegistrationNo", resgistrationNo),
                     new SqlParameter("@status", SqlDbType.Int),
-                    new SqlParameter("@msg", SqlDbType.NVarChar, 200)
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 500),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeId)
+                    
                 };
                 DB.param[2].Direction = ParameterDirection.Output;
                 DB.param[3].Direction = ParameterDirection.Output;
@@ -1620,14 +1625,15 @@ namespace DataLayer.Data
             return dt;
         }
 
-        public DataTable GetPatientOrder_List(string Lang, int hospitalId, int registrationNo, int visitID)
+        public DataTable GetPatientOrder_List(string Lang, int hospitalId, int registrationNo, int visitID,string EpisodeType = "OP")
         {
             DB.param = new SqlParameter[]
             {
                 new SqlParameter("@Lang", Lang),
                 new SqlParameter("@BranchId", hospitalId),
                 new SqlParameter("@VisitId", visitID),                
-                new SqlParameter("@RegistrationNo", registrationNo)
+                new SqlParameter("@RegistrationNo", registrationNo),
+                new SqlParameter("@EpisodeType", EpisodeType)
             };
             
 
@@ -1719,7 +1725,7 @@ namespace DataLayer.Data
         }
 
 
-        public DataTable GetBookingPatientFamily_List(string Lang, int hospitalId, int registrationNo, int BookinghospitalId, ref int erStatus, ref string msg)
+        public DataTable GetBookingPatientFamily_List(string Lang, int hospitalId, int registrationNo, int BookinghospitalId, ref int erStatus, ref string msg, string PPhone = null)
         {
             DB.param = new SqlParameter[]
             {
@@ -1729,6 +1735,7 @@ namespace DataLayer.Data
                 new SqlParameter("@BookingBranchId", BookinghospitalId),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
                 new SqlParameter("@Msg", SqlDbType.NVarChar, 200),
+                new SqlParameter("@BookingPhone", PPhone)
             };
             DB.param[4].Direction = ParameterDirection.Output;
             DB.param[5].Direction = ParameterDirection.Output;
@@ -1761,6 +1768,47 @@ namespace DataLayer.Data
 
             erStatus = Convert.ToInt32(DB.param[4].Value);
             msg = DB.param[5].Value.ToString();
+            return dt;
+        }
+        public List<PatientFamilyList> GetPatientFamilyProfile_List_V3(string Lang, int hospitalId, int registrationNo, string Source, ref int erStatus, ref string msg)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@BranchId", hospitalId),
+                new SqlParameter("@RegistrationNo", registrationNo),
+                new SqlParameter("@Source", Source),
+                new SqlParameter("@Er_Status", SqlDbType.Int),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 1000),
+            };
+            DB.param[4].Direction = ParameterDirection.Output;
+            DB.param[5].Direction = ParameterDirection.Output;
+
+
+            var dt = DB.ExecuteSPAndReturnDataTable("DBO.[FamilyProfile_Switch_List_SP]").ToListObject<PatientFamilyList>();
+
+            erStatus = Convert.ToInt32(DB.param[4].Value);
+            msg = DB.param[5].Value.ToString();
+            return dt;
+        }
+
+        public List<PatientFamilyList> GetPatientFamilyProfile_List_V3_ByMobile(string Lang, string Phone, string Source, ref int erStatus, ref string msg)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@MobileNo", Phone),                
+                new SqlParameter("@Source", Source),
+                new SqlParameter("@Er_Status", SqlDbType.Int),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 1000),
+            };
+            DB.param[3].Direction = ParameterDirection.Output;
+            DB.param[4].Direction = ParameterDirection.Output;
+
+            var dt = DB.ExecuteSPAndReturnDataTable("DBO.[FamilyProfile_Switch_List_ByMobile_SP]").ToListObject<PatientFamilyList>();
+
+            erStatus = Convert.ToInt32(DB.param[3].Value);
+            msg = DB.param[4].Value.ToString();
             return dt;
         }
 
@@ -1833,14 +1881,16 @@ namespace DataLayer.Data
         }
 
 
-        public DataTable GetPatientBills(int hospitaId, int registrationNo, ref int errStatus, ref string errMessage)
+        public DataTable GetPatientBills(int hospitaId, int registrationNo, ref int errStatus, ref string errMessage, string EpisodeType = "OP" , int EpisodeID = 0)
         {
             DB.param = new SqlParameter[]
             {
                 new SqlParameter("@BranchId ", hospitaId),
                 new SqlParameter("@RegistrationNo ", registrationNo),
                 new SqlParameter("@status",  SqlDbType.Int),
-                new SqlParameter("@msg ",  SqlDbType.NVarChar, 200)
+                new SqlParameter("@msg",  SqlDbType.NVarChar, 200),
+                new SqlParameter("@EpisodeID",  EpisodeID),
+                new SqlParameter("@EpisodeType",  EpisodeType )
             };
             DB.param[2].Direction = ParameterDirection.Output;
             DB.param[3].Direction = ParameterDirection.Output;
@@ -1995,14 +2045,16 @@ namespace DataLayer.Data
             DB.ExecuteSP("[dbo].[Update_VideoCall_Join_SP]");
         }
 
-        public DataTable GET_FoodAllergyList_ByPatient (string Lang, int PatientMRN, int BranchID, string Source)
+        public DataTable GET_FoodAllergyList_ByPatient (string Lang, int PatientMRN, int BranchID, string Source,string EpisodeType = "OP", int EpisodeID = 0)
         {
             DB.param = new SqlParameter[]
                 {
                     new SqlParameter("@Lang", Lang),
                     new SqlParameter("@RegistrationNo", PatientMRN),
                     new SqlParameter("@BranchID", BranchID),
-                    new SqlParameter("@Source", Source)
+                    new SqlParameter("@Source", Source),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeID)                    
                 };
             
             var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_AllergyList_Food_Patient_SP]");
@@ -2083,6 +2135,29 @@ namespace DataLayer.Data
 
             return allDt;
 
+        }
+
+
+
+
+        public DataTable GET_Patient_VitalSign(string Lang, int PatientMRN, int BranchID, string Source, string EpisodeType = "OP", int EpisodeID = 0)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", Lang),
+                    new SqlParameter("@RegistrationNo", PatientMRN),
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@Source", Source),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeID),
+                    new SqlParameter("@Er_Status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 1000)
+                };
+            DB.param[6].Direction = ParameterDirection.Output;
+            DB.param[7].Direction = ParameterDirection.Output;
+
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_PatientVitals_SP]");
+            return ReturnDataTable;
         }
 
     }

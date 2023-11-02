@@ -64,6 +64,15 @@ namespace DataLayer.Model
 
     }
 
+    public class DamPerscriptionResponse
+    {
+        //public int status { get; set; }
+        //public string msg { get; set; }
+        public object prescriptions { get; set; }
+        //public string error_type { get; set; }
+
+    }
+
     public class GenericResponse_Report
     {
         public int status { get; set; }
@@ -168,7 +177,9 @@ namespace DataLayer.Model
 
         public string DocCode { get; set; }
 
-        
+        public string ClinicCode { get; set; }
+
+
     }
     public class DoctorsDataList
     {
@@ -1105,6 +1116,8 @@ namespace DataLayer.Model
         public string PEMail { get; set; }
         public string Registrationno { get; set; }
         public string BranchId { get; set; }
+        
+        public string branchID { get; set; }
         public string PatientCellNo2 { get; set; }
         
         public string PatientFullName { get; set; }
@@ -1116,5 +1129,263 @@ namespace DataLayer.Model
 
 
 
+    public class Medical_Perscription_modal
+	{
+        public int Visit_Id { get; set; }
+        public string Doctor_Name { get; set; }
+        public string Prescription_Date { get; set; }
+        public string Drug_Name { get; set; }
+        public string Route { get; set; }
+        public string Duration { get; set; }
+        public string Frequency { get; set; }
+        public string Instructions { get; set; }
+        public string Remarks { get; set; }
+        public int Active { get; set; }
+        public string Strength { get; set; }
+        public string Age { get; set; }
+        public string Gender { get; set; }
+        public string Company { get; set; }
+        public string Dosage { get; set; }
+        public string UNIFIED_DEPT_NAME { get; set; }
+        public int PrescriptionId { get; set; }
+        public int DrugId { get; set; }
+
+
+    }
+
+
+    public class Patient_Appointment_Modal
+    {
+        public Patient_Appointment_Modal()
+		{
+            this.ConfirmationStatus = "No";
+            this.ConfirmationStatus_AR = "لا";
+            this.IsUpComming = "0";
+            this.latitude = "26.37818751872406";
+            this.longitude = "49.99144945274543";
+            this.IsVideoCall = "0";
+        }
+
+
+        public string Id { get; set; } 
+        public string AppointmentNo { get; set; }
+        public string RegistrationNo { get; set; }
+        public string ClinicName { get; set; }
+        public DateTime AppDate { get; set; }
+        public string  AppTime { get; set; }
+        public string PatientVisited { get; set; }
+        public string PatientName { get; set; }
+        public string DoctorName { get; set; }
+        public string ConfirmationStatus { get; set; }
+        public string ConfirmationStatus_AR { get; set; }
+        public string DoctorName_AR { get; set; }
+        public string ClinicName_AR { get; set; }
+        public string IsUpComming { get; set; }
+        public string DoctorId { get; set; }
+        public string IsVideoCall { get; set; }
+        public string VideoCallURL { get; set; }
+        public bool isPaid { get; set; }
+        public string DurationLeft { get; set; }
+        public string image_url { get; set; }
+        public string BranchName { get; set; }
+        public string latitude { get; set; }
+        public string longitude { get; set; }
+
+
+
+    }
+
+    public class Patient_Appointment_Modal_ForMobile
+    {
+        public Patient_Appointment_Modal_ForMobile()
+        {
+            this.ConfirmationStatus = "No";
+            this.ConfirmationStatus_AR = "لا";
+            this.IsUpComming = 0;
+            this.latitude = "26.37818751872406";
+            this.longitude = "49.99144945274543";
+            this.IsVideoCall = 0;
+            this.videoCallURL = null;
+            this.image_url = null;
+                 
+        }
+
+
+        public int Id { get; set; }
+        public int AppointmentNo { get; set; }
+        public int RegistrationNo { get; set; }
+        public string ClinicName { get; set; }
+        public DateTime AppDate { get; set; }
+        public string AppTime { get; set; }
+        public int PatientVisited { get; set; }
+        public string PatientName { get; set; }
+        public string DoctorName { get; set; }
+        public string ConfirmationStatus { get; set; }
+        public string ConfirmationStatus_AR { get; set; }
+        public string DoctorName_AR { get; set; }
+        public string ClinicName_AR { get; set; }
+        public int IsUpComming { get; set; }
+        public int DoctorId { get; set; }
+        public int IsVideoCall { get; set; }
+        public string videoCallURL { get; set; }
+        public bool isPaid { get; set; }
+        public int DurationLeft { get; set; }
+        public string image_url { get; set; }
+        public string BranchName { get; set; }
+        public string latitude { get; set; }
+        public string longitude { get; set; }
+    }
+
+    public class Doctor_Schedule_days_Modal
+    {
+        public int Id { set; get; }
+        public int DepartmentID { set; get; }
+        public int Doctor_Id { set; get; }
+        public DateTime Scheduled_Day { set; get; }
+        public string FromTime { set; get; }
+        public string ToTime { set; get; }
+        public int SlotTypeId { set; get; }
+        public string SlotTypeName { set; get; }
+        public int DayBooked { set; get; }
+        //public string NoSchedules { set; get; }
+        public string AvailableSlots { set; get; }
+        public string TotalSlotCount { set; get; }
+        public string Split_Shift { set; get; }
+        public string Schedule_1_From { set; get; }
+        public string Schedule_1_To { set; get; }
+        public string Schedule_2_From { set; get; }
+        public string Schedule_2_To { set; get; }
+        public string SNO { set; get; }
+        public string PageNo { set; get; }
+
+    }
+
+    public class Doctor_Schedule_days_Modal_ForMobile
+    {
+        public Doctor_Schedule_days_Modal_ForMobile()
+		{
+            this.NoSchedules = 0;
+            this.SNO = 0;
+            this.PageNo = 0;
+            this.Split_Shift = 0;
+    }
+        public int Id { set; get; }
+        public int DepartmentID { set; get; }
+        public int Doctor_Id { set; get; }
+        public DateTime Scheduled_Day { set; get; }
+        public string FromTime { set; get; }
+        public string ToTime { set; get; }
+        public int SlotTypeId { set; get; }
+        public string SlotTypeName { set; get; }
+        public int DayBooked { set; get; }
+        public int NoSchedules { set; get; }
+        public string AvailableSlots { set; get; }
+        public string TotalSlotCount { set; get; }
+        public int Split_Shift { set; get; }
+        public string Schedule_1_From { set; get; }
+        public string Schedule_1_To { set; get; }
+        public string Schedule_2_From { set; get; }
+        public string Schedule_2_To { set; get; }
+        public int SNO { set; get; }
+        public int PageNo { set; get; }
+
+    }
+
+    //***  FOR POST DAMMAM API's
+    // For Cancel Appoitment
+    public class BookingID
+	{
+        public string bookingID { set; get; }
+    
+    }
+
+    // For Book Appoitment Save Appoitment
+    public class BookAppointment
+    {
+        public string doctorID { set; get; }
+        public string clinicCode { set; get; }
+        public string time { set; get; }
+        public string patient_document_id { set; get; }
+        public string fileNumber { set; get; }
+    }
+
+    public class RescheduleAppoitment
+    {
+        public string bookingID { set; get; }
+        public string time { set; get; }
+    }
+
+    public class CreatePatient
+    {
+        public string firstName { set; get; }
+        public string secondName { set; get; }
+        public string thirdName { set; get; }
+        public string familyName { set; get; }
+        public string firstNameAr { set; get; }
+        public string secondNameAr { set; get; }
+        public string thirdNameAr { set; get; }
+        public string familyNameAr { set; get; }
+        public string gender { set; get; }
+        public string nationality { set; get; }
+        public string religion { set; get; }
+        public string dateofbirth { set; get; }
+        
+        public string phone { set; get; }
+        public string patient_document_id { set; get; }
+    }
+
+
+    public class PatientFamilyList
+	{
+        public string BranchName { get; set; }
+        public string BranchId { get; set; }
+        public string RegistrationNo { get; set; }
+        public string FirstName { get; set; }
+        public string MiddleName { get; set; }
+        public string LastName { get; set; }
+        public string FamilyName { get; set; }
+        public string PatientFullName { get; set; }
+        public string PatientId { get; set; }
+        public string PCellno { get; set; }
+        public string DOB { get; set; }
+        public string Age { get; set; }
+        public string Gender { get; set; }
+        public string MaritalStatus { get; set; }
+        public int NationalityId { get; set; }
+        public string Nationality { get; set; }
+        public string image_url { get; set; }
+
+    }
+
+    public class PatientVisit
+    {
+            public int id { get; set; }
+            public int appointmentNo{ get; set; }
+            public int registrationNo{ get; set; }
+            public string clinicName{ get; set; }
+            public string appDate{ get; set; }
+            public string appTime{ get; set; }
+            public int patientVisited{ get; set; }
+            public string patientName{ get; set; }
+            public string doctorName{ get; set; }
+            public string appointmentType{ get; set; }
+            public string videoCallUrl{ get; set; }
+            public string doctorId{ get; set; }
+            public int paid{ get; set; }
+        public int episodeId { get; set; }
+        public string episodeType { get; set; }
+        public string episodeStatus { get; set; }
+
+    }
+    public class PatientInsurance
+    {
+            public int registrationno { get; set; }
+            public string category { get; set; }
+            public string company { get; set; }
+            public string grade { get; set; }
+            public string policyNo { get; set; }
+            public string insuranceId { get; set; }
+            public string idExpiryDate { get; set; }
+	}
 
 }

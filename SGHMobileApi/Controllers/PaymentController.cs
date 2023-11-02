@@ -58,7 +58,19 @@ namespace SGHMobileApi.Controllers
                 var hospitalId = Convert.ToInt32(col["hospital_id"]); 
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
 
-                var allData = _paymentDb.GetPatientBillList(lang,hospitalId,registrationNo, fromdate, todate, InvoiceType);
+
+
+                var EpisodeType = "OP";
+                var EpisodeID = 0;
+
+                if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                    EpisodeType = col["Episode_Type"];
+                if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                    EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+
+
+                var allData = _paymentDb.GetPatientBillList(lang,hospitalId,registrationNo, fromdate, todate, InvoiceType , EpisodeType , EpisodeID);
 
 
                 if (allData != null && allData.Rows.Count > 0)

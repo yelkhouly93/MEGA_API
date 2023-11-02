@@ -266,32 +266,62 @@ namespace SGHMobileApi.Controllers
                 int errStatus = 0;
                 string errMessage = "";
 
+                if (hospitaId == 9)
+                {
+                    resp.status = 0;
+                    resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
+
                 var patientDb = new PatientDB();
 
                 var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"].ToString();
+
                 if (!string.IsNullOrEmpty(col["Sources"]))
                     ApiSource = col["Sources"].ToString();
 
-                var allPatientDiagnosis = patientDb.GetPatientTestResultsNew(lang, hospitaId, registrationNo, ref errStatus, ref errMessage, ApiSource);
+
+                var EpisodeType = "OP";
+                var EpisodeID = 0;
+
+                if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                    EpisodeType = col["Episode_Type"];
+                if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                    EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+                if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                {
+                    resp.status = 0;
+                    resp.msg = "WRONG Episode Type";
+                    return Ok(resp);
+                }
+
+                var allPatientDiagnosis = patientDb.GetPatientTestResultsNew(lang, hospitaId, registrationNo, ref errStatus, ref errMessage, ApiSource , EpisodeType , EpisodeID);
 
                 if (allPatientDiagnosis != null && allPatientDiagnosis.Count > 0)
                 {
-                    if (ApiSource.ToLower() == "saleforce")
-					{
-                        resp.status = 1;
-                        resp.msg = errMessage;
-                        resp.response = allPatientDiagnosis;
-                    }
-                    else
-					{
-                        resp.status = 1;
-                        resp.msg = errMessage;
-                        resp.response = allPatientDiagnosis;
-                    }
+					resp.status = 1;
+					resp.msg = errMessage;
+					resp.response = allPatientDiagnosis;
 
-                    
+					//               if (ApiSource.ToLower() == "saleforce")
+					//{
+					//                   resp.status = 1;
+					//                   resp.msg = errMessage;
+					//                   resp.response = allPatientDiagnosis;
+					//               }
+					//               else
+					//{
+					//                   resp.status = 1;
+					//                   resp.msg = errMessage;
+					//                   resp.response = allPatientDiagnosis;
+					//               }
 
-                }
+
+
+				}
                 else
                 {
                     resp.status = 0;
@@ -320,6 +350,13 @@ namespace SGHMobileApi.Controllers
                 var lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
                 var testId = Convert.ToInt32(col["test_id"]);
+
+                if (hospitaId == 9)
+                {
+                    resp.status = 0;
+                    resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
 
                 int errStatus = 0;
                 string errMessage = "";
@@ -450,6 +487,13 @@ namespace SGHMobileApi.Controllers
                 var lang = col["lang"];
                 var hospitalId = Convert.ToInt32( col["hospital_id"]);
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+
+                if (hospitalId == 9)
+                {
+                    resp.status = 0;
+                    resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
 
                 var patientDb = new PatientDB();
                 var allReportList = patientDb.GetPreDefineMedicalReports(lang, hospitalId, registrationNo);

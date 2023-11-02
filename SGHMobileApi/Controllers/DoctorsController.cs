@@ -975,6 +975,8 @@ namespace SmartBookingService.Controllers
                     var physicianId = Convert.ToInt32(col["physician_id"]);
 
 
+                    var tempStrDate = col["startdate"];
+
                     var selectedDate = Convert.ToDateTime(System.DateTime.Today.ToString());
                     if (!string.IsNullOrEmpty(col["startdate"]))
                         selectedDate = Convert.ToDateTime(col["startdate"]);
@@ -992,7 +994,8 @@ namespace SmartBookingService.Controllers
                         ApiSource = col["Sources"].ToString();
 
 
-                    var allAvailableSlots = physicianDb.GetAvailableOnlyDayOfDoctors(lang, hospitalId, clinicId, physicianId, selectedDate, ApiSource);
+                    //var allAvailableSlots = physicianDb.GetAvailableOnlyDayOfDoctors(lang, hospitalId, clinicId, physicianId, selectedDate, ApiSource);
+                    var allAvailableSlots = physicianDb.GetAvailableOnlyDayOfDoctors_TEMPTEST(lang, hospitalId, clinicId, physicianId, tempStrDate, ApiSource);
 
                     if (allAvailableSlots == null || allAvailableSlots.Rows.Count <= 0)
                     {

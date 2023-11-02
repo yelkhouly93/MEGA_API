@@ -76,6 +76,7 @@
     <Compile Include="Data\RatingDB.cs" />
     <Compile Include="Data\SGHMedicalDAL\LoginDAL.cs" />
     <Compile Include="Data\SurveyDB.cs" />
+    <Compile Include="Data\VitalSignDB.cs" />
     <Compile Include="Data\WalletDB.cs" />
     <Compile Include="Data\WaterReminder.cs" />
     <Compile Include="Model\AppConfigModal.cs" />

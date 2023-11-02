@@ -562,15 +562,13 @@
             </summary>
       <returns>Return the list of bills for patient.</returns>
     </member>
+    <member name="M:SmartBookingService.Controllers.Patient_V3Controller.PatientPrescription(System.Net.Http.Formatting.FormDataCollection)">
+      <summary>
+            Get Patient Diagnosis against patient registration No.
+            </summary>
+      <returns>Return Patient Diagnosis against patient registration No</returns>
+    </member>
   </members>
-  <assembly>
-    <name>DataLayer</name>
-  </assembly>
-  <members />
-  <assembly>
-    <name>DataLayer</name>
-  </assembly>
-  <members />
   <assembly>
     <name>DataLayer</name>
   </assembly>

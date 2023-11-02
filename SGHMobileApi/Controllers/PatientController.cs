@@ -1008,6 +1008,13 @@ namespace SmartBookingService.Controllers
                 {
                     var lang = col["lang"];
                     var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                    if (hospitalId == 9)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
                     var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                     List<PatientDiagnosis> allPatientDiagnosis;
                     var apiCaller = new PatientDiagnosisApiCaller();
@@ -1068,6 +1075,13 @@ namespace SmartBookingService.Controllers
                     lang = col["lang"];
 
                 var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                if (hospitalId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
 
 
@@ -1119,15 +1133,32 @@ namespace SmartBookingService.Controllers
                 string errMessage = "";
                 PatientDB _patientDB = new PatientDB();
 
+
+                var EpisodeId = 0;
+                var EpisodeType = "OP";
                 try
                 {                    
                     hospitaId = Convert.ToInt32(col["hospital_id"]);
                     registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+
+                    if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                        EpisodeId = Convert.ToInt32(col["Episode_Id"]);
+
+                    if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                        EpisodeType = col["Episode_Type"].ToString();
+
                 }
                 catch (Exception e)
                 {
                     _resp.status = 0;
                     _resp.msg = "Parameter in Wrong Format : -- " + e.Message;
+                    return Ok(_resp);
+                }
+
+                if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+				{
+                    _resp.status = 0;
+                    _resp.msg = "WRONG Episode Type";
                     return Ok(_resp);
                 }
 
@@ -1138,7 +1169,7 @@ namespace SmartBookingService.Controllers
                     ApiSource = col["Sources"].ToString();
 
 
-                var _allPatientMedDT = _patientDB.GetPatientPrescriptionDT(lang, hospitaId, registrationNo, ref errStatus, ref errMessage , ApiSource);
+                var _allPatientMedDT = _patientDB.GetPatientPrescriptionDT(lang, hospitaId, registrationNo, ref errStatus, ref errMessage , ApiSource,EpisodeId,EpisodeType);
                                 
 
                 if (_allPatientMedDT != null && _allPatientMedDT.Rows.Count > 0)
@@ -1286,6 +1317,13 @@ namespace SmartBookingService.Controllers
                     else
                         hospitalId = Convert.ToInt32(col["hospital_id"]);
 
+                    if (hospitalId == 9)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
 
                     var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
 
@@ -1295,11 +1333,24 @@ namespace SmartBookingService.Controllers
                     else
                         VisitorID = Convert.ToInt32(col["visit_id"]);
 
+                    var EpisodeType = "OP";
+                    if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                        EpisodeType = col["Episode_Type"];
+
+
+
+                    if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "WRONG Episode Type";
+                        return Ok(_resp);
+                    }
+
                     //var errStatus = 0;
                     //var errMessage = "";
 
                     PatientDB _patientDB = new PatientDB();
-                    var PatientOrderDT = _patientDB.GetPatientOrder_List(lang, hospitalId,patientMrn, VisitorID);
+                    var PatientOrderDT = _patientDB.GetPatientOrder_List(lang, hospitalId,patientMrn, VisitorID , EpisodeType);
 
                     if (PatientOrderDT != null && PatientOrderDT.Rows.Count >  0)
                     {
@@ -1348,7 +1399,14 @@ namespace SmartBookingService.Controllers
                     var hospitalId = Convert.ToInt32(col["hospital_id"]);
                     var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
 
-                    int errStatus = 0;
+                if (hospitalId == 9)
+                {
+                    _resp.status = 0;                    
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";                    
+                    return Ok(_resp);
+                }
+
+                int errStatus = 0;
                     string errMessage = "";
 
                     PatientDB _patientDB = new PatientDB();
@@ -1695,8 +1753,32 @@ namespace SmartBookingService.Controllers
                     int errStatus = 0;
                     string errMessage = "";
 
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
+                    var EpisodeType = "OP";
+                    var EpisodeID = 0;
+
+                    if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                        EpisodeType = col["Episode_Type"];
+                    if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                        EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+
+
+                    if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "WRONG Episode Type";
+                        return Ok(_resp);
+                    }
+
                     string consentMessage = string.Empty;
-                    var _bills = _patientDb.GetPatientBills(hospitaId, registrationNo, ref errStatus, ref errMessage);
+                    var _bills = _patientDb.GetPatientBills(hospitaId, registrationNo, ref errStatus, ref errMessage , EpisodeType, EpisodeID);
 
                     if (_bills != null && _bills.Rows.Count > 0)
                     {
@@ -1746,6 +1828,14 @@ namespace SmartBookingService.Controllers
 
                 var CMRN = col["patient_reg_no"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;                    
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";                        
+                    return Ok(_resp);
+                }
+
                 var PatientPhone = col["patient_phone"];
                 var patient_DOB = col["patient_DOB"];                
                 var patient_Gender = col["patient_Gender"];
@@ -1839,6 +1929,17 @@ namespace SmartBookingService.Controllers
 
                 var CMRN = col["patient_reg_no"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
                 var PatientNationalalID = col["patient_national_id"];
                 var patient_pwd = col["patient_Pwd"];
                 PatientDB patientDb = new PatientDB();
@@ -1901,13 +2002,42 @@ namespace SmartBookingService.Controllers
                         Lang = col["lang"];
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        if (Lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
+
                     var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                     var Source = col["Sources"].ToString();
                     int errStatus = 0;
                     string errMessage = "";
 
+                    var EpisodeType = "OP";
+                    var EpisodeID = 0;
+
+                    if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                        EpisodeType = col["Episode_Type"];
+                    if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                        EpisodeID = Convert.ToInt32 (col["Episode_Id"]);
+
+
+                    if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "WRONG Episode Type";
+                        return Ok(_resp);
+                    }
+
+
                     string consentMessage = string.Empty;
-                    var _FoodAllergyList = _patientDb.GET_FoodAllergyList_ByPatient(Lang ,registrationNo, hospitaId, Source);
+                    var _FoodAllergyList = _patientDb.GET_FoodAllergyList_ByPatient(Lang ,registrationNo, hospitaId, Source, EpisodeType, EpisodeID);
 
                     if (_FoodAllergyList != null && _FoodAllergyList.Rows.Count > 0)
                     {
@@ -1959,7 +2089,17 @@ namespace SmartBookingService.Controllers
      //               try
 					//{
                         var hospitaId = Convert.ToInt32(col["hospital_id"]);
-                        var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        if (Lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+                    var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                         var Source = col["Sources"].ToString();
                         var FoodIds = col["FoodIds"].ToString();
                         int errStatus = 0;
@@ -1993,6 +2133,93 @@ namespace SmartBookingService.Controllers
             }
             return Ok();
         }
+
+
+
+        [HttpPost]
+        [Route("v2/Patient-VitalSign-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientVitalSign(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            try
+            {
+                if (!string.IsNullOrEmpty(col["patient_reg_no"])
+                    && !string.IsNullOrEmpty(col["Sources"])
+                    && !string.IsNullOrEmpty(col["hospital_id"])
+                    )
+                {
+                    var Lang = "EN";
+                    if (!string.IsNullOrEmpty(col["lang"]))
+                        Lang = col["lang"];
+
+                    var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                    if (hospitaId == 9)
+                    {
+                        _resp.status = 0;
+                        if (Lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
+
+                    var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                    var Source = col["Sources"].ToString();
+
+
+
+                    int errStatus = 0;
+                    string errMessage = "No record Found";
+
+                    var EpisodeType = "OP";
+                    var EpisodeID = 0;
+
+                    if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                        EpisodeType = col["Episode_Type"];
+                    if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                        EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+
+                    if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "WRONG Episode Type";
+                        return Ok(_resp);
+                    }
+                    var _DataList = _patientDb.GET_Patient_VitalSign(Lang, registrationNo, hospitaId, Source, EpisodeType, EpisodeID);
+
+                    if (_DataList != null && _DataList.Rows.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Record Found";
+                        resp.response = _DataList;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No Record Found";
+                        resp.response = null;
+                    }
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Missing Parameter!";
+                }
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                //log.Error(ex);
+
+            }
+            return Ok();
+        }
+
 
 
     }

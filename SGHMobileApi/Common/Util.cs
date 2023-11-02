@@ -25,7 +25,7 @@ namespace SGHMobileApi.Common
 {
     public static class Util
     {
-        public static List<int> OasisBranches = new List<int> { 9, 5 };
+        public static List<int> OasisBranches = new List<int> { 9 };
         public static List<int> UaeBranches = new List<int> { 301, 302, 303, 304 };
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);

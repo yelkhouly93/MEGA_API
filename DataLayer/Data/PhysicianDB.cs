@@ -216,6 +216,31 @@ namespace DataLayer.Data
         //}
 
 
+        public DataTable GetAvailableOnlyDayOfDoctors_TEMPTEST(string lang, int hospitalID, int clinicID, int physicianID, string selectedDate, string ApiSources = "MobileApp", int pageno = -1, int pagesize = 10)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", lang),
+                new SqlParameter("@Branch_Id", hospitalID),
+                new SqlParameter("@DepartmentId", clinicID),
+                new SqlParameter("@DoctorId", physicianID),
+                new SqlParameter("@TDate", selectedDate),
+                new SqlParameter("@DatesOnly", 1),
+                new SqlParameter("@ThisDateOnly", 1),
+                new SqlParameter("@PageNo", pageno),
+                new SqlParameter("@PageSize", pagesize)
+            };
+
+            string DB_SP_Name = "DBO.[Get_DoctorSchedules_SPv3]";
+
+            if (ApiSources.ToLower() == "saleforce")
+                DB_SP_Name = "SF.[Get_DoctorSchedules_SPv3]";
+
+            var allAvailableSlots = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+            return allAvailableSlots;
+
+        }
+
 
         public DataTable GetAvailableOnlyDayOfDoctors(string lang, int hospitalID, int clinicID, int physicianID, DateTime selectedDate,string ApiSources="MobileApp", int pageno = -1, int pagesize = 10)
         {
@@ -556,6 +581,7 @@ namespace DataLayer.Data
                         TempDoctors.Nationality = row.Nationality;
                         TempDoctors.SUBSPECIALTY = row.SUBSPECIALTY;
                         TempDoctors.DocCode = row.DocCode;
+                        TempDoctors.ClinicCode = row.ClinicCode;
 
 
                         _DoctorData.DoctorProfile = TempDoctors;

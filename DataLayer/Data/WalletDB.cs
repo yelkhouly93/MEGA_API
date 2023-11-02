@@ -124,22 +124,22 @@ namespace DataLayer.Data
                 new SqlParameter("@Lang", Lang),
                 new SqlParameter("@BranchId", BranchId),
                 new SqlParameter("@PatientMRN", PatientMRN),
-                new SqlParameter("@BillType", BillType),                
+                new SqlParameter("@BillType", BillType),
                 new SqlParameter("@OnlineTransactionId", OnlineTrasactionID),
                 new SqlParameter("@PaidAmount", PaidAmount),
                 new SqlParameter("@PaymentMethod", PaymentMethod),
                 new SqlParameter("@Sources", Sources),
+                new SqlParameter("@TrackId", TrackID),
                 new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.NVarChar, 500),
-                new SqlParameter("@TrackId", TrackID)
+                new SqlParameter("@msg", SqlDbType.NVarChar, 500)                
             };
-            DB.param[7].Direction = ParameterDirection.Output;
-            DB.param[8].Direction = ParameterDirection.Output;
+            DB.param[9].Direction = ParameterDirection.Output;
+            DB.param[10].Direction = ParameterDirection.Output;
 
             var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Save_WalletOnlinePayment_SP");
 
-            errStatus = Convert.ToInt32(DB.param[7].Value);
-            errMessage = DB.param[8].Value.ToString();
+            errStatus = Convert.ToInt32(DB.param[9].Value);
+            errMessage = DB.param[10].Value.ToString();
 
             return dataTable;
         }
