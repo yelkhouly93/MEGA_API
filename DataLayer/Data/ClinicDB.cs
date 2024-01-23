@@ -113,5 +113,25 @@ namespace DataLayer.Data
 
         }
 
+        public DataTable GetClinicsByBodyAreaDataTable(string lang, int hospitalID,string BodyArea,int age , string gender,  string ApiSources = "MobileApp")
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@BodyArea", BodyArea),
+                    new SqlParameter("@Age", age),
+                    new SqlParameter("@Gender", gender)
+                };
+
+            string DB_SP_Name = "DBO.[Get_Clinics_byBodyArea_SP]";
+
+            var allClinicsDt
+                = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+            return allClinicsDt;
+
+        }
+
     }
 }

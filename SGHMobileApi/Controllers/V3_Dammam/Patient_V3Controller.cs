@@ -312,11 +312,23 @@ namespace SmartBookingService.Controllers
                 {
                     status = 0;
                     LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                    PostResponse ReturnObject;
+                    PostResponse_AddPatient ReturnObject;
                     var APiResilts = _loginApiCaller.PatientAddApi_NewDammam(registerPatient , out ReturnObject);
 
                     if (APiResilts)
+					{
                         status = 1;
+                        try
+						{
+                            registrationNo = Convert.ToInt32(ReturnObject.data.mrn);
+                        }
+                        catch(Exception e)
+						{
+
+						}
+                        
+                    }
+                        
 
                     if (status != 1)
                     {
@@ -368,7 +380,7 @@ namespace SmartBookingService.Controllers
                         (registerPatient.PatientMiddleName == null ? "" : registerPatient.PatientMiddleName + " ") +
                         (registerPatient.PatientLastName == null ? "" : registerPatient.PatientLastName);
 
-                    //string branchName = (registerPatient.HospitaId == 1 ? "Jeddah" : (registerPatient.HospitaId == 2 ? "Riyadh" : (registerPatient.HospitaId == 3 ? "Madinah" : (registerPatient.HospitaId == 10 ? "Dammam" : (registerPatient.HospitaId == 8 ? "Hail" : (registerPatient.HospitaId == 101 ? "Beverly" : (registerPatient.HospitaId == 201 ? "Cairo" : "Branch")))))));
+                    //string branchName = (registerPatient.HospitaId == 1 ? "Jeddah" : (registerPatient.HospitaId == 2 ? "Riyadh" : (registerPatient.HospitaId == 3 ? "Madinah" : (registerPatient.HospitaId == 9 ? "Dammam" : (registerPatient.HospitaId == 8 ? "Hail" : (registerPatient.HospitaId == 101 ? "Beverly" : (registerPatient.HospitaId == 201 ? "Cairo" : "Branch")))))));
 
                     string branchName = "Sadui German Health";
 
@@ -514,14 +526,17 @@ namespace SmartBookingService.Controllers
                     resp.status = 0;
                     resp.msg = "NO Record Found";
 
+
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    UserInfo_New userInfo = new UserInfo_New();
+                    var IdType = "";
+                    var IdValue = "";
                     if (BookinghospitalId ==9) // Booking IN DAMMAM
 					{
                         // Call dammam API Function fill list
-                        LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                        UserInfo_New userInfo = new UserInfo_New();
+                        
 
-                        var IdType = "";
-                        var IdValue = "";
+                        
                         if (hospitalId == 9) // Patient From Damam
 						{
                             
@@ -532,8 +547,17 @@ namespace SmartBookingService.Controllers
                             IdType = "MOB";
                             IdValue = userInfo.phone.ToString();
                         }
+                        else
+						{
+                            var loginDb = new Login2DB();
+                            var userInfo_NEW = loginDb.ValidateLoginUser_New(lang, hospitalId, null, col["patient_reg_no"].ToString(), null, ref errStatus, ref errMessage, "MOBILEAPP");
+                            IdType = "MOB";
+                            IdValue = userInfo_NEW.phone.ToString();
+                        }
                                                     
                         List<login_check_modal> _damuserInfo = new List<login_check_modal>();
+
+
                        _damuserInfo = _loginApiCaller.ValidateLoginUserByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
 
                         if (_damuserInfo.Count == 0)
@@ -553,8 +577,25 @@ namespace SmartBookingService.Controllers
                     }
                     else
 					{
+                        var PatientFamilyDT = new DataTable();
+                        if (hospitalId == 9)
+						{
+                             IdType = "MRN";
+                             IdValue = patientMrn.ToString();
+                             userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+
+                            PatientFamilyDT = _patientDB.GetBookingPatientFamily_List(lang, 0, 0, BookinghospitalId, ref errStatus, ref errMessage , userInfo.phone);
+                            //public List<login_check_modal> login_check(string Lang, int hospitalId, string pCellNo, string nationalId, int registrationNo, string Source, ref int erStatus, ref string msg, bool IsEncrypt = true)
+
+                        }
+                        else
+						{
+                            PatientFamilyDT = _patientDB.GetBookingPatientFamily_List(lang, hospitalId, patientMrn, BookinghospitalId, ref errStatus, ref errMessage);
+                        }
+
+
                         // checked in  HIS
-                        var PatientFamilyDT = _patientDB.GetBookingPatientFamily_List(lang, hospitalId, patientMrn, BookinghospitalId, ref errStatus, ref errMessage);
+                        
                         if (errStatus == 1)
                         {
                             resp.status = 0;
@@ -870,8 +911,8 @@ namespace SmartBookingService.Controllers
                 }
                 else
 				{
-                    PatientDB _patientDB = new PatientDB();
-                    var PatientInsuranceDT = _patientDB.GetPatientInsuranceInfo_DT(hospitalId, patientMrn, ref errStatus, ref errMessage);
+                    InsuranceDB _InsuranceDB = new InsuranceDB();
+                    var PatientInsuranceDT = _InsuranceDB.GetPatientInsuranceInfo_DT(hospitalId, patientMrn, ref errStatus, ref errMessage);
                     if (PatientInsuranceDT != null && PatientInsuranceDT.Rows.Count > 0)
                     {
                         resp.status = 1;

@@ -258,7 +258,7 @@ namespace SGHMobileApi.Controllers
         {
             GenericResponse resp = new GenericResponse();
 
-            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+             if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
             {
                 var lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);

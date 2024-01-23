@@ -211,7 +211,7 @@ namespace SmartBookingService.Controllers
                 string PName = (registerPatient.PatientFirstName == null ? "" : registerPatient.PatientFirstName + " ") +
                     (registerPatient.PatientMiddleName == null ? "" : registerPatient.PatientMiddleName + " ") +
                     (registerPatient.PatientLastName == null ? "" : registerPatient.PatientLastName);
-                string branchName = (registerPatient.HospitaId == 1 ? "Jeddah" : (registerPatient.HospitaId == 2 ? "Riyadh" : (registerPatient.HospitaId == 3 ? "Madinah" : (registerPatient.HospitaId == 10 ? "Dammam" : (registerPatient.HospitaId == 8 ? "Hail" : (registerPatient.HospitaId == 101 ? "Beverly" : (registerPatient.HospitaId == 201 ? "Cairo" : "Branch")))))));
+                string branchName = (registerPatient.HospitaId == 1 ? "Jeddah" : (registerPatient.HospitaId == 2 ? "Riyadh" : (registerPatient.HospitaId == 3 ? "Madinah" : (registerPatient.HospitaId == 9 ? "Dammam" : (registerPatient.HospitaId == 8 ? "Hail" : (registerPatient.HospitaId == 101 ? "Beverly" : (registerPatient.HospitaId == 201 ? "Cairo" : "Branch")))))));
 
                 string smsRes = "";
 
@@ -760,22 +760,23 @@ namespace SmartBookingService.Controllers
                         ApiSource = col["Sources"].ToString();
 
 
-                    UserInfo_New userInfo = new UserInfo_New();
+					UserInfo_New userInfo = new UserInfo_New();
 
-                    if (!Util.OasisBranches.Contains(hospitalId))
-                    {
-                        var apiCaller = new PatientApiCaller();
+					if (!Util.OasisBranches.Contains(hospitalId))
+					{
+						var apiCaller = new PatientApiCaller();
                         //var tempdata = apiCaller.CheckPatientData(lang, hospitalId, patientId, patientPhone, null, ref errStatus, ref errMessage);
-                    }
-                    else
-                    {   
                         userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, col["patient_reg_no"].ToString(), null, ref errStatus, ref errMessage, ApiSource);
                     }
+					else
+					{
+						
+					}
 
-                    
 
 
-                    if (errStatus == 0)
+
+					if (errStatus == 0)
                     {
                         resp.status = 1;
                         resp.msg = errMessage;
@@ -831,8 +832,18 @@ namespace SmartBookingService.Controllers
                 }
 
 
+                /**
+                 * New Logic For Visitors
+                 * **/
+                var IdType = 1;
+
+
                 try
                 {
+                    if (!string.IsNullOrEmpty(col["Patient_IDType"]))
+                        IdType  = Convert.ToInt32(col["Patient_IDType"]);
+                    
+
                     registerPatient.HospitaId = Convert.ToInt32(col["hospital_id"]);
 
                     registerPatient.PatientBirthday = Convert.ToDateTime(col["patient_birthday"]);
@@ -1084,8 +1095,15 @@ namespace SmartBookingService.Controllers
 
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
 
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    ApiSource = col["Sources"].ToString();
 
-                var allAppointmnetList = patientDb.GetPatientVisits(lang, hospitalId, registrationNo);
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"].ToString();
+
+
+                var allAppointmnetList = patientDb.GetPatientVisits(lang, hospitalId, registrationNo , ApiSource);
 
 
                 if (allAppointmnetList != null && allAppointmnetList.Rows.Count > 0)
@@ -1383,66 +1401,65 @@ namespace SmartBookingService.Controllers
         }
 
 
-
         [HttpPost]
-        [Route("v2/Patient-InsuranceInfo-get")]
+        [Route("v2/Patient-ServiceOrders-get")]
         [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult PatientInsuranceInfo(FormDataCollection col)
+        public IHttpActionResult GetServicesAmount(FormDataCollection col)
         {
-            var resp = new GenericResponse();
-            resp.status = 0;
-            resp.msg = "";
-            //try
-            //{
-            if (!string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["hospital_id"]))
-                {   
-                    var hospitalId = Convert.ToInt32(col["hospital_id"]);
-                    var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
 
-                if (hospitalId == 9)
+            if (!string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["visit_id"]) && !string.IsNullOrEmpty(col["hospital_id"]) )
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var HospitalId = Convert.ToInt32(col["hospital_id"]);
+                var Visit_id = Convert.ToInt32(col["visit_id"]);
+                var MRN = Convert.ToInt32(col["patient_reg_no"]);
+
+                var Status = 0;
+                var Msg = "";
+                var BillType = "C";
+
+
+                if (!string.IsNullOrEmpty(col["bill_type"]))
+                    BillType = col["bill_type"];
+
+                var EpisodeType = "OP";
+                if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                    EpisodeType = col["Episode_Type"];
+
+                PatientDB _patientDB = new PatientDB();
+                var datatableAmount = _patientDB.GetPatientServiceOrder_List(lang, HospitalId, MRN, Visit_id, EpisodeType, ref Status, ref Msg);
+
+                if (Status == 1 && datatableAmount.Rows.Count > 0)
                 {
-                    _resp.status = 0;                    
-                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";                    
-                    return Ok(_resp);
-                }
+                    _resp.status = 1;
+                    _resp.msg = Msg;
+                    _resp.response = datatableAmount;
 
-                int errStatus = 0;
-                    string errMessage = "";
-
-                    PatientDB _patientDB = new PatientDB();
-                    var PatientInsuranceDT = _patientDB.GetPatientInsuranceInfo_DT(hospitalId, patientMrn,ref errStatus , ref errMessage);
-
-
-                    if (PatientInsuranceDT != null && PatientInsuranceDT.Rows.Count > 0)
-                    {
-                        resp.status = 1;
-                        resp.msg = "Record(s) Found";
-                        resp.response = PatientInsuranceDT;
-                    }
-                    else
-                    {
-                        resp.status = 0;
-                        resp.msg = "No Record Found";
-
-                    }
                 }
                 else
                 {
-                    resp.status = 0;
-                    resp.msg = "Missing Parameter!";
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found";
                 }
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
 
+            return Ok(_resp);
 
-                return Ok(resp);
-            //}
-            //catch (Exception ex)
-            //{
-            //    var test = ex;
-            //}
-
-            //return Ok();
         }
 
+
+
+        
 
 
         //[HttpPost]
@@ -2142,8 +2159,7 @@ namespace SmartBookingService.Controllers
         public IHttpActionResult GetPatientVitalSign(FormDataCollection col)
         {
             GenericResponse resp = new GenericResponse();
-            try
-            {
+            
                 if (!string.IsNullOrEmpty(col["patient_reg_no"])
                     && !string.IsNullOrEmpty(col["Sources"])
                     && !string.IsNullOrEmpty(col["hospital_id"])
@@ -2210,13 +2226,7 @@ namespace SmartBookingService.Controllers
                     resp.msg = "Missing Parameter!";
                 }
                 return Ok(resp);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                //log.Error(ex);
-
-            }
+            
             return Ok();
         }
 

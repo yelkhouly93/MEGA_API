@@ -122,6 +122,10 @@ namespace SGHMobileApi.Controllers
                     var clinicId = 0;
                     var SlotType = 1;
                     var lang = col["lang"];
+                    
+                    
+                    
+
                     var sources = ConfigurationManager.AppSettings["API_SOURCE_KEY"].ToString();
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
@@ -132,6 +136,16 @@ namespace SGHMobileApi.Controllers
                         _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                         return Ok(_resp);
                     }
+
+                    //for SALE FORCE POINT - for REPORTING 
+                    var agent_Userid = "";
+                    var agent_UserName = "";
+
+                    if (!string.IsNullOrEmpty(col["agent_Userid"]))
+                        agent_Userid = col["agent_Userid"];
+                    if (!string.IsNullOrEmpty(col["agent_UserName"]))
+                        agent_UserName = col["agent_UserName"];
+                    //for SALE FORCE POINT - for REPORTING 
 
 
                     if (!string.IsNullOrEmpty(col["Sources"]))
@@ -284,7 +298,7 @@ namespace SGHMobileApi.Controllers
                     var EarlyReminder = 0;
                     var HeardAboutUs = 0;
                     var clinicId = 0;
-                    var lang = col["lang"];
+                    var lang = col["lang"];                    
                     var sources = ConfigurationManager.AppSettings["API_SOURCE_KEY"].ToString();
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
@@ -415,10 +429,23 @@ namespace SGHMobileApi.Controllers
                     if (!string.IsNullOrEmpty(col["SlotType"]))
                         BookType = Convert.ToInt32(col["SlotType"]);
 
+
+                    //for SALE FORCE POINT - for REPORTING 
+                    var agent_Userid = "";
+                    var agent_UserName = "";
+
+                    if (!string.IsNullOrEmpty(col["agent_Userid"]))
+                        agent_Userid = col["agent_Userid"];
+                    if (!string.IsNullOrEmpty(col["agent_UserName"]))
+                        agent_UserName = col["agent_UserName"];
+                    //for SALE FORCE POINT - for REPORTING 
+
+
+
                     var patientDb = new PatientDB();
                     try
                     {
-                        patientDb.RescheduleAppointment(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, AppointmentID, EarlyReminder, HeardAboutUs, Sources, BookType, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
+                        patientDb.RescheduleAppointment(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, AppointmentID, EarlyReminder, HeardAboutUs, Sources, BookType, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName , agent_UserName , agent_Userid);
 
 
                         if (errStatus != 0)
@@ -500,9 +527,19 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["Sources"]))
                     Sources = col["Sources"];
 
+                //for SALE FORCE POINT - for REPORTING 
+                var agent_Userid = "";
+                var agent_UserName = "";
+
+                if (!string.IsNullOrEmpty(col["agent_Userid"]))
+                    agent_Userid = col["agent_Userid"];
+                if (!string.IsNullOrEmpty(col["agent_UserName"]))
+                    agent_UserName = col["agent_UserName"];
+                //for SALE FORCE POINT - for REPORTING 
+
 
                 var patientDb = new PatientDB();
-                patientDb.CancelAppointment(lang, hospitaId, AppointmentID, registrationNo, ReasonID, Sources, ref errStatus, ref errMessage);
+                patientDb.CancelAppointment(lang, hospitaId, AppointmentID, registrationNo, ReasonID, Sources, ref errStatus, ref errMessage , agent_Userid , agent_UserName);
 
                 if (errStatus != 0 )
                 {
@@ -1084,6 +1121,57 @@ namespace SGHMobileApi.Controllers
             return Token;
         }
 
+
+
+        [HttpPost]
+        [Route("v2/patient-missed-appointments-list")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientMissedApointmentList(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            var patientDb = new PatientDB();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]) && col["patient_reg_no"] != "0")
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                if (hospitalId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
+                var allAppointmnetList = patientDb.GetPatientMissedAppointmentList(lang, hospitalId, registrationNo);
+
+
+                if (allAppointmnetList != null && allAppointmnetList.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Record(s) Found";
+                    _resp.response = allAppointmnetList;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found";
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
 
 
 

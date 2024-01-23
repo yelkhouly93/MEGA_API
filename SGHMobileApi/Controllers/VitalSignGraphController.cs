@@ -88,5 +88,101 @@ namespace SGHMobileApi.Controllers
         }
 
 
+
+        [HttpPost]
+        [Route("v2/Patient-My-VitalSign-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientMyVitalSign(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();            
+                if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+                {
+                    var lang = col["lang"];
+                    var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                    var patientId = Convert.ToInt32(col["patient_reg_no"]);
+
+                    var DataDb = new VitalSignDB();
+                    var SpDatatable = DataDb.GET_Patient_My_VitalSign_DT(lang, patientId, hospitaId );
+                    if (SpDatatable != null && SpDatatable.Rows.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Record Found";
+                        resp.response = SpDatatable;
+                    }
+                    else
+					{
+                        resp.status = 0;
+                        resp.msg = "NO Record Found";
+                    }
+                    
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Failed : Missing Parameters";
+                }
+
+
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v2/Patient-My-VitalSign-Details-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientMyVitalSignDetails(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            
+                if (!string.IsNullOrEmpty(col["hospital_id"]) 
+                    && !string.IsNullOrEmpty(col["patient_reg_no"])
+                    && !string.IsNullOrEmpty(col["Vital"])
+                    )
+                {
+                    var lang = "EN";
+                    if (!string.IsNullOrEmpty(col["lang"]))
+                        lang = col["lang"];
+
+                    var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                    var patientId = Convert.ToInt32(col["patient_reg_no"]);
+                    var VitalSign = col["Vital"];
+
+                    if (!Util.OasisBranches.Contains(hospitaId))
+                    {
+                        var DataDb = new VitalSignDB();
+                        var SpDatatable = DataDb.GET_Patient_My_VitalSign_Detail_DT(lang, patientId ,  hospitaId ,VitalSign);
+                        if (SpDatatable != null && SpDatatable.Rows.Count > 0)
+                        {
+                            resp.status = 1;
+                            resp.msg = "Record Found";
+                            resp.response = SpDatatable;
+                        }
+                        else
+                        {
+                            resp.status = 0;
+                            resp.msg = "NO Record Found";
+                        }
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "NO Record Found";
+                    }
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Failed : Missing Parameters";
+                }
+
+            
+
+
+
+
+            return Ok(resp);
+        }
+
+
     }
 }

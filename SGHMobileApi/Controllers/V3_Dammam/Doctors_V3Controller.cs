@@ -74,7 +74,7 @@ namespace SmartBookingService.Controllers
 
 
                         LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                        var _DataInfo = _loginApiCaller.GetDoctorSchduleDaysByApi_NewDam(lang, physicianId.ToString() , ClinicCode);
+                        var _DataInfo = _loginApiCaller.GetDoctorSchduleDaysByApi_NewDam(lang, physicianId.ToString() , ClinicCode , selectedDate);
 
                         if (_DataInfo != null && _DataInfo.Count == 0)
                         {
@@ -231,7 +231,7 @@ namespace SmartBookingService.Controllers
 
 
         [HttpPost]
-        [Route("v2/Mydoctors-get")]
+        [Route("v3/Mydoctors-get")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult GetMyDoctorsbyClinic_Copy_v2(FormDataCollection col)
         {

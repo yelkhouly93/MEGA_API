@@ -114,7 +114,7 @@ namespace SGHMobileApi.Controllers
                 var apiCaller = new PatientLabResultsApiCaller();
 
                 //var allPatientResults = apiCaller.GetPatientTestResultsAPI(lang, hospitaId, testId, ref errStatus, ref errMessage);
-                if (testId == 0)
+                if (testId == 0 || hospitaId == 9)
 				{
                     resp.status = 0;
                     resp.msg = "Currently Not Available For dammam.";

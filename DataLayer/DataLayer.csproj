@@ -61,6 +61,8 @@
     <Compile Include="Data\ApplicationDB.cs" />
     <Compile Include="Data\ClinicDB.cs" />
     <Compile Include="Data\CommonDB.cs" />
+    <Compile Include="Data\DoctorAPI\DoctorAPIDB.cs" />
+    <Compile Include="Data\Insurance.cs" />
     <Compile Include="Data\LABResultDB.cs" />
     <Compile Include="Data\Login2DB.cs" />
     <Compile Include="Data\FeedbackDB.cs" />

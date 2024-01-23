@@ -280,8 +280,10 @@
     <Compile Include="Controllers\ClientApi\SaveAppointmentApiCaller.cs" />
     <Compile Include="Controllers\ClinicController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
+    <Compile Include="Controllers\DOCAPI\DocClinincController.cs" />
     <Compile Include="Controllers\DoctorsController.cs" />
     <Compile Include="Controllers\HospitalController.cs" />
+    <Compile Include="Controllers\InsuranceController.cs" />
     <Compile Include="Controllers\Login2Controller.cs" />
     <Compile Include="Controllers\V3_Dammam\Appointment_V3Controller.cs" />
     <Compile Include="Controllers\V3_Dammam\Doctors_V3Controller.cs" />
@@ -364,6 +366,7 @@
   <ItemGroup>
     <Folder Include="Views\AppConfig\" />
     <Folder Include="Views\Home\" />
+    <Folder Include="Views\Insurance\" />
     <Folder Include="Views\Media\" />
     <Folder Include="Views\NotificationReminder\" />
     <Folder Include="Views\PatientDigitalID_EXT_\" />

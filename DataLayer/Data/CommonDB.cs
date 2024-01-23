@@ -250,37 +250,7 @@ namespace DataLayer.Data
             return dataTable;
         }
 
-        public DataTable GetPatientInSuranceApprovalStatus_DT(string Lang , int BranchID, int RegistrationNo, ref int errStatus, ref string errMessage)
-        {
-            DB.param = new SqlParameter[]
-            {                
-                new SqlParameter("@Lang", Lang),
-                new SqlParameter("@BranchId", BranchID),
-                new SqlParameter("@RegistrationNo", RegistrationNo),
-                new SqlParameter("@status", SqlDbType.Int),
-                new SqlParameter("@msg", SqlDbType.NVarChar, 200)
-            };
-            DB.param[3].Direction = ParameterDirection.Output;
-            DB.param[4].Direction = ParameterDirection.Output;
-
-            var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Get_PatientUCAFStatus_SP");
-            try
-            {
-                if (DB.param[3].Value != null)
-                    errStatus = Convert.ToInt32(DB.param[3].Value);
-                
-                errMessage = DB.param[4].Value.ToString();
-            }
-            catch (Exception ex)
-            {
-                errStatus = 0;                
-            }
-            
-
-            return dataTable;
-        }
-
-
+        
         public DataTable SaveNewRequest (string lang , int BranchID, int RegistrationNo, int RequestType, string RequestDetails, ref int errStatus, ref string errMessage)
         {
             DB.param = new SqlParameter[]
@@ -653,6 +623,19 @@ namespace DataLayer.Data
                 new SqlParameter("@BranchId", BranchId)
             };
             var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.[Get_CMS_USERS_TOERP_SP]");
+            return dataTable;
+        }
+
+
+
+        public DataTable Get_AppHelp_DT(string Lang, string ScreenName)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@ScreenName", ScreenName)
+            };
+            var dataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_App_Help_Details_SP]");
             return dataTable;
         }
 

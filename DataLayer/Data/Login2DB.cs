@@ -243,18 +243,19 @@ namespace DataLayer.Data
                 new SqlParameter("@Source", Source)
             };
             _db.param[5].Direction = ParameterDirection.Output;
-            _db.param[6].Direction = ParameterDirection.Output;            
+            _db.param[6].Direction = ParameterDirection.Output;
 
             var dt = _db.ExecuteSPAndReturnDataTable("DBO.[Validate_User_V4_SP]").ToListObject<login_check_modal>();
+            //var dt = _db.ExecuteSPAndReturnDataTable("DBO.[Validate_User_V4_SP]");
 
             erStatus = Convert.ToInt32(_db.param[5].Value);
             msg = _db.param[6].Value.ToString();
-            //if (erStatus != 1 && IsEncrypt)
-            //{
-            //    dt = Encrpt_LoginUserList_dt(dt);
-            //}
-            //List < login_check_modal >
-            return dt;
+			//if (erStatus != 1 && IsEncrypt)
+			//{
+			//	dt = Encrpt_LoginUserList_dt(dt);
+			//}
+			//List < login_check_modal >
+			return dt;
         }
 
 
@@ -359,6 +360,57 @@ namespace DataLayer.Data
             //    ReturnObj.Rows[i].SetField<string>("Registrationno") = StrRegNumber;
             //}
 
+            return ReturnObj;
+        }
+
+        public List<login_check_modal> Encrpt_UserList_Obj(List<login_check_modal> dtobj)
+        {
+            var ReturnObj = new List<login_check_modal>();
+            
+            if (dtobj != null)
+            {                
+                for (int i=0;i < dtobj.Count();i++)
+                {   
+                    var tempDR = new login_check_modal();
+                    tempDR.Branch_EN = util.Encrypt(dtobj[i].Branch_EN.ToString(), true);
+                    tempDR.Branch_AR = util.Encrypt(dtobj[i].Branch_AR.ToString(), true);
+                    tempDR.Registrationno = util.Encrypt(dtobj[i].Registrationno.ToString(), true);
+                    tempDR.branchID = util.Encrypt(dtobj[i].branchID.ToString(), true);
+                    
+                    //if (dtobj[i].PatientId != null)
+                    //    tempDR.PatientId = util.Encrypt(dtobj[i].PatientId.ToString(), true);
+
+                    //tempDR.PatientName_EN = util.Encrypt(dtobj[i].PatientName_EN.ToString(), true);
+                    
+                    //var tempPatienPhone = "****" +  dtobj[i].PatientCellNo.Substring(dtobj[i].PatientCellNo.Length - 4);
+                    //tempDR.PatientCellNo = util.Encrypt(tempPatienPhone, true);
+
+                    //tempDR.PatientCellNo2 = util.Encrypt(dtobj[i].PatientCellNo2.ToString(), true);
+                    //tempDR.PatientName_EN = util.Encrypt(dtobj[i].PatientName_EN.ToString(), true);
+                    //tempDR.DOB = dtobj[i].DOB.ToString();
+                    //tempDR.image_url = dtobj[i].image_url.ToString();
+
+
+                    if (dtobj[i].PatientId != null)
+                        tempDR.PatientId = dtobj[i].PatientId.ToString();
+
+                    tempDR.PatientName_EN = dtobj[i].PatientName_EN.ToString();
+
+                    var tempPatienPhone = "****" + dtobj[i].PatientCellNo.Substring(dtobj[i].PatientCellNo.Length - 4);
+                    tempDR.PatientCellNo = tempPatienPhone;
+
+                    tempDR.PatientCellNo2 = dtobj[i].PatientCellNo2.ToString();
+                    tempDR.PatientName_EN = dtobj[i].PatientName_EN.ToString();
+                    tempDR.DOB = dtobj[i].DOB.ToString();
+                    tempDR.image_url = dtobj[i].image_url.ToString();
+
+
+
+
+
+                    ReturnObj.Add(tempDR);
+                }
+            }
             return ReturnObj;
         }
 

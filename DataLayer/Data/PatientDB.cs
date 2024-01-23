@@ -645,41 +645,77 @@ namespace DataLayer.Data
 
         }
 
-        public void SaveAppointment_V2(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId, int EarlyReminder, int HeardAboutUsId,string sources,int SlotType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName)
+        public void SaveAppointment_V2(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId, int EarlyReminder, int HeardAboutUsId,string sources,int SlotType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName , string agent_UserName ="" , string agent_UserID = "")
         {
 
-            DB.param = new SqlParameter[]
-            {
-                new SqlParameter("@Lang", lang),
-                new SqlParameter("@BranchId", hospitalID),
-                new SqlParameter("@PatientType", 3),
-                new SqlParameter("@DepartmentId", clinicId),
-                new SqlParameter("@DoctorId", physicianId),
-                new SqlParameter("@ScheduleDayId", scheduleDayId),
-                new SqlParameter("@FromDate", selectedDate),
-                new SqlParameter("@FromDateTime", timeFrom),
-                new SqlParameter("@ToDateTime", timeTo),
-                new SqlParameter("@PatientId", patientID),
-                new SqlParameter("@InformEarlierAvailability", EarlyReminder),
-                new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
-                new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 500),
-                new SqlParameter("@ReturnFlag", SqlDbType.Int),
-                new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
-                new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
-                new SqlParameter("@Source", sources),
-                new SqlParameter("@BookingType", SlotType)
-            };
-
-            DB.param[12].Direction = ParameterDirection.Output;
-            DB.param[13].Direction = ParameterDirection.Output;
-            DB.param[14].Direction = ParameterDirection.Output;
-            DB.param[15].Direction = ParameterDirection.Output;
+           
 
 
             string DB_SP_Name = "DBO.[Save_Appointment_V2_SP]";
 
             if (sources.ToLower() == "saleforce")
+			{
+                DB.param = new SqlParameter[]
+               {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@PatientType", 3),
+                    new SqlParameter("@DepartmentId", clinicId),
+                    new SqlParameter("@DoctorId", physicianId),
+                    new SqlParameter("@ScheduleDayId", scheduleDayId),
+                    new SqlParameter("@FromDate", selectedDate),
+                    new SqlParameter("@FromDateTime", timeFrom),
+                    new SqlParameter("@ToDateTime", timeTo),
+                    new SqlParameter("@PatientId", patientID),
+                    new SqlParameter("@InformEarlierAvailability", EarlyReminder),
+                    new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
+                    new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 500),
+                    new SqlParameter("@ReturnFlag", SqlDbType.Int),
+                    new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
+                    new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@Source", sources),
+                    new SqlParameter("@BookingType", SlotType),
+                    new SqlParameter("@SF_UserId", agent_UserID),
+                    new SqlParameter("@SF_UserName", agent_UserName)
+               };
+
+                DB.param[12].Direction = ParameterDirection.Output;
+                DB.param[13].Direction = ParameterDirection.Output;
+                DB.param[14].Direction = ParameterDirection.Output;
+                DB.param[15].Direction = ParameterDirection.Output;
+
                 DB_SP_Name = "SF.[Save_Appointment_V2_SP]";
+            }
+			else
+			{
+                DB.param = new SqlParameter[]
+               {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@PatientType", 3),
+                    new SqlParameter("@DepartmentId", clinicId),
+                    new SqlParameter("@DoctorId", physicianId),
+                    new SqlParameter("@ScheduleDayId", scheduleDayId),
+                    new SqlParameter("@FromDate", selectedDate),
+                    new SqlParameter("@FromDateTime", timeFrom),
+                    new SqlParameter("@ToDateTime", timeTo),
+                    new SqlParameter("@PatientId", patientID),
+                    new SqlParameter("@InformEarlierAvailability", EarlyReminder),
+                    new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
+                    new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 500),
+                    new SqlParameter("@ReturnFlag", SqlDbType.Int),
+                    new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
+                    new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@Source", sources),
+                    new SqlParameter("@BookingType", SlotType)
+               };
+
+                DB.param[12].Direction = ParameterDirection.Output;
+                DB.param[13].Direction = ParameterDirection.Output;
+                DB.param[14].Direction = ParameterDirection.Output;
+                DB.param[15].Direction = ParameterDirection.Output;
+            }
+                
 
             var flag = DB.ExecuteSP(DB_SP_Name);
 
@@ -788,42 +824,79 @@ namespace DataLayer.Data
 
 
 
-        public void RescheduleAppointment(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId,int AppointmentID, int EarlyReminder, int HeardAboutUsId,string Sources,int BookType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName)
+        public void RescheduleAppointment(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId,int AppointmentID, int EarlyReminder, int HeardAboutUsId,string Sources,int BookType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName,string agent_UserName="",string agent_UserID = "")
         {
 
-            DB.param = new SqlParameter[]
-            {
-                new SqlParameter("@Lang", lang),
-                new SqlParameter("@BranchId", hospitalID),
-                new SqlParameter("@PatientType", 3),
-                new SqlParameter("@DepartmentId", clinicId),
-                new SqlParameter("@DoctorId", physicianId),
-                new SqlParameter("@ScheduleDayId", scheduleDayId),
-                new SqlParameter("@FromDate", selectedDate),
-                new SqlParameter("@FromDateTime", timeFrom),
-                new SqlParameter("@ToDateTime", timeTo),
-                new SqlParameter("@PatientId", patientID),
-                new SqlParameter("@AppointmentID", AppointmentID),
-                new SqlParameter("@InformEarlierAvailability", EarlyReminder),
-                new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
-                new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 200),
-                new SqlParameter("@ReturnFlag", SqlDbType.Int),
-                new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
-                new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
-                new SqlParameter("@Sources", Sources),
-                new SqlParameter("@BookingType", BookType),
-                
-            };
             
-            DB.param[13].Direction = ParameterDirection.Output;
-            DB.param[14].Direction = ParameterDirection.Output;
-            DB.param[15].Direction = ParameterDirection.Output;
-            DB.param[16].Direction = ParameterDirection.Output;
+            
 
             string DB_SP_Name = "DBO.[Reschedule_Appointment_SP]";
 
             if (Sources.ToLower() == "saleforce")
+			{
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@PatientType", 3),
+                    new SqlParameter("@DepartmentId", clinicId),
+                    new SqlParameter("@DoctorId", physicianId),
+                    new SqlParameter("@ScheduleDayId", scheduleDayId),
+                    new SqlParameter("@FromDate", selectedDate),
+                    new SqlParameter("@FromDateTime", timeFrom),
+                    new SqlParameter("@ToDateTime", timeTo),
+                    new SqlParameter("@PatientId", patientID),
+                    new SqlParameter("@AppointmentID", AppointmentID),
+                    new SqlParameter("@InformEarlierAvailability", EarlyReminder),
+                    new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
+                    new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@ReturnFlag", SqlDbType.Int),
+                    new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
+                    new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@Sources", Sources),
+                    new SqlParameter("@BookingType", BookType),
+                    new SqlParameter("@SF_UserId", agent_UserID),
+                    new SqlParameter("@SF_UserName", agent_UserName)
+
+                };
+
                 DB_SP_Name = "SF.[Reschedule_Appointment_SP]";
+            }
+			else
+			{
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@PatientType", 3),
+                    new SqlParameter("@DepartmentId", clinicId),
+                    new SqlParameter("@DoctorId", physicianId),
+                    new SqlParameter("@ScheduleDayId", scheduleDayId),
+                    new SqlParameter("@FromDate", selectedDate),
+                    new SqlParameter("@FromDateTime", timeFrom),
+                    new SqlParameter("@ToDateTime", timeTo),
+                    new SqlParameter("@PatientId", patientID),
+                    new SqlParameter("@AppointmentID", AppointmentID),
+                    new SqlParameter("@InformEarlierAvailability", EarlyReminder),
+                    new SqlParameter("@HeardAboutUsId", HeardAboutUsId),
+                    new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@ReturnFlag", SqlDbType.Int),
+                    new SqlParameter("@IsVideoAppointment", SqlDbType.Int),
+                    new SqlParameter("@DoctorName", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@Sources", Sources),
+                    new SqlParameter("@BookingType", BookType),
+
+                };
+
+            }
+
+
+
+
+            DB.param[13].Direction = ParameterDirection.Output;
+            DB.param[14].Direction = ParameterDirection.Output;
+            DB.param[15].Direction = ParameterDirection.Output;
+            DB.param[16].Direction = ParameterDirection.Output;
 
             var flag = DB.ExecuteSP(DB_SP_Name);
 
@@ -834,31 +907,55 @@ namespace DataLayer.Data
 
         }
 
-        public void CancelAppointment(string lang, int hospitalID, int AppointmentID, int RegistrationNo,int CancelResonID,string Sources, ref int Er_Status, ref string Msg)
+        public void CancelAppointment(string lang, int hospitalID, int AppointmentID, int RegistrationNo,int CancelResonID,string Sources, ref int Er_Status, ref string Msg , string agent_userid= "",string agent_username = "")
         {
 
-            DB.param = new SqlParameter[]
-            {
-                new SqlParameter("@Lang", lang),
-                new SqlParameter("@BranchId", hospitalID),
-                new SqlParameter("@AppointmentId", AppointmentID),
-                new SqlParameter("@RegistrationNo", RegistrationNo),
-                new SqlParameter("@CancelResonID", CancelResonID),                
-                new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 200),
-                new SqlParameter("@ReturnFlag", SqlDbType.Int),
-                new SqlParameter("@Sources", Sources)
-
-            };
-
-            
-            DB.param[5].Direction = ParameterDirection.Output;
-            DB.param[6].Direction = ParameterDirection.Output;
             
             
             string DB_SP_Name = "[dbo].[Cancel_PatientAppointments_SP]";
 
             if (Sources.ToLower() == "saleforce")
+			{
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@AppointmentId", AppointmentID),
+                    new SqlParameter("@RegistrationNo", RegistrationNo),
+                    new SqlParameter("@CancelResonID", CancelResonID),
+                    new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@ReturnFlag", SqlDbType.Int),
+                    new SqlParameter("@Sources", Sources),
+                    new SqlParameter("@SF_UserId", agent_userid),
+                    new SqlParameter("@SF_UserName", agent_username)
+                };
+
+                DB.param[5].Direction = ParameterDirection.Output;
+                DB.param[6].Direction = ParameterDirection.Output;
+
                 DB_SP_Name = "[SF].[Cancel_PatientAppointments_SP]";
+            
+            }
+            else
+			{
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@AppointmentId", AppointmentID),
+                    new SqlParameter("@RegistrationNo", RegistrationNo),
+                    new SqlParameter("@CancelResonID", CancelResonID),
+                    new SqlParameter("@ReturnMessage", SqlDbType.NVarChar, 200),
+                    new SqlParameter("@ReturnFlag", SqlDbType.Int),
+                    new SqlParameter("@Sources", Sources)
+
+                };
+
+                DB.param[5].Direction = ParameterDirection.Output;
+                DB.param[6].Direction = ParameterDirection.Output;
+
+            }
+
 
 
             var flag = DB.ExecuteSP(DB_SP_Name);
@@ -945,7 +1042,7 @@ namespace DataLayer.Data
             DB.param[19].Direction = ParameterDirection.Output;
             DB.param[20].Direction = ParameterDirection.Output;
 
-
+            
             string DB_SP_Name = "[dbo].[Save_PatientData_V2_SP]";
 
             if (ApiSources.ToLower() == "saleforce")
@@ -1414,7 +1511,7 @@ namespace DataLayer.Data
 
         }
 
-        public DataTable GetPatientVisits(string lang, int hospitalID, int RegistrationNo)
+        public DataTable GetPatientVisits(string lang, int hospitalID, int RegistrationNo , string ApiSources = "MobileApp")
         {
             DB.param = new SqlParameter[]
                 {
@@ -1423,8 +1520,15 @@ namespace DataLayer.Data
                     new SqlParameter("@RegistrationNo", RegistrationNo)
                 };
 
+
+            string DB_SP_Name = "DBO.Get_PatientVisits_SP";
+
+            if (ApiSources.ToLower() == "saleforce")
+                DB_SP_Name = "SF.Get_PatientVisits_SP";
+
+
             var allClinicsDt
-                = DB.ExecuteSPAndReturnDataTable("DBO.[Get_PatientVisits_SP]");
+                = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
 
             return allClinicsDt;
 
@@ -1642,35 +1746,30 @@ namespace DataLayer.Data
         }
 
 
-        public DataTable GetPatientInsuranceInfo_DT(int hospitalId, int registrationNo, ref int erStatus, ref string msg)
+        //public DataTable GetPatientServiceOrder_List(int BranchId, int AppointmentID, string BillType, int OperatorID, string Service_ids, string item_Ids, string department_ids, ref int errStatus, ref string errMessage)
+        public DataTable GetPatientServiceOrder_List(string Lang, int hospitalId, int registrationNo, int visitID, string EpisodeType , ref int errStatus , ref string errMessage)
         {
-            try
+            DB.param = new SqlParameter[]
             {
-                DB.param = new SqlParameter[]
-                {
-                    new SqlParameter("@BranchId", hospitalId),
-                    new SqlParameter("@RegistrationNo", registrationNo),
-                    new SqlParameter("@status", SqlDbType.Int),
-                    new SqlParameter("@msg", SqlDbType.NVarChar, 2000)
-                };
-                DB.param[2].Direction = ParameterDirection.Output;
-                DB.param[3].Direction = ParameterDirection.Output;
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@BranchId", hospitalId),
+                new SqlParameter("@VisitId", visitID),
+                new SqlParameter("@EpisodeType", EpisodeType),
+                new SqlParameter("@MRN", registrationNo),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 1000)
+            };
+            DB.param[5].Direction = ParameterDirection.Output;
+            DB.param[6].Direction = ParameterDirection.Output;
 
-                var dt = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_PatientInsuranceInfo_SP]");
+            var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Get_ServicesList_WithAmount_SP");
+            errStatus = Convert.ToInt32(DB.param[5].Value);
+            errMessage = DB.param[6].Value.ToString();
 
-                erStatus = Convert.ToInt32(DB.param[2].Value);
-                msg = DB.param[3].Value.ToString();
-                return dt;
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex);
-            }
-
-            return null;
-            
+            return dataTable;
         }
 
+        
 
         public void UpdatePatientData(int hospitalId, int registrationNo, DateTime DOB,int Gender, string pCellNo,int Marital_Status, int NationalityID, string Patient_Email,string Sources, ref int Status, ref string msg)
         {
@@ -2159,6 +2258,24 @@ namespace DataLayer.Data
             var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_PatientVitals_SP]");
             return ReturnDataTable;
         }
+
+
+        public DataTable GetPatientMissedAppointmentList(string lang, int hospitalID, int RegistrationNo)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@RegistrationNo", RegistrationNo)
+                };
+
+            var allDataDt
+                = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Notification_MissAppoitment_List_SP]");
+
+            return allDataDt;
+
+        }
+
 
     }
 }

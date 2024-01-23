@@ -51,7 +51,7 @@ namespace SGHMobileApi.Controllers
 
 
 
-                var allData = _SurveyDb.GetSurveyQuestions(lang, SurveyId);
+                var allData = _SurveyDb.GetSurveyQuestions(lang, SurveyId, ServiceID);
 
 
                 if (allData != null && allData.Rows.Count > 0)
@@ -89,11 +89,11 @@ namespace SGHMobileApi.Controllers
                 && !string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["Source"])
                 && !string.IsNullOrEmpty(col["SurveyId"]) && !string.IsNullOrEmpty(col["ServiceId"])
                 )
-            {                
+            {
 
                 
-                try
-				{
+    //            try
+				//{
                     var AnswerQuery = col["QAnswersQuery"];
                     var Source = col["Source"];
                     var ActionId = Convert.ToInt32(col["ServiceId"]);
@@ -108,12 +108,12 @@ namespace SGHMobileApi.Controllers
                     
                     _resp.status = status;
                     _resp.msg = msg;
-                }
-                catch(Exception ex)
-				{
-                    _resp.status = 0;
-                    _resp.msg = "Failed : Please Provide the Valid Parameters";
-                }
+                //}
+    //            catch(Exception ex)
+				//{
+    //                _resp.status = 0;
+    //                _resp.msg = "Failed : Please Provide the Valid Parameters";
+    //            }
             }
             else
             {

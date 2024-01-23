@@ -787,109 +787,7 @@ namespace SGHMobileApi.Controllers
 
         }
 
-        [HttpPost]
-        [Route("v2/IncApprovalStatus-Get")]
-        [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult GetInSuranceApprovalStatus(FormDataCollection col)
-        {
-            _resp = new GenericResponse();
-            CommonDB CDB = new CommonDB();
-
-            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
-            {
-                var lang = "EN";
-                var CMRN = Convert.ToInt32(col["patient_reg_no"]);
-                var BranchID = Convert.ToInt32(col["hospital_id"]);
-
-                if (!string.IsNullOrEmpty(col["lang"]))
-                    lang = col["lang"];
-
-                var status = 0;
-                var msg = "";
-
-
-                var DTList = CDB.GetPatientInSuranceApprovalStatus_DT(lang, BranchID,CMRN, ref status, ref msg);
-
-
-                if (DTList != null && DTList.Rows.Count > 0)
-                {
-                    _resp.status = 1;
-                    _resp.msg = "Record(s) Found";
-                    _resp.response = DTList;
-
-                }
-                else
-                {
-                    _resp.status = 0;
-                    _resp.msg = "No Record Found";
-                }
-
-            }
-            else
-            {
-                _resp.status = 0;
-                _resp.msg = "Failed : Missing Parameters";
-            }
-
-            return Ok(_resp);
-
-        }
-
-        [HttpPost]
-        [Route("v3/IncApprovalStatus-Get")]
-        [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult GetInSuranceApprovalStatus_V3(FormDataCollection col)
-        {
-            _resp = new GenericResponse();
-            CommonDB CDB = new CommonDB();
-
-            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
-            {
-                var lang = "EN";
-                var CMRN = Convert.ToInt32(col["patient_reg_no"]);
-                var BranchID = Convert.ToInt32(col["hospital_id"]);
-
-                if (!string.IsNullOrEmpty(col["lang"]))
-                    lang = col["lang"];
-
-                var status = 0;
-                var msg = "";
-
-                if (BranchID == 9)
-				{
-                    _resp.status = 0;
-                    _resp.msg = "No Record Found";
-                    return Ok(_resp);
-
-                }
-
-                var DTList = CDB.GetPatientInSuranceApprovalStatus_DT(lang, BranchID, CMRN, ref status, ref msg);
-
-
-                if (DTList != null && DTList.Rows.Count > 0)
-                {
-                    _resp.status = 1;
-                    _resp.msg = "Record(s) Found";
-                    _resp.response = DTList;
-
-                }
-                else
-                {
-                    _resp.status = 0;
-                    _resp.msg = "No Record Found";
-                }
-
-            }
-            else
-            {
-                _resp.status = 0;
-                _resp.msg = "Failed : Missing Parameters";
-            }
-
-            return Ok(_resp);
-
-        }
-
+        
 
         //[HttpPost]
         //[Route("api/GetData")]
@@ -1273,6 +1171,14 @@ namespace SGHMobileApi.Controllers
                 var ActivationOTP = 0;
                 var Error_Code = 1;
                 var MSG = "";
+
+                if (hospitaId == 9 )
+				{
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not avaiable";
+                    return Ok(_resp);
+                }
+
 
                 CDB.SENT_OTP(hospitaId, PatientPhone, CMRN, National_ID, ReasonCode, ref ActivationOTP, ref Error_Code, ref MSG);
 
@@ -2042,6 +1948,48 @@ namespace SGHMobileApi.Controllers
         //@ServiceType = ‘OP’,
 
         //@ServiceId = 3
+
+
+
+
+        [HttpPost]
+        [Route("v2/App-help-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetAPP_Help(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["ScreenName"]))
+            {
+                var lang = "EN";
+                var ScreenName = col["ScreenName"];                
+                if (col["lang"] != null)
+                    lang = col["lang"];
+
+                var dt = CDB.Get_AppHelp_DT(lang,ScreenName);
+
+                if (dt != null && dt.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Data Found";
+                    _resp.response = dt;
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No data Found";
+                }
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
 
     }
 }

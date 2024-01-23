@@ -290,5 +290,72 @@ namespace SmartBookingService.Controllers
             return Ok(_resp);
         }
 
+        [HttpPost]
+        [Route("v2/clinics-3DArea-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetAllClinics_3DArea_V2(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            _clinicDb = new ClinicDB();
+            if (col != null && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["BodyArea"])
+                && !string.IsNullOrEmpty(col["Age"]) && !string.IsNullOrEmpty(col["Gender"])
+                )
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+
+                int hospitalId = 0;
+                var BodyArea = "";
+                var age = 0;
+                var Gender = "Male";
+                try
+                {
+                    hospitalId = Convert.ToInt32(col["hospital_id"]);
+                    BodyArea = col["BodyArea"].ToString();
+                    age = Convert.ToInt32(col["Age"]);
+                    Gender = col["Gender"].ToString();
+
+
+                }
+                catch (Exception e)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Parameter in Wrong Format : -- " + e.Message;
+                    return Ok(_resp);
+                }
+
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    ApiSource = col["Sources"].ToString();
+
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"];
+
+                DataTable allDataTable;
+                /**/
+                allDataTable = _clinicDb.GetClinicsByBodyAreaDataTable(lang, hospitalId, BodyArea, age, Gender);
+
+                if (allDataTable.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Success";
+                    _resp.response = allDataTable;
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Fail";
+                }
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters.";
+            }
+            return Ok(_resp);
+        }
+
     }
 }

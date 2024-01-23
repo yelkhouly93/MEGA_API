@@ -404,9 +404,15 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["lang"]))
                     lang = col["lang"];
 
+				try
+				{
+
+				
                 var PatientMRN = Convert.ToInt32(col["patient_reg_no"]);
                 var hospitalID = Convert.ToInt32(col["hospital_id"]);
+
                 var beneficiaryID = Convert.ToInt32(col["beneficiary_ID"]);
+
                 var TransferAmount = col["Transfer_Amount"];
                 var Sources = col["Sources"];
 
@@ -419,6 +425,12 @@ namespace SGHMobileApi.Controllers
                 _resp.status = Status;
                 _resp.msg = Msg;
                 _resp.response = _datatable;
+                }
+                catch(Exception ex)
+				{
+                    _resp.status = 0;
+                    _resp.msg = "Invalid Parameter";
+                }
             }
             else
             {

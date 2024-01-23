@@ -12,6 +12,7 @@ using SGHMobileApi.Common;
 using SmartBookingService.Controllers.ClientApi;
 using System.Data;
 using System.Configuration;
+using DataLayer.Common;
 
 namespace SGHMobileApi.Controllers
 {
@@ -19,6 +20,8 @@ namespace SGHMobileApi.Controllers
     [AuthenticationFilter]
     public class Login_V3Controller : ApiController
     {
+        private readonly EncryptDecrypt_New util = new EncryptDecrypt_New();
+
         [HttpPost]
         [Route("v3/login-check")]
         [ResponseType(typeof(List<GenericResponse>))]
@@ -221,7 +224,11 @@ namespace SGHMobileApi.Controllers
                         // SENT OTP 
                         int activationCode = 0, ErrorCode;
 
-                        _loginApiCaller.GenerateOTP_V3(userInfo[0].BranchId , userInfo[0].PatientCellNo2, userInfo[0].Registrationno , userInfo[0].PatientId , Source ,ref activationCode ,ref errStatus , ref errMessage);
+                        //_loginApiCaller.GenerateOTP_V3(util.Decrypt (userInfo[0].BranchId , true) , userInfo[0].PatientCellNo2, util.Decrypt( userInfo[0].Registrationno , true) , userInfo[0].PatientId , Source ,ref activationCode ,ref errStatus , ref errMessage);
+                        _loginApiCaller.GenerateOTP_V3(userInfo[0].BranchId,  userInfo[0].PatientCellNo2, userInfo[0].Registrationno, userInfo[0].PatientId, Source, ref activationCode, ref errStatus, ref errMessage);
+
+
+                        // Encrpt the Data here For condition if 1 record Found
 
 
                         var PhoneNumber = userInfo[0].PatientCellNo2;
@@ -233,7 +240,7 @@ namespace SGHMobileApi.Controllers
                         //OTP = "1111";
                         if (OTP != "6465" && OTP != "1122")
                         {
-                            PhoneNumber = "0581178188";
+                            //PhoneNumber = "0581178188";
                             MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
                             MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
                             Util.SendTestSMS(PhoneNumber, MsgContent);                            
@@ -245,9 +252,19 @@ namespace SGHMobileApi.Controllers
                         // Loop to Empty Mobile Number 
 					}
 
+                    // Encrpt the Data here For condition before sending to API
+                    
+                    var Final_userInfo = new List<login_check_modal>();
+                    //Final_userInfo = userInfo;
+                    if (IsEncrypt)
+                       Final_userInfo = loginDb.Encrpt_UserList_Obj(userInfo);
+                    else
+                        Final_userInfo = userInfo;
+
+
 
                     resp.msg = errMessage;
-                    resp.response = userInfo;
+                    resp.response = Final_userInfo;
                 }
                 else
                 {

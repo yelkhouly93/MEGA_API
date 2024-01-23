@@ -17,6 +17,7 @@ namespace SmartBookingService.Controllers.ClientApi
     public class LoginApiCaller
     {
         CustomDBHelper DB = new CustomDBHelper("RECEPTION");
+        private readonly EncryptDecrypt_New util = new EncryptDecrypt_New();
 
         public UserInfo ValidateLoginUserByApi(string lang, int hospitalID, string PCellNo, string RegistrationNo, string NationalId, ref int activationNo, ref int Er_Status, ref string Msg)
         {
@@ -146,24 +147,45 @@ namespace SmartBookingService.Controllers.ClientApi
                 for (var i = 0; i < _userInfoModel.Count; i++)
 				{
                     login_check_modal _TempModalObj = new login_check_modal();
-                    _TempModalObj.BranchId = "9"; // FOr Dammam Fixed
-                    _TempModalObj.branchID = "9"; // FOr Dammam Fixed
-                    _TempModalObj.Branch_AR = "Dammam Branch";// FOr Dammam Fixed
-                    _TempModalObj.Branch_EN = "Dammam Branch";// FOr Dammam Fixed
-                    _TempModalObj.DOB = _userInfoModel[i].birthday;
-                    _TempModalObj.image_url = "";
-                    _TempModalObj.PatientCellNo = _userInfoModel[i].phone;
-                    _TempModalObj.PatientCellNo2 = _userInfoModel[i].phone;
-                    //_TempModalObj.PatientCellNo = "0581178188";
-                    //_TempModalObj.PatientCellNo2 = "0581178188";
-                    _TempModalObj.PatientFullName = _userInfoModel[i].name;
-                    _TempModalObj.PatientId= _userInfoModel[i].registration_no;
-                    _TempModalObj.PatientName_AR= _userInfoModel[i].name_ar;
-                    _TempModalObj.PatientName_EN= _userInfoModel[i].name;
-                    _TempModalObj.PEMail = _userInfoModel[i].email;
-                    _TempModalObj.Registrationno = _userInfoModel[i].registration_no;
 
-                    _userInfo.Add(_TempModalObj);
+
+
+                    //_TempModalObj.BranchId = util.Encrypt("9", true);  // FOr Dammam Fixed
+                    //_TempModalObj.branchID = util.Encrypt("9", true); // FOr Dammam Fixed
+                    //_TempModalObj.Branch_AR = util.Encrypt("Dammam Branch", true);// FOr Dammam Fixed
+                    //_TempModalObj.Branch_EN = util.Encrypt("Dammam Branch", true);// FOr Dammam Fixed
+                    //_TempModalObj.Registrationno = util.Encrypt(_userInfoModel[i].registration_no.ToString(), true);
+                    //_TempModalObj.DOB = _userInfoModel[i].birthday.ToString();
+                    //_TempModalObj.image_url = "";
+                    //_TempModalObj.PatientCellNo = _userInfoModel[i].phone.ToString();
+                    //_TempModalObj.PatientCellNo2 = _userInfoModel[i].phone.ToString();
+                    ////_TempModalObj.PatientCellNo = "0581178188";
+                    ////_TempModalObj.PatientCellNo2 = "0581178188";
+                    //_TempModalObj.PatientFullName = _userInfoModel[i].name.ToString();
+                    //_TempModalObj.PatientId = _userInfoModel[i].registration_no.ToString();
+                    //_TempModalObj.PatientName_AR = _userInfoModel[i].name_ar.ToString();
+                    //_TempModalObj.PatientName_EN = _userInfoModel[i].name.ToString();
+                    //_TempModalObj.PEMail = _userInfoModel[i].email.ToString();
+
+                    if (_userInfoModel[i].registration_no.ToString() != "" && _userInfoModel[i].registration_no.ToString() != "0")
+					{
+                        _TempModalObj.BranchId = "9";  // FOr Dammam Fixed
+                        _TempModalObj.branchID = "9"; // FOr Dammam Fixed
+                        _TempModalObj.Branch_AR = "المستشفى السعودي الألماني الدمام";// FOr Dammam Fixed
+                        _TempModalObj.Branch_EN = "Dammam Branch";// FOr Dammam Fixed
+                        _TempModalObj.Registrationno = _userInfoModel[i].registration_no.ToString();
+                        _TempModalObj.DOB = _userInfoModel[i].birthday.ToString();
+                        _TempModalObj.image_url = "";
+                        _TempModalObj.PatientCellNo = _userInfoModel[i].phone.ToString();
+                        _TempModalObj.PatientCellNo2 = _userInfoModel[i].phone.ToString();
+                        _TempModalObj.PatientFullName = _userInfoModel[i].name.ToString();
+                        _TempModalObj.PatientId = _userInfoModel[i].registration_no.ToString();
+                        _TempModalObj.PatientName_AR = _userInfoModel[i].name_ar.ToString();
+                        _TempModalObj.PatientName_EN = _userInfoModel[i].name.ToString();
+                        _TempModalObj.PEMail = _userInfoModel[i].email.ToString();
+                        _userInfo.Add(_TempModalObj);
+                    }
+                    
                 }
             }
             return _userInfo;
@@ -208,7 +230,17 @@ namespace SmartBookingService.Controllers.ClientApi
             UserInfo_New userInfo = new UserInfo_New();
             if (userInfoModel == null || userInfoModel.Count <= 0) return userInfo;
             userInfo.address = userInfoModel[0].address;
-            userInfo.birthday = DateTime.Parse(userInfoModel[0].birthday);
+            try
+			{
+                if (userInfoModel[0].birthday != "")
+                    userInfo.birthday = DateTime.Parse(userInfoModel[0].birthday);
+            }
+            catch (Exception e)
+			{
+
+			}
+            
+
             userInfo.email = userInfoModel[0].email;
             userInfo.family_name = userInfoModel[0].family_name;
             userInfo.first_name = userInfoModel[0].first_name;
@@ -237,15 +269,18 @@ namespace SmartBookingService.Controllers.ClientApi
             userInfo.NationalityId = userInfoModel[0].nationalityId;
             userInfo.Nationality = userInfoModel[0].nationality;
 
+            if (userInfo.NationalityId == "")
+                userInfo.NationalityId = "0";
 
-            userInfo.image_url = "";
+
+                userInfo.image_url = "";
 
             userInfo.IsCash = true;
 
             userInfo.Branch_Id = "9";
             userInfo.Branch_Name = "SGH Dammam";
 
-            userInfo.Branch_Name_ar = "SGH Dammam";
+            userInfo.Branch_Name_ar = "المستشفى السعودي الألماني الدمام";
 
 
             return userInfo;
@@ -372,7 +407,7 @@ namespace SmartBookingService.Controllers.ClientApi
         }
 
 
-        private List<Patient_Appointment_Modal_ForMobile> MapPatientAppointments_NewDamma(List<Patient_Appointment_Modal> _APIModal)
+        private List<Patient_Appointment_Modal_ForMobile> MapPatientAppointments_NewDamma(List<Patient_Appointment_Modal> _APIModal , string lang = "EN")
         {
             List<Patient_Appointment_Modal_ForMobile> _ListObj = new List<Patient_Appointment_Modal_ForMobile>();
             //Doctor_Schedule_days_Modal_ForMobile
@@ -400,7 +435,11 @@ namespace SmartBookingService.Controllers.ClientApi
                         _TempModalObj.AppDate = _APIModal[i].AppDate;
                         _TempModalObj.AppointmentNo = Convert.ToInt32(_APIModal[i].AppointmentNo);
                         _TempModalObj.AppTime = _APIModal[i].AppTime + ":00";
-                        _TempModalObj.BranchName = "SGH Dammam";
+                        if (lang == "AR" || lang == "ar")
+                            _TempModalObj.BranchName = "المستشفى السعودي الألماني الدمام";
+                        else
+                            _TempModalObj.BranchName = "SGH Dammam"; 
+
                         _TempModalObj.ClinicName = _APIModal[i].ClinicName;
                         _TempModalObj.ClinicName_AR = _APIModal[i].ClinicName_AR;
                         _TempModalObj.DoctorId = Convert.ToInt32(_APIModal[i].DoctorId);
@@ -519,7 +558,7 @@ namespace SmartBookingService.Controllers.ClientApi
 
         }
 
-        public bool PatientAddApi_NewDammam(RegisterPatient2 registerPatient , out PostResponse ReturnObject)
+        public bool PatientAddApi_NewDammam(RegisterPatient2 registerPatient , out PostResponse_AddPatient ReturnObject)
         {
             HttpStatusCode status;
             string RegistrationUrl = "http://130.11.2.213:30005/createPatient";
@@ -578,10 +617,10 @@ namespace SmartBookingService.Controllers.ClientApi
                 ,thirdName = ""
                 ,thirdNameAr = ""                
             };
-            var _NewData = RestUtility.CallAPI_POST<PostResponse>(RegistrationUrl, _accData, out status);
+            var _NewData = RestUtility.CallAPI_POST<PostResponse_AddPatient>(RegistrationUrl, _accData, out status);
 
-            ReturnObject = new PostResponse();
-            ReturnObject = _NewData as PostResponse;
+            ReturnObject = new PostResponse_AddPatient();
+            ReturnObject = _NewData as PostResponse_AddPatient;
 
             if (status == HttpStatusCode.OK)
                 return true;
@@ -605,9 +644,15 @@ namespace SmartBookingService.Controllers.ClientApi
 
         // doctor Schule days
         //Doctor_Schedule_days_Modal
-        public List<Doctor_Schedule_days_Modal_ForMobile> GetDoctorSchduleDaysByApi_NewDam(string lang, string DoctorID,string clinicCode)
+        public List<Doctor_Schedule_days_Modal_ForMobile> GetDoctorSchduleDaysByApi_NewDam(string lang, string DoctorID,string clinicCode , DateTime selectedDate)
         {
             DateTime now = DateTime.Now;
+            if (selectedDate >= now)
+                now = selectedDate;
+
+
+
+
             var startDate = new DateTime(now.Year, now.Month, 1);
             var endDate = startDate.AddMonths(1).AddDays(-1);
 
@@ -738,7 +783,7 @@ namespace SmartBookingService.Controllers.ClientApi
                 for (var i = 0; i < _APIModal.Count; i++)
                 {
                     PateintTests _TempModalObj = new PateintTests();
-                    _TempModalObj.ftp_path  = " "; // FOr Dammam Fixed
+                    _TempModalObj.ftp_path  = "https://cxmw.sghgroup.com.sa/TESTAPI/cs/index2.html"; // FOr Dammam Fixed
                     
                     var temOPID = "OP";
                     
@@ -789,11 +834,11 @@ namespace SmartBookingService.Controllers.ClientApi
             var _patientData_Dam = new List<patientData_Dam>();
             _patientData_Dam = _NewData as List<patientData_Dam>;
 
-            var _userInfo = MapPatientListToFamilyList(_patientData_Dam);
+            var _userInfo = MapPatientListToFamilyList(_patientData_Dam , lang);
             return _userInfo;
 
         }
-        public List<PatientFamilyList> MapPatientListToFamilyList(List<patientData_Dam> _InputData)
+        public List<PatientFamilyList> MapPatientListToFamilyList(List<patientData_Dam> _InputData, string lang = "EN")
         {
             var NewData = new List<PatientFamilyList>();
 
@@ -801,26 +846,42 @@ namespace SmartBookingService.Controllers.ClientApi
             {
                 for (var i = 0; i < _InputData.Count; i++)
                 {
-                    PatientFamilyList _TempModalObj = new PatientFamilyList();
-                    _TempModalObj.BranchId = "9"; // FOr Dammam Fixed
-                    _TempModalObj.Age = _InputData[i].age;
-                    _TempModalObj.BranchName = "SGH Dammam";
-                    _TempModalObj.DOB = _InputData[i].birthday;
-                    _TempModalObj.FamilyName = _InputData[i].family_name;
-                    _TempModalObj.FirstName = _InputData[i].first_name;
-                    _TempModalObj.Gender = _InputData[i].gender;
-                    _TempModalObj.image_url = "";
-                    _TempModalObj.LastName = _InputData[i].last_name;
-                    _TempModalObj.MaritalStatus = "";
-                    _TempModalObj.MiddleName = _InputData[i].middle_name;
-                    _TempModalObj.Nationality = _InputData[i].nationality ;
-                    _TempModalObj.NationalityId = Convert.ToInt32( _InputData[i].nationalityId);
-                    _TempModalObj.PatientFullName = _InputData[i].name;
-                    _TempModalObj.PatientId = _InputData[i].national_id;
-                    _TempModalObj.PCellno = _InputData[i].phone;
-                    _TempModalObj.RegistrationNo = _InputData[i].registration_no;
+                    if (_InputData[i].registration_no != "" && _InputData[i].registration_no != "0")
+					{
+                        PatientFamilyList _TempModalObj = new PatientFamilyList();
+                        _TempModalObj.BranchId = "9"; // FOr Dammam Fixed
+                        _TempModalObj.Age = _InputData[i].age;
+                        if (lang == "AR" || lang == "ar")
+                            _TempModalObj.BranchName = " المستشفى السعودي الألماني الدمام";
+                        else
+                            _TempModalObj.BranchName = "SGH Dammam";
+                        _TempModalObj.DOB = _InputData[i].birthday;
+                        _TempModalObj.FamilyName = _InputData[i].family_name;
+                        _TempModalObj.FirstName = _InputData[i].first_name;
+                        _TempModalObj.Gender = _InputData[i].gender;
+                        _TempModalObj.image_url = "";
+                        _TempModalObj.LastName = _InputData[i].last_name;
+                        _TempModalObj.MaritalStatus = "";
+                        _TempModalObj.MiddleName = _InputData[i].middle_name;
+                        _TempModalObj.Nationality = _InputData[i].nationality;
+						try
+						{
+                            _TempModalObj.NationalityId = Convert.ToInt32(_InputData[i].nationalityId);
+                        }
+                        catch(Exception e)
+						{
 
-                    NewData.Add(_TempModalObj);
+						}
+                        
+
+                        _TempModalObj.PatientFullName = _InputData[i].name;
+                        _TempModalObj.PatientId = _InputData[i].national_id;
+                        _TempModalObj.PCellno = _InputData[i].phone;
+                        _TempModalObj.RegistrationNo = _InputData[i].registration_no;
+
+                        NewData.Add(_TempModalObj);
+                    }
+                    
                 }
             }
             return NewData;

@@ -78,6 +78,23 @@ namespace DataLayer.Model
 
     }
 
+    public class data
+    {
+        public string patientId { get; set; }
+        public string mrn { get; set; }
+        
+    }
+    public class PostResponse_AddPatient
+    {
+        public string errorCode { get; set; }
+        public string code { get; set; }        
+        public string errorMessage { get; set; }
+        public data data { get; set; }
+        
+
+    }
+
+
 
     public class PatientVisit_Dam
 	{
@@ -109,6 +126,14 @@ namespace DataLayer.Model
         public string accountNo { get; set; }
         public string insuranceId { get; set; }
         public string idExpiryDate { get; set; }
+
+    }
+
+
+    public class AddPatientResponse
+	{
+        string request_id { get; set; }
+        int code { get; }
 
     }
 }

@@ -104,8 +104,17 @@ namespace DataLayer.Data
             DB.param[8].Direction = ParameterDirection.Output;
 
             var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Get_ServicesCashAmount_V2_SP");
+            try
+			{
+                errStatus = Convert.ToInt32(DB.param[7].Value);
+            }
+            catch(Exception ex)
+			{
+                errStatus = 0;
 
-            errStatus = Convert.ToInt32(DB.param[7].Value);
+            }
+                
+
             errMessage = DB.param[8].Value.ToString();
 
             return dataTable;

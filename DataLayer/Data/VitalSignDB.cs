@@ -30,5 +30,33 @@ namespace DataLayer.Data
             return ReturnDataTable;
         }
 
+
+        public DataTable GET_Patient_My_VitalSign_DT(string Lang, int PatientMRN, int BranchID)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", Lang),
+                    new SqlParameter("@RegistrationNo", PatientMRN),
+                    new SqlParameter("@BranchID", BranchID)                    
+                };
+
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_PatientMyVitals_SP]");
+            return ReturnDataTable;
+        }
+
+        public DataTable GET_Patient_My_VitalSign_Detail_DT(string Lang, int PatientMRN, int BranchID ,  string VitalSign)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", Lang),
+                    new SqlParameter("@RegistrationNo", PatientMRN),
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@Vital", VitalSign)
+                };
+
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_PatientMyVitals_Details_SP]");
+            return ReturnDataTable;
+        }
+
     }
 }

@@ -286,7 +286,7 @@ namespace SmartBookingService.Controllers
                         {
                             // New Logic as per Eng. Basmah Approval
                             // Due to Oasis Issue Cancel and Book 
-                            if (lang =="EN")
+                            if (lang =="EN" || lang == "en"  )
                                 resp.msg = "To reschedule the appoitment, Please Book New Appointment and Cancel the old Appointment."; 
                             else
                                 resp.msg = "لإعادة جدولة الموعد برجاء حجز موعد جديد وإلغاء الموعد القديم.";
