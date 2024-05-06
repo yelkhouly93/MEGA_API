@@ -933,14 +933,14 @@ namespace SGHMobileApi.Controllers
                 else
                 {
                     resp.error_type = "invalid_or_mismatched_otp";
-                    resp.msg = "OTP Not Verified";
+                    resp.msg = ".. OTP Not Verified";
                     resp.status = 0;
                 }
             }
             else
             {
                 resp.error_type = "Missing Parameters";
-                resp.msg = "OTP Not Verified";
+                resp.msg = "... OTP Not Verified ...";
                 resp.status = 0;
             }
             
@@ -1023,9 +1023,20 @@ namespace SGHMobileApi.Controllers
                 }
                 else
                 {
-                    resp.error_type = "invalid_or_mismatched_otp";
-                    resp.msg = "OTP Not Verified";
-                    resp.status = 0;
+                    if (verifiedCode != null)
+					{
+                        resp.error_type = "invalid_or_mismatched_otp";
+                        resp.msg = "OTP Not Verified....";
+                        resp.status = 0;
+                        
+                    }
+                    else
+					{
+                        resp.error_type = "Exceed Limit";
+                        resp.msg = "OTP Not Verified! verification Limit Exceed, Please Login Again!";
+                        resp.status = 0;
+                    }
+                    
                 }
             }
             else if(!string.IsNullOrEmpty(col["verification_code"]) && !string.IsNullOrEmpty(col["patient_phone"]))
@@ -1060,14 +1071,14 @@ namespace SGHMobileApi.Controllers
                 else
                 {
                     resp.error_type = "invalid_or_mismatched_otp";
-                    resp.msg = "OTP Not Verified";
+                    resp.msg = "OTP Not Verified!";
                     resp.status = 0;
                 }
             }
             else
             {
                 resp.error_type = "Missing Parameters";
-                resp.msg = "OTP Not Verified";
+                resp.msg = "! OTP Not Verified";
                 resp.status = 0;
             }
 

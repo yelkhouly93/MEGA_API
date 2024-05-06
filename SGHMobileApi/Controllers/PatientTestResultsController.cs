@@ -411,6 +411,8 @@ namespace SGHMobileApi.Controllers
                 var ParmEnc = TripleDESImp.TripleDesEncrypt(Str_Id);
                 var FinalURL = ConfigurationManager.AppSettings["LabResultURL"].ToString() + ParmEnc;
                 
+                FinalURL = "http://10.130.14.38:82/Reports/AyeshaTest";
+
                 tmpobj.ReportUrl = Util.ConvertURL_to_PDF(FinalURL , testId.ToString());
                 if (tmpobj.ReportUrl != null)
                 {

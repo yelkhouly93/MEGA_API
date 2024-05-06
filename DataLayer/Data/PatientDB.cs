@@ -832,7 +832,7 @@ namespace DataLayer.Data
 
             string DB_SP_Name = "DBO.[Reschedule_Appointment_SP]";
 
-            if (Sources.ToLower() == "saleforce")
+            if (Sources.ToLower() == "saleforce" || Sources == "SaleForce")
 			{
                 DB.param = new SqlParameter[]
                 {

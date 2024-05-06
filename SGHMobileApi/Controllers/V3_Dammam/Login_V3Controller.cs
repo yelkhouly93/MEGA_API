@@ -130,7 +130,17 @@ namespace SGHMobileApi.Controllers
 
                 //First Check in Other Branches - Old Logic
                 if (!OnlyDammam)
+				{
                     userInfo = loginDb.login_check(lang, hospitalId, PCell, PatientNationId, patientMrn, Source, ref errStatus, ref errMessage, IsEncrypt);
+                    if (errStatus == 100)
+					{
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        resp.error_type = errStatus.ToString();
+                        return Ok(resp);
+                    }
+                }
+                    
 
 
                 // Call dammam API Function fill list
@@ -360,9 +370,24 @@ namespace SGHMobileApi.Controllers
                 }
                 else
                 {
-                    resp.error_type = "invalid_or_mismatched_otp";
-                    resp.msg = "OTP Not Verified";
-                    resp.status = 0;
+                    //resp.error_type = "invalid_or_mismatched_otp";
+                    //resp.msg = "OTP Not Verified V3 - 1";
+                    //resp.status = 0;
+                    if (verifiedCode == "EXPIRED")
+                    {
+                        resp.error_type = "Exceed Limit";
+                        resp.msg = "Verification Limit Exceed, Please Login Again!";
+                        resp.status = 0;
+
+
+                    }
+                    else
+                    {
+                        resp.error_type = "invalid_or_mismatched_otp";
+                        resp.msg = "OTP Not Verified....";
+                        resp.status = 0;
+                        
+                    }
                 }
             }
             else if (!string.IsNullOrEmpty(col["verification_code"]) && !string.IsNullOrEmpty(col["patient_phone"]))
@@ -397,14 +422,14 @@ namespace SGHMobileApi.Controllers
                 else
                 {
                     resp.error_type = "invalid_or_mismatched_otp";
-                    resp.msg = "OTP Not Verified";
+                    resp.msg = "OTP Not Verified..";
                     resp.status = 0;
                 }
             }
             else
             {
                 resp.error_type = "Missing Parameters";
-                resp.msg = "OTP Not Verified";
+                resp.msg = "OTP Not Verified.";
                 resp.status = 0;
             }
 

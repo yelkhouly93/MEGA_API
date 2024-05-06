@@ -110,7 +110,7 @@ namespace SmartBookingService.Controllers
                 catch (Exception ex)
                 {
                     _resp.status = 0;
-                    _resp.msg = "Wrong Format ! Please check Hospital ID OR National ID should be Integer.";
+                    _resp.msg = "Wrong Format ! Please check Hospital ID OR Employee ID should be Integer.";
                     _resp.error_type = "0";
                     return Ok(_resp);
                 }
@@ -146,6 +146,75 @@ namespace SmartBookingService.Controllers
 
         }
 
-        
+
+        [HttpPost]
+        [Route("docapp/Doctor-Appointment-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetDoctorAppointmentList(FormDataCollection col)
+        {
+            if (!string.IsNullOrEmpty(col["Hospital_ID"]) && !string.IsNullOrEmpty(col["Employee_ID"])
+                && !string.IsNullOrEmpty(col["FromDate"])
+                && !string.IsNullOrEmpty(col["ToDate"])
+                )
+            {
+                var EmployeeID = "";
+                var BranchID = 0;
+                DateTime ToDate = Convert.ToDateTime("1/1/1900");
+                DateTime FromDate = Convert.ToDateTime("1/1/1900");
+
+                try
+                {
+                    BranchID = Convert.ToInt32(col["Hospital_ID"]);
+                    EmployeeID = col["Employee_ID"];
+
+                    if (!string.IsNullOrEmpty(col["ToDate"]))
+                        ToDate = Convert.ToDateTime(col["ToDate"]);
+
+                    if (!string.IsNullOrEmpty(col["FromDate"]))
+                        FromDate = Convert.ToDateTime(col["FromDate"]);
+                }
+                catch (Exception ex)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Wrong Format ! Please check Hospital ID OR Employee ID Or DateTime Formate.";
+                    _resp.error_type = "0";
+                    return Ok(_resp);
+                }
+
+                var lang = "EN";
+
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    ApiSource = col["Sources"].ToString();
+                
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"].ToString();
+
+                var _AllDateTable = __MainDb.GetDoctorAppointmentList(lang, BranchID.ToString(), EmployeeID,ToDate, FromDate,ApiSource);
+
+                if (_AllDateTable != null)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Record Found";
+                    _resp.response = _AllDateTable;
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No Data Found.";
+                }
+            }
+            else
+            {
+                _resp.msg = "Failed! Missing Parameter";
+            }
+            return Ok(_resp);
+
+        }
+
+
     }
 }

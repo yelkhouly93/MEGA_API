@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using RestClient;
 using System.Net;
+using DataLayer.Data.ORACLE;
 
 namespace SGHMobileApi.Controllers
 {
@@ -26,6 +27,8 @@ namespace SGHMobileApi.Controllers
         {
             status = 0
         };
+
+        
 
 
         [HttpPost]

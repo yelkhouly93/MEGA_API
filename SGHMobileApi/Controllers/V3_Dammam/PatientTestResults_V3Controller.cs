@@ -9,7 +9,7 @@ using System.Net.Http.Formatting;
 using SmartBookingService.Controllers.ClientApi;
 using SGHMobileApi.Common;
 using System.Configuration;
-
+using DataLayer.Data.ORACLE;
 
 namespace SGHMobileApi.Controllers
 {
@@ -18,6 +18,10 @@ namespace SGHMobileApi.Controllers
     public class PatientTestResults_V3Controller : ApiController
     {
 
+        private GenericResponse _resp = new GenericResponse()
+        {
+            status = 0
+        };
 
         [HttpPost]
         [Route("v3/test-List-get")]
@@ -94,6 +98,19 @@ namespace SGHMobileApi.Controllers
         }
 
 
+        [HttpPost]
+        [Route("v2/test-dammam")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult TESTDAMAM(FormDataCollection col)
+        {
+
+            _resp = new GenericResponse();
+            ORACLECS_DB _OraDb = new ORACLECS_DB();
+            _OraDb.TESTEXECUTE();
+
+            return Ok(_resp);
+        }
+
 
         [HttpPost]
         [Route("v3/test-resultdetails-get")]
@@ -101,11 +118,19 @@ namespace SGHMobileApi.Controllers
         public IHttpActionResult GetTestResultDetail(FormDataCollection col)
         {
             var resp = new GenericResponse();
-            if (!string.IsNullOrEmpty(col["test_id"]))
+            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"])
+
+                )
             {
                 var lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
                 var testId = Convert.ToInt32(col["test_id"]);
+                var ReportType = "Lab";
+
+                if (!string.IsNullOrEmpty(col["Report_type"]))
+                    ReportType = col["Report_type"].ToString();
+
+
 
                 int errStatus = 0;
                 string errMessage = "";
@@ -113,11 +138,24 @@ namespace SGHMobileApi.Controllers
                 var patientDb = new PatientDB();
                 var apiCaller = new PatientLabResultsApiCaller();
 
-                //var allPatientResults = apiCaller.GetPatientTestResultsAPI(lang, hospitaId, testId, ref errStatus, ref errMessage);
-                if (testId == 0 || hospitaId == 9)
+                
+                if (hospitaId == 9)
 				{
-                    resp.status = 0;
-                    resp.msg = "Currently Not Available For dammam.";
+                    ORACLECS_DB _OraDb = new ORACLECS_DB();
+                    string OraSQL = "";
+                    
+                    var dataResults = _OraDb.EXECUTE_SQL_DT(OraSQL);
+                    if (dataResults != null)
+					{
+                        resp.status = 1;
+                        resp.msg = "Data Found";
+                        resp.response = dataResults;
+                    }
+                    else
+					{
+                        resp.status = 0;
+                        resp.msg = "No data Found.";
+                    }
                     return Ok(resp);
                 }
                 var allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);

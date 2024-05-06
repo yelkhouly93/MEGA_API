@@ -197,7 +197,7 @@ namespace SGHMobileApi.Controllers
 
                     var patientDb = new PatientDB();
                     //patientDb.SaveAppointment(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, EarlyReminder, HeardAboutUs, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
-                    patientDb.SaveAppointment_V2(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, EarlyReminder, HeardAboutUs, sources, SlotType, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName);
+                    patientDb.SaveAppointment_V2(lang, hospitaId, clinicId, physicianId, selectedDate, patientId, timeFrom, timeTo, scheduleDayId, EarlyReminder, HeardAboutUs, sources, SlotType, ref errStatus, ref errMessage, ref isVideoAppointment, ref doctorName , agent_UserName,agent_Userid);
                     
 
 

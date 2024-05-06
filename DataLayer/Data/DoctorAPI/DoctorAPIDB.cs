@@ -53,5 +53,23 @@ namespace DataLayer.Data.DoctorAPI
             return allDataTableModel;
         }
 
+        public DataTable GetDoctorAppointmentList(string lang, string hospitalId, string EmployeeID,  DateTime Todate, DateTime FromDate , string ApiSources)
+        {
+            _db.param = new SqlParameter[]
+           {
+                new SqlParameter("@Lang", lang),
+                new SqlParameter("@BranchId", hospitalId),
+                new SqlParameter("@EmpID", EmployeeID),
+                new SqlParameter("@Todate", Todate),
+                new SqlParameter("@FromDate", FromDate),
+                new SqlParameter("@ApiSources", ApiSources)
+           };
+
+            string DB_SP_Name = "DocApi.[Get_DoctorsAppointmentList_SP]";
+            var allDataTableModel = _db.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+            return allDataTableModel;
+        }
+
     }
 }
