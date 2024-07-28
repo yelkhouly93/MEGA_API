@@ -37,7 +37,16 @@ namespace DataLayer.Common
                     {
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandTimeout = 300;
-                        return cmd.ExecuteScalar().ToString();
+                        var tempstr = cmd.ExecuteScalar();
+                        
+                        if (tempstr == null)
+                            return "";
+
+                        return tempstr.ToString();
+
+                        //return cmd.ExecuteScalar().ToString();
+
+
                     }
                 }
                 catch (Exception ex)
@@ -230,6 +239,52 @@ namespace DataLayer.Common
                 }
             }
         }
+
+
+        public new DataTable ExecuteSPAndReturnDataTable_WithDataTableInput(DataTable inputdataTable , string SPName = ""  )
+        {
+            using (SqlConnection CN = new SqlConnection(base.SqlConnectionString))
+            {
+                try
+                {
+                    CN.Open();
+
+                    DataTable dt = new DataTable();
+                    using (SqlCommand cmd = new SqlCommand(SPName, CN))
+                    {
+                        cmd.CommandType = CommandType.StoredProcedure;
+                        cmd.CommandTimeout = 300;
+                        if (param != null)
+                        {
+                            foreach (SqlParameter item in param)
+                            {
+                                cmd.Parameters.Add(item);
+                            }
+                        }
+
+                        this.Successful = true;
+                        SqlDataReader rs = cmd.ExecuteReader();
+                        dt.Load(rs);
+                        rs.Close();
+                        rs.Dispose();
+
+                        return dt;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CN.Close();
+                    CN.Dispose();
+                    this.Successful = false;
+                    this.ErrorMessage = ex.Message;
+                    this.ErrorStackTrace = ex.StackTrace;
+
+                    Log_SP_ERROR(SPName, ex.Message, ex.StackTrace);
+                    throw new ApplicationException("<b>From:</b> " + SPName + "<br/><br/><b>Error Message:</b> <br /> " + ex.Message + "<br /><br /><b>Stack Trace:</b><br /> " + ex.StackTrace);
+                }
+            }
+        }
+
 
         public new DataTable ExecuteSQLAndReturnDataTable(string sql)
         {

@@ -112,5 +112,11 @@ namespace DataLayer.Data.ORACLE
                 return null;
             }
         }
+    
+    
+        public void GetLabResults ()
+		{
+
+		}
     }
 }

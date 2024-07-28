@@ -640,6 +640,19 @@ namespace DataLayer.Data
         }
 
 
+
+        public void InsertUAESMSTABLE(string MobileNumber, string SMSTEXT)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@MobileNumber", MobileNumber),
+                new SqlParameter("@SMSText", SMSTEXT)
+            };
+            DB.ExecuteSP("[dbo].[ADD_UAE_SMSTEXT_SP]");
+        }
+
+
+
     }
 
 }

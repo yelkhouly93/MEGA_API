@@ -26,7 +26,7 @@ namespace SGHMobileApi.Common
     public static class Util
     {
         public static List<int> OasisBranches = new List<int> { 9 };
-        public static List<int> UaeBranches = new List<int> { 301, 302, 303, 304 };
+        public static List<int> UaeBranches = new List<int> { 301, 302, 303, 304 , 305 , 306 , 307 , 308 , 309 , 310 };
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         public static IPAddress GetLocalIPAddress()
@@ -641,6 +641,17 @@ namespace SGHMobileApi.Common
 
             string pdfurl = ConfigurationManager.AppSettings["pdfurl"].ToString() + sFileName + ".pdf";
             return pdfurl;
+        }
+
+        public static bool IsDigitsOnly(string str)
+        {
+            foreach (char c in str)
+            {
+                if (c < '0' || c > '9')
+                    return false;
+            }
+
+            return true;
         }
 
     }

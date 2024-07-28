@@ -68,6 +68,15 @@ namespace SGHMobileApi.Controllers
                 if (!string.IsNullOrEmpty(col["Episode_Id"]))
                     EpisodeID = Convert.ToInt32(col["Episode_Id"]);
 
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
                 var allData = _paymentDb.GetPatientBillList(lang,hospitalId,registrationNo, fromdate, todate, InvoiceType , EpisodeType , EpisodeID);
@@ -178,6 +187,15 @@ namespace SGHMobileApi.Controllers
                 var Status = 0;
                 var Msg = "";
 
+                if (HospitalId >= 301 && HospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;                  
+                        _resp.msg = "Sorry this service not available";
+                    
+                    return Ok(_resp);
+                }
+
+
                 if (BillType != "I" && BillType != "C")
                 {
                     _resp.status = 0;
@@ -243,6 +261,15 @@ namespace SGHMobileApi.Controllers
                 var PaidAmount = "0";
                 // New Logic tracking ID on 08-05-2023 TRACKING ID
                 var TrackID = 0;
+
+
+                if (hospitalID >= 301 && hospitalID < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;             
+                        _resp.msg = "Sorry this service not available";                  
+                    return Ok(_resp);
+                }
+
 
                 var PaymentMethod = "V2/API";
                 if (!string.IsNullOrEmpty(col["OnlineTransaction_id"]))
@@ -430,6 +457,14 @@ namespace SGHMobileApi.Controllers
                 var Status = 0;
                 var Msg = "";
 
+                if (HospitalId >= 301 && HospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;               
+                        _resp.msg = "Sorry this service not available";                   
+                    return Ok(_resp);
+                }
+
+
                 if (BillType != "I" && BillType != "C")
                 {
                     _resp.status = 0;
@@ -502,7 +537,17 @@ namespace SGHMobileApi.Controllers
 
                 var Visit_id = Convert.ToInt32(col["Visit_id"]);
                 var hospitalID = Convert.ToInt32(col["hospital_id"]);
-                
+
+
+                if (hospitalID >= 301 && hospitalID < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    
+                    _resp.msg = "Sorry this service not available";
+                    
+                    return Ok(_resp);
+                }
+
                 var Service_Ids = col["Service_Ids"];
                 var Department_Ids = col["Department_Ids"];
                 var Item_Ids = col["Item_Ids"];

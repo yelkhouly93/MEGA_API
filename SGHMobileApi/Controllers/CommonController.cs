@@ -1199,7 +1199,19 @@ namespace SGHMobileApi.Controllers
                 else if (hospitaId == 201)
                     Util.SendSMS_Cairo(PatientPhone, MsgContent);
                 else if (Util.UaeBranches.Contains(hospitaId))
-                    Util.SendSMS_UAE(hospitaId, PatientPhone, MsgContent);
+				{
+                    //if (ReasonCode == 2)
+                        MsgContent = ConfigurationManager.AppSettings["SMS_InitalText_UAE"].ToString() + ActivationOTP + " For Update Profile. ";
+                    //else
+                    //    MsgContent = ConfigurationManager.AppSettings["SMS_InitalText_UAE"].ToString() + ActivationOTP + " ";
+
+                    MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+
+                    var CBC = new CommonDB();
+                    CBC.InsertUAESMSTABLE(PatientPhone, MsgContent);
+                    //Util.SendSMS_UAE(hospitaId, PatientPhone, MsgContent);
+                }
+                    
 
 
 
@@ -1641,6 +1653,13 @@ namespace SGHMobileApi.Controllers
         [HttpPost]
         public IHttpActionResult UploadFiles(string patient_reg_no, int hospital_id)
         {
+
+            
+
+            
+
+
+
             CommonDB CDB = new CommonDB();
             ////Fetch the File.
             //HttpPostedFile postedFile = HttpContext.Current.Request.Files[0];
@@ -1659,6 +1678,33 @@ namespace SGHMobileApi.Controllers
 
             //Fetch the File.
             HttpPostedFile postedFile = HttpContext.Current.Request.Files[0];
+
+
+            // Validate File Extenstion First
+
+            var PostedFileExtension = Path.GetExtension(postedFile.FileName);
+            if (PostedFileExtension.ToLower() == ".png" || PostedFileExtension.ToLower() == ".JPEG" || PostedFileExtension.ToLower() == ".JPG ")
+			{
+                // File Extension Allowed
+
+			}
+            else
+			{
+                _resp.status = 0;
+                _resp.msg = "Failed | From File Format.";
+                return Ok(_resp);
+            }
+
+            // Validate File Signature 
+            if (!IsValidImage(HttpContext.Current.Request.Files[0]))
+			{
+                _resp.status = 0;
+                _resp.msg = "Failed | From File Format.";
+                return Ok(_resp);
+
+            }
+
+
 
             //Fetch the File Name.
             //string fileName = HttpContext.Current.Request.Form["fileName"] + Path.GetExtension(postedFile.FileName);
@@ -1682,6 +1728,49 @@ namespace SGHMobileApi.Controllers
             _resp.response = URpfile;
             //Send OK Response to Client.
             return Ok(_resp);
+        }
+        public static bool IsValidImage(HttpPostedFile file)
+        {
+            try
+            {
+                // Read the first 8 bytes from the file stream
+                byte[] bytes;
+                using (BinaryReader reader = new BinaryReader(file.InputStream))
+                {
+                    bytes = reader.ReadBytes(8);
+                }
+
+                // Check against known image file signatures
+                if (IsJpeg(bytes) || IsPng(bytes))
+                {
+                    return true;
+                }
+
+                return false;
+            }
+            catch (Exception ex)
+            {
+                //Console.WriteLine("Error: " + ex.Message);
+                return false;
+            }
+        }
+        private static bool IsJpeg(byte[] bytes)
+        {
+            return bytes.Length > 1 &&
+                   bytes[0] == 0xFF &&
+                   bytes[1] == 0xD8;
+        }
+        private static bool IsPng(byte[] bytes)
+        {
+            return bytes.Length > 7 &&
+                   bytes[0] == 0x89 &&
+                   bytes[1] == 0x50 &&
+                   bytes[2] == 0x4E &&
+                   bytes[3] == 0x47 &&
+                   bytes[4] == 0x0D &&
+                   bytes[5] == 0x0A &&
+                   bytes[6] == 0x1A &&
+                   bytes[7] == 0x0A;
         }
 
         //[HttpPost()]

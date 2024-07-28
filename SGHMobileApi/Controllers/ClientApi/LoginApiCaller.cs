@@ -178,7 +178,10 @@ namespace SmartBookingService.Controllers.ClientApi
                         _TempModalObj.image_url = "";
                         _TempModalObj.PatientCellNo = _userInfoModel[i].phone.ToString();
                         _TempModalObj.PatientCellNo2 = _userInfoModel[i].phone.ToString();
-                        _TempModalObj.PatientFullName = _userInfoModel[i].name.ToString();
+
+                        //_TempModalObj.PatientFullName = _userInfoModel[i].name.ToString();
+                        _TempModalObj.PatientFullName = MaskFullName(_userInfoModel[i].name.ToString());
+
                         _TempModalObj.PatientId = _userInfoModel[i].registration_no.ToString();
                         _TempModalObj.PatientName_AR = _userInfoModel[i].name_ar.ToString();
                         _TempModalObj.PatientName_EN = _userInfoModel[i].name.ToString();
@@ -189,6 +192,29 @@ namespace SmartBookingService.Controllers.ClientApi
                 }
             }
             return _userInfo;
+        }
+
+        public static string MaskFullName(string fullName)
+        {
+            if (string.IsNullOrEmpty(fullName))
+            {
+                throw new ArgumentNullException(nameof(fullName), "Full name cannot be null or empty.");
+            }
+
+            if (fullName.Length <= 6)
+            {
+                throw new ArgumentException("Full name should be longer than 6 characters.", nameof(fullName));
+            }
+
+            int visibleStartLength = 3;
+            int visibleEndLength = 3;
+            int maskedLength = fullName.Length - visibleStartLength - visibleEndLength;
+
+            string visibleStart = fullName.Substring(0, visibleStartLength);
+            string visibleEnd = fullName.Substring(fullName.Length - visibleEndLength, visibleEndLength);
+            string maskedPart = new string('*', maskedLength);
+
+            return visibleStart + maskedPart + visibleEnd;
         }
 
 
@@ -353,7 +379,7 @@ namespace SmartBookingService.Controllers.ClientApi
             return _ListObj;
         }
 
-        public void GenerateOTP_V3 (string hospitalID ,string MOBILE_NO,string MRN,string NationalId,string Source, ref int activationNo, ref int Er_Status, ref string Msg)
+        public void GenerateOTP_V3 (string hospitalID ,string MOBILE_NO,string MRN,string NationalId,string Source, ref int activationNo, ref int Er_Status, ref string Msg , int CountryId = 0)
 		{
             DB.param = new SqlParameter[]
                 {
@@ -364,7 +390,8 @@ namespace SmartBookingService.Controllers.ClientApi
                 new SqlParameter("@Source", Source),
                 new SqlParameter("@ACtivationNo", SqlDbType.Int),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
-                new SqlParameter("@Msg", SqlDbType.NVarChar, 500)
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500),
+                new SqlParameter("@CountryID", CountryId)
                 };
             DB.param[5].Direction = ParameterDirection.Output;
             DB.param[6].Direction = ParameterDirection.Output;
@@ -794,9 +821,14 @@ namespace SmartBookingService.Controllers.ClientApi
                     _TempModalObj.registration_no = Convert.ToInt32(_APIModal[i].fileNumber) ;// FOr Dammam Fixed                    
                     _TempModalObj.report_filename = _APIModal[i].orders[0].dose + " " + _APIModal[i].orders[0].dispensingUnit;
                     
-                    _TempModalObj.report_id = 0; // Currently Fixed For Dammam
+                    //_TempModalObj.report_id = 0; // Currently Fixed For Dammam
+                    //_TempModalObj.test_id = 0; // Currently Fixed For Dammam
+                    _TempModalObj.report_id = _APIModal[i].orders[0].orderLine; // Currently Fixed For Dammam
+                    _TempModalObj.test_id = _APIModal[i].orders[0].orderLine; // Currently Fixed For Dammam
+
+
                     _TempModalObj.report_type = ReportType;
-                    _TempModalObj.test_id = 0; // Currently Fixed For Dammam
+                    
                     _TempModalObj.test_name = _APIModal[i].orders[0].procedureName;
                     
                     DateTime dt = DateTime.ParseExact(_APIModal[i].orders[0].requestDate, formatString, null);

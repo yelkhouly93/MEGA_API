@@ -272,6 +272,14 @@ namespace SGHMobileApi.Controllers
                     resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                     return Ok(resp);
                 }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    resp.status = 0;
+
+                    resp.msg = "Sorry this service not available";
+                    
+                    return Ok(resp);
+                }
 
                 var patientDb = new PatientDB();
 
@@ -355,6 +363,14 @@ namespace SGHMobileApi.Controllers
                 {
                     resp.status = 0;
                     resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    resp.status = 0;
+
+                    resp.msg = "Sorry this service not available";
+                    
                     return Ok(resp);
                 }
 
@@ -494,6 +510,15 @@ namespace SGHMobileApi.Controllers
                 {
                     resp.status = 0;
                     resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    resp.status = 0;
+                    if (lang == "EN")
+                        resp.msg = "Sorry this service not available";
+                    else
+                        resp.msg = "عذرا هذه الخدمة غير متوفرة";
                     return Ok(resp);
                 }
 

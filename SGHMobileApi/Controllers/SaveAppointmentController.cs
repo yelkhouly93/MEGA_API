@@ -136,6 +136,15 @@ namespace SGHMobileApi.Controllers
                         _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                         return Ok(_resp);
                     }
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
 
                     //for SALE FORCE POINT - for REPORTING 
                     var agent_Userid = "";
@@ -309,6 +318,16 @@ namespace SGHMobileApi.Controllers
                         return Ok(_resp);
                     }
 
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
                     if (!string.IsNullOrEmpty(col["Sources"]))
                         sources = col["Sources"];
 
@@ -409,6 +428,16 @@ namespace SGHMobileApi.Controllers
                     var doctorName = "";
                     var EarlyReminder = 0;
                     var HeardAboutUs = 0;
+
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
 
                     if (!string.IsNullOrEmpty(col["EarlierReminder"]))
                         EarlyReminder = Convert.ToInt32(col["EarlierReminder"]);
@@ -515,6 +544,15 @@ namespace SGHMobileApi.Controllers
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                 var AppointmentID = Convert.ToInt32(col["Appointment_Id"]);
                 int errStatus = 0;
@@ -595,6 +633,15 @@ namespace SGHMobileApi.Controllers
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                 var AppointmentID = Convert.ToInt32(col["Appointment_Id"]);
                 int errStatus = 0;
@@ -658,6 +705,15 @@ namespace SGHMobileApi.Controllers
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
                 var ApiSource = "MobileApp";
@@ -713,6 +769,15 @@ namespace SGHMobileApi.Controllers
                 {
                     _resp.status = 0;
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
 
@@ -847,6 +912,15 @@ namespace SGHMobileApi.Controllers
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
                 var patientDb = new PatientDB();
@@ -900,6 +974,13 @@ namespace SGHMobileApi.Controllers
                 {
                     _resp.status = 0;
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;                    
+                    _resp.msg = "Sorry this service not available";
+                    
                     return Ok(_resp);
                 }
 
@@ -1050,6 +1131,16 @@ namespace SGHMobileApi.Controllers
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                 var AppoitmentID = Convert.ToInt32(col["Appointment_ID"]);
 
@@ -1143,6 +1234,15 @@ namespace SGHMobileApi.Controllers
                 {
                     _resp.status = 0;
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
 

@@ -67,8 +67,10 @@ namespace SGHMobileApi.Controllers
                         Util.SendSMS_Cairo(_userInfo.phone, activationNo + " is your OTP for SGH Mobile App");
                     else if (Util.UaeBranches.Contains(hospitaId))
                     {
-                        string response = Util.SendSMS_UAE(hospitaId, _userInfo.phone, activationNo + " is your OTP for SGH Mobile App");
-                        log.Info("UAE SMS Reponse: " + response);
+                        var CBC = new CommonDB();
+                        CBC.InsertUAESMSTABLE(_userInfo.phone, activationNo + " is your OTP for SGH Mobile App");
+                        //string response = Util.SendSMS_UAE(hospitaId, _userInfo.phone, activationNo + " is your OTP for SGH Mobile App");
+                        //log.Info("UAE SMS Reponse: " + response);
                     }
 
 
@@ -348,8 +350,10 @@ namespace SGHMobileApi.Controllers
                             Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                         else if (Util.UaeBranches.Contains(hospitalId))
                         {
-                            string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                            log.Info("UAE SMS Reponse: " + response);
+                            var CBC = new CommonDB();
+                            CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                            //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                            //log.Info("UAE SMS Reponse: " + response);
                         }
 
 
@@ -678,8 +682,10 @@ namespace SGHMobileApi.Controllers
                                 Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                             else if (Util.UaeBranches.Contains(hospitalId))
                             {
-                                string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                                log.Info("UAE SMS Reponse: " + response);
+                                var CBC = new CommonDB();
+                                CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                                //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                                //log.Info("UAE SMS Reponse: " + response);
                             }
                         }
 
@@ -795,8 +801,10 @@ namespace SGHMobileApi.Controllers
                             Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                         else if (Util.UaeBranches.Contains(hospitalId))
                         {
-                            string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                            log.Info("UAE SMS Reponse: " + response);
+                            var CBC = new CommonDB();
+                            CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                            //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                            //log.Info("UAE SMS Reponse: " + response);
                         }
 
 
@@ -1135,8 +1143,10 @@ namespace SGHMobileApi.Controllers
                             Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                         else if (Util.UaeBranches.Contains(hospitalId))
                         {
-                            string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                            log.Info("UAE SMS Reponse: " + response);
+                            var CBC = new CommonDB();
+                            CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                            //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                            //log.Info("UAE SMS Reponse: " + response);
                         }
                         resp.msg = errMessage;                        
                     }
@@ -1212,8 +1222,10 @@ namespace SGHMobileApi.Controllers
                                 Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                             else if (Util.UaeBranches.Contains(hospitalId))
                             {
-                                string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                                log.Info("UAE SMS Reponse: " + response);
+                                var CBC = new CommonDB();
+                                CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                                //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                                //log.Info("UAE SMS Reponse: " + response);
                             }
                         }
                         resp.msg = "OTP has been resent to your registered number.";
@@ -1241,7 +1253,6 @@ namespace SGHMobileApi.Controllers
 
             return Ok();
         }
-
 
 
 

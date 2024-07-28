@@ -118,12 +118,15 @@ namespace SGHMobileApi.Controllers
         public IHttpActionResult GetTestResultDetail(FormDataCollection col)
         {
             var resp = new GenericResponse();
-            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"])
+            //if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"])
 
-                )
-            {
+            //    )
+
+            if (!string.IsNullOrEmpty(col["test_id"]) )
+                {
                 var lang = col["lang"];
-                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                //var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var hospitaId = 0;
                 var testId = Convert.ToInt32(col["test_id"]);
                 var ReportType = "Lab";
 
@@ -139,25 +142,27 @@ namespace SGHMobileApi.Controllers
                 var apiCaller = new PatientLabResultsApiCaller();
 
                 
-                if (hospitaId == 9)
-				{
-                    ORACLECS_DB _OraDb = new ORACLECS_DB();
-                    string OraSQL = "";
+    //            if (hospitaId == 9)
+				//{
+    //                ORACLECS_DB _OraDb = new ORACLECS_DB();
+    //                string OraSQL = "";
                     
-                    var dataResults = _OraDb.EXECUTE_SQL_DT(OraSQL);
-                    if (dataResults != null)
-					{
-                        resp.status = 1;
-                        resp.msg = "Data Found";
-                        resp.response = dataResults;
-                    }
-                    else
-					{
-                        resp.status = 0;
-                        resp.msg = "No data Found.";
-                    }
-                    return Ok(resp);
-                }
+    //                var dataResults = _OraDb.EXECUTE_SQL_DT(OraSQL);
+    //                if (dataResults != null)
+				//	{
+    //                    resp.status = 1;
+    //                    resp.msg = "Data Found";
+    //                    resp.response = dataResults;
+    //                }
+    //                else
+				//	{
+    //                    resp.status = 0;
+    //                    resp.msg = "No data Found.";
+    //                }
+    //                return Ok(resp);
+    //            }
+                
+                
                 var allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);
 
                 if (allPatientResults != null)
@@ -232,6 +237,193 @@ namespace SGHMobileApi.Controllers
             }
             return Ok(resp);
         }
+
+
+        [HttpPost]
+        [Route("v4/test-List-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientTestReportsList_V4(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                int errStatus = 0;
+                string errMessage = "";
+
+                var patientDb = new PatientDB();
+
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"].ToString();
+
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    ApiSource = col["Sources"].ToString();
+
+
+                var EpisodeType = "OP";
+                var EpisodeID = 0;
+
+                if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                    EpisodeType = col["Episode_Type"];
+                if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                    EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+                if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                {
+                    resp.status = 0;
+                    resp.msg = "WRONG Episode Type";
+                    return Ok(resp);
+                }
+
+                var PatientData = new List<PateintTests>();
+                if (hospitaId > 300 && hospitaId < 400)
+				{
+                    // UAE
+                    var UAEMRN = col["patient_reg_no"].ToString();
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var _NewData = _UAEApiCaller.GetPatientTestList_NewUAE(lang, hospitaId, UAEMRN, ref errStatus, ref errMessage);
+
+                    if (_NewData != null && _NewData.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = _NewData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                    }
+                    return Ok(resp);
+                }
+                else if (hospitaId == 9)
+                {
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    PatientData = _loginApiCaller.GetPatientLabRadiologyByApi_NewDam(lang, registrationNo.ToString(), ref errStatus, ref errMessage);
+                }
+                else
+                {
+                    PatientData = patientDb.GetPatientTestResultsNew(lang, hospitaId, registrationNo, ref errStatus, ref errMessage, ApiSource, EpisodeType, EpisodeID);
+                }
+
+                if (PatientData != null && PatientData.Count > 0)
+                {
+                    resp.status = 1;
+                    resp.msg = errMessage;
+                    resp.response = PatientData;
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = errMessage;
+                }
+
+
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed : Missing Parameters";
+
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v4/test-resultdetails-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetTestResultDetail_V4(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+            //if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"])
+
+            //    )
+
+            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]))
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                
+                var testId = Convert.ToInt32(col["test_id"]);
+                var ReportType = "Lab";
+
+                if (!string.IsNullOrEmpty(col["Report_type"]))
+                    ReportType = col["Report_type"].ToString();
+
+
+
+                int errStatus = 0;
+                string errMessage = "";
+
+                var patientDb = new PatientDB();
+                var apiCaller = new PatientLabResultsApiCaller();
+
+
+                //            if (hospitaId == 9)
+                //{
+                //                ORACLECS_DB _OraDb = new ORACLECS_DB();
+                //                string OraSQL = "";
+
+                //                var dataResults = _OraDb.EXECUTE_SQL_DT(OraSQL);
+                //                if (dataResults != null)
+                //	{
+                //                    resp.status = 1;
+                //                    resp.msg = "Data Found";
+                //                    resp.response = dataResults;
+                //                }
+                //                else
+                //	{
+                //                    resp.status = 0;
+                //                    resp.msg = "No data Found.";
+                //                }
+                //                return Ok(resp);
+                //            }
+                var allPatientResults = new TestResultMain();
+
+                if (hospitaId > 300 && hospitaId < 400)
+				{
+
+				}
+                else if (hospitaId == 9)
+				{
+
+				}
+                else
+				{
+                    allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);
+                }
+
+                //var allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);
+
+                if (allPatientResults != null)
+                {
+                    resp.status = 1;
+                    resp.msg = errMessage;
+                    resp.response = allPatientResults;
+
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Resutls Empty";
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter.";
+            }
+
+
+            return Ok(resp);
+        }
+
+
 
     }
 }

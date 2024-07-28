@@ -743,6 +743,13 @@ namespace SmartBookingService.Controllers
                 //var clinicId = Convert.ToInt32(col["clinic_id"]);
                 var clinicId = 0;
 
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Branch Not Supported";
+                    return Ok(_resp);
+                }
+
                 var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
 
                 var allPhysician = _physicianDb.GetAllPhsiciansDataTable(lang, hospitalId, clinicId, pageNo, pageSize , true, registrationNo);
@@ -846,6 +853,12 @@ namespace SmartBookingService.Controllers
 
             _physicianDb = new PhysicianDB();
 
+            if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+            {
+                _resp.status = 0;
+                _resp.msg = "Branch Not Supported";
+                return Ok(_resp);
+            }
 
             int errStatus = 0;
             string errMessage = "";
@@ -890,7 +903,8 @@ namespace SmartBookingService.Controllers
         public IHttpActionResult GetDoctorsScheduledDays_v2(FormDataCollection col)
         {
             //!string.IsNullOrEmpty(col["clinic_id"]) &&
-            try
+            
+                try
             {
                 if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["physician_id"]) && col["physician_id"] != "0")
                 {
@@ -903,6 +917,16 @@ namespace SmartBookingService.Controllers
                                         
 
                     var physicianId = Convert.ToInt32(col["physician_id"]);
+
+
+                    if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Branch Not Supported";
+                        return Ok(_resp);
+                    }
+
+
 
 
                     var selectedDate = Convert.ToDateTime(System.DateTime.Today.ToString());
@@ -975,6 +999,14 @@ namespace SmartBookingService.Controllers
                     var physicianId = Convert.ToInt32(col["physician_id"]);
 
 
+                    if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Branch Not Supported";
+                        return Ok(_resp);
+                    }
+
+
                     var tempStrDate = col["startdate"];
 
                     var selectedDate = Convert.ToDateTime(System.DateTime.Today.ToString());
@@ -1044,8 +1076,13 @@ namespace SmartBookingService.Controllers
                     var physicianDb = new PhysicianDB();
                     var availableSlotsApiCaller = new AvailableSlotsApiCaller();
                     List<AvailableSlots> allAvailableSlots;
-                    
 
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Branch Not Supported";
+                        return Ok(_resp);
+                    }
 
 
                     var ApiSource = "MobileApp";

@@ -397,8 +397,10 @@ namespace SmartBookingService.Controllers
                                 Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                             else if (Util.UaeBranches.Contains(hospitalId))
                             {
-                                string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                                Log.Info("UAE SMS Reponse: " + response);
+                                var CBC = new CommonDB();
+                                CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                                //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                                //Log.Info("UAE SMS Reponse: " + response);
                             }
                         }
 
@@ -684,8 +686,10 @@ namespace SmartBookingService.Controllers
                                 Util.SendSMS_Cairo(PhoneNumber, MsgContent);
                             else if (Util.UaeBranches.Contains(hospitalId))
                             {
-                                string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
-                                Log.Info("UAE SMS Reponse: " + response);
+                                var CBC = new CommonDB();
+                                CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                                //string response = Util.SendSMS_UAE(hospitalId, PhoneNumber, MsgContent);
+                                //Log.Info("UAE SMS Reponse: " + response);
                             }
                         }
 
@@ -1026,6 +1030,16 @@ namespace SmartBookingService.Controllers
                         return Ok(_resp);
                     }
 
+                    if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
                     var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                     List<PatientDiagnosis> allPatientDiagnosis;
                     var apiCaller = new PatientDiagnosisApiCaller();
@@ -1090,6 +1104,16 @@ namespace SmartBookingService.Controllers
                 {
                     _resp.status = 0;
                     _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
                 }
 
@@ -1170,6 +1194,14 @@ namespace SmartBookingService.Controllers
                 {
                     _resp.status = 0;
                     _resp.msg = "Parameter in Wrong Format : -- " + e.Message;
+                    return Ok(_resp);
+                }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    
+                    _resp.msg = "Sorry this service not available";
+                    
                     return Ok(_resp);
                 }
 
@@ -1341,6 +1373,15 @@ namespace SmartBookingService.Controllers
                         _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
                         return Ok(_resp);
                     }
+                    if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
 
 
                     var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
@@ -1422,6 +1463,17 @@ namespace SmartBookingService.Controllers
                 var Status = 0;
                 var Msg = "";
                 var BillType = "C";
+
+
+                if (HospitalId >= 301 && HospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
                 if (!string.IsNullOrEmpty(col["bill_type"]))
@@ -1535,6 +1587,17 @@ namespace SmartBookingService.Controllers
                     var Lang = "EN";
                     if (!string.IsNullOrEmpty(col["Lang"]))
                         Lang = col["Lang"];
+
+                    if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (Lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
 
                     // Not the Order_ID  prameter = Visit Id 
                     var OrderID = Convert.ToInt32(col["Order_ID"]);
@@ -1774,6 +1837,15 @@ namespace SmartBookingService.Controllers
                     {
                         _resp.status = 0;
                         _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        
+                            _resp.msg = "Sorry this service not available";
+                        
                         return Ok(_resp);
                     }
 
@@ -2020,6 +2092,16 @@ namespace SmartBookingService.Controllers
 
                     var hospitaId = Convert.ToInt32(col["hospital_id"]);
 
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (Lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
                     if (hospitaId == 9)
                     {
                         _resp.status = 0;
@@ -2116,6 +2198,16 @@ namespace SmartBookingService.Controllers
                             _resp.msg = "عذرا هذه الخدمة غير متوفرة";
                         return Ok(_resp);
                     }
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        _resp.status = 0;
+                        if (Lang == "EN")
+                            _resp.msg = "Sorry this service not available";
+                        else
+                            _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                        return Ok(_resp);
+                    }
+
                     var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                         var Source = col["Sources"].ToString();
                         var FoodIds = col["FoodIds"].ToString();
@@ -2180,9 +2272,18 @@ namespace SmartBookingService.Controllers
                             _resp.msg = "عذرا هذه الخدمة غير متوفرة";
                         return Ok(_resp);
                     }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (Lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
 
 
-                    var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
                     var Source = col["Sources"].ToString();
 
 

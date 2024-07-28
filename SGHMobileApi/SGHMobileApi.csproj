@@ -306,6 +306,7 @@
     <Compile Include="Controllers\AgrementController.cs" />
     <Compile Include="Controllers\AppConfigController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
+    <Compile Include="Controllers\ClientApi\ApiCallerUAE.cs" />
     <Compile Include="Controllers\ClientApi\AvailableSlotsApiCaller.cs" />
     <Compile Include="Controllers\ClientApi\ClinicApiCaller.cs" />
     <Compile Include="Controllers\ClientApi\HttpHelper.cs" />
@@ -317,6 +318,7 @@
     <Compile Include="Controllers\ClientApi\PatientLabResultsApiCaller.cs" />
     <Compile Include="Controllers\ClientApi\PatientPrescriptionApiCaller.cs" />
     <Compile Include="Controllers\ClientApi\SaveAppointmentApiCaller.cs" />
+    <Compile Include="Controllers\ClientApi\UAEDataBL.cs" />
     <Compile Include="Controllers\ClinicController.cs" />
     <Compile Include="Controllers\CommonController.cs" />
     <Compile Include="Controllers\DOCAPI\DocClinincController.cs" />

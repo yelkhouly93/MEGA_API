@@ -39,7 +39,7 @@ namespace SmartBookingService.Controllers
                 try
                 {
                     var hospitalId = Convert.ToInt32(col["hospital_id"]);
-                    var PatientMRN = Convert.ToInt32(col["patient_reg_no"]);
+                    
 
                     var errStatus = 0;
                     var errMessage = "";
@@ -55,50 +55,77 @@ namespace SmartBookingService.Controllers
                     var IdValue = "";
                     LoginApiCaller _loginApiCaller = new LoginApiCaller();
 
-                    if (hospitalId == 9)
-					{
-                        
-                        IdType = "MRN";
-                        IdValue = PatientMRN.ToString();
-                        
-                        userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
 
 
-                        IdType = "MOB";
-                        IdValue = userInfo.phone.ToString();
-                        PatientListFromDammam = _loginApiCaller.GetPatientListsByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                    //ahsan New changes due to dammam
+                    //checked for DUBAI Patient 
+                    if (hospitalId >= 301 && hospitalId < 400)
+                    {
+                        var UAEMRN = col["patient_reg_no"].ToString();
+                        ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
 
-                        PatientListFromHIS = patientDb.GetPatientFamilyProfile_List_V3_ByMobile(lang, PatientListFromDammam[0].PCellno, ApiSource, ref errStatus, ref errMessage);
+                        var _NewData = _UAEApiCaller.GetPatientFamilyList_NewUAE(lang, hospitalId, UAEMRN, ref errStatus, ref errMessage);
 
+                        if (_NewData.Count > 0)
+                        {
+                            _resp.status = 1;
+                            _resp.msg = errMessage;
+                            _resp.response = _NewData;
+                            return Ok(_resp);
+                        }
                     }
                     else
 					{
-                        PatientListFromHIS = patientDb.GetPatientFamilyProfile_List_V3(lang, hospitalId, PatientMRN, ApiSource, ref errStatus, ref errMessage);
-                        if (PatientListFromHIS.Count > 0)
-                            IdValue = PatientListFromHIS[0].PCellno;
+                        var PatientMRN = Convert.ToInt32(col["patient_reg_no"]);
+
+
+                        if (hospitalId == 9)
+                        {
+
+                            IdType = "MRN";
+                            IdValue = PatientMRN.ToString();
+
+                            userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+
+
+                            IdType = "MOB";
+                            IdValue = userInfo.phone.ToString();
+                            PatientListFromDammam = _loginApiCaller.GetPatientListsByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+
+                            PatientListFromHIS = patientDb.GetPatientFamilyProfile_List_V3_ByMobile(lang, PatientListFromDammam[0].PCellno, ApiSource, ref errStatus, ref errMessage);
+
+                        }
                         else
-						{
-                            var loginDb = new Login2DB();
-                            userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, PatientMRN.ToString(), null, ref errStatus, ref errMessage, ApiSource);
-                            IdValue = userInfo.phone;
+                        {
+                            PatientListFromHIS = patientDb.GetPatientFamilyProfile_List_V3(lang, hospitalId, PatientMRN, ApiSource, ref errStatus, ref errMessage);
+                            if (PatientListFromHIS.Count > 0)
+                                IdValue = PatientListFromHIS[0].PCellno;
+                            else
+                            {
+                                var loginDb = new Login2DB();
+                                userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, PatientMRN.ToString(), null, ref errStatus, ref errMessage, ApiSource);
+                                IdValue = userInfo.phone;
+                            }
+
+                            IdType = "MOB";
+                            PatientListFromDammam = _loginApiCaller.GetPatientListsByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
                         }
 
-                        IdType = "MOB";                        
-                        PatientListFromDammam = _loginApiCaller.GetPatientListsByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                        PatientListFromHIS.AddRange(PatientListFromDammam);
+
+                        _resp.status = 0;
+                        _resp.msg = "No Record Found";
+
+                        if (PatientListFromHIS.Count > 0)
+                        {
+                            _resp.status = 1;
+                            _resp.msg = "Record Found";
+                            _resp.response = PatientListFromHIS;
+                        }
+
                     }
 
-                    PatientListFromHIS.AddRange(PatientListFromDammam);
 
-                    _resp.status = 0;
-                    _resp.msg = "No Record Found";
-
-                    if (PatientListFromHIS.Count > 0)
-					{
-                        _resp.status = 1;
-                        _resp.msg = "Record Found";
-                        _resp.response = PatientListFromHIS;
-                    }
-                    
 
                 }
                 catch (Exception e)
@@ -119,6 +146,127 @@ namespace SmartBookingService.Controllers
 
         }
 
-        
+
+
+        [HttpPost]
+        [Route("v4/patientFamilyProfile-List-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientFamilyProfileList_V4(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            var patientDb = new PatientDB();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["Source"]))
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                try
+                {
+                    var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                    var PatientMRN = Convert.ToInt32(col["patient_reg_no"]);
+
+                    var errStatus = 0;
+                    var errMessage = "";
+
+                    var ApiSource = "MobileApp";
+                    if (!string.IsNullOrEmpty(col["Source"]))
+                        ApiSource = col["Source"].ToString();
+
+                    UserInfo_New userInfo = new UserInfo_New();
+                    var PatientListFromDammam = new List<PatientFamilyList>();
+                    var PatientListFromHIS = new List<PatientFamilyList>();
+                    var IdType = "";
+                    var IdValue = "";
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+
+
+                    //checked for DUBAI Patient 
+                    if (hospitalId >= 301 && hospitalId < 400)
+                    {
+                        var UAEMRN = col["patient_reg_no"].ToString();
+                        ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+
+                        var _NewData = _UAEApiCaller.GetPatientFamilyList_NewUAE(lang, hospitalId, UAEMRN, ref errStatus, ref errMessage);
+
+                        if (_NewData.Count > 0)
+                        {
+                            _resp.status = 1;
+                            _resp.msg = errMessage;
+                            _resp.response = _NewData;
+                            return Ok(_resp);
+                        }
+                    }
+                    else
+					{
+                        if (hospitalId == 9)
+                        {
+
+                            IdType = "MRN";
+                            IdValue = PatientMRN.ToString();
+
+                            userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+
+
+                            IdType = "MOB";
+                            IdValue = userInfo.phone.ToString();
+                            PatientListFromDammam = _loginApiCaller.GetPatientListsByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+
+                            PatientListFromHIS = patientDb.GetPatientFamilyProfile_List_V3_ByMobile(lang, PatientListFromDammam[0].PCellno, ApiSource, ref errStatus, ref errMessage);
+
+                        }
+                        else
+                        {
+                            PatientListFromHIS = patientDb.GetPatientFamilyProfile_List_V3(lang, hospitalId, PatientMRN, ApiSource, ref errStatus, ref errMessage);
+                            if (PatientListFromHIS.Count > 0)
+                                IdValue = PatientListFromHIS[0].PCellno;
+                            else
+                            {
+                                var loginDb = new Login2DB();
+                                userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, PatientMRN.ToString(), null, ref errStatus, ref errMessage, ApiSource);
+                                IdValue = userInfo.phone;
+                            }
+
+                            IdType = "MOB";
+                            PatientListFromDammam = _loginApiCaller.GetPatientListsByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                        }
+
+
+                        PatientListFromHIS.AddRange(PatientListFromDammam);
+
+                        _resp.status = 0;
+                        _resp.msg = "No Record Found";
+
+                        if (PatientListFromHIS.Count > 0)
+                        {
+                            _resp.status = 1;
+                            _resp.msg = "Record Found";
+                            _resp.response = PatientListFromHIS;
+                        }
+                    }
+                    
+
+
+                }
+                catch (Exception e)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Parameter in Wrong Format : -- " + e.Message;
+                    return Ok(_resp);
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
+
     }
 }

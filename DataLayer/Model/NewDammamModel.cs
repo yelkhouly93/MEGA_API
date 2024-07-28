@@ -67,7 +67,10 @@ namespace DataLayer.Model
         public string procedureNumber { get; set; }
         public string procedureName { get; set; }
         public string procedureLoc { get; set; }
+        public int orderLine { get; set; }
+
         
+
 
     }
 

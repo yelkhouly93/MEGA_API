@@ -82,6 +82,7 @@ namespace SmartBookingService.Controllers
             var longitude = 0.00;
             var latitude = 0.00;
             var CallingArea = "";
+            var For_TEST = "1";
 
             var CountryID = 0;
 
@@ -110,7 +111,10 @@ namespace SmartBookingService.Controllers
                 if (!string.IsNullOrEmpty(col["Area"]))
                     CallingArea = col["Area"].ToString();
 
-                
+                if (!string.IsNullOrEmpty(col["FOR_TEST"]))
+                    For_TEST = col["FOR_TEST"].ToString();
+
+
             }
             else
             {
@@ -124,7 +128,7 @@ namespace SmartBookingService.Controllers
                 ApiSource = col["Sources"].ToString();
 
 
-            var allHospitals = _hospitalDb.GetAllHospitalsDataTable_v2(lang, groupentityid, Ispayment , CountryID, latitude , longitude , ApiSource , CallingArea);
+            var allHospitals = _hospitalDb.GetAllHospitalsDataTable_v2(lang, groupentityid, Ispayment , CountryID, latitude , longitude , ApiSource , CallingArea , For_TEST);
             //_expandoList = _dbCommonDb.MappingDT_dynamicList(allHospitals);
 
             if (allHospitals.Rows.Count > 0)

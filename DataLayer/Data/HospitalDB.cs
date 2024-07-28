@@ -51,7 +51,7 @@ namespace DataLayer.Data
         }
 
 
-        public DataTable GetAllHospitalsDataTable_v2(string lang, string groupentityid ,  int IsPaymentDetail = 0 , int CountryID = 0 , double lat = 0, double lng = 0 , string ApiSources = "MobileApp" , string CallingArea = "")
+        public DataTable GetAllHospitalsDataTable_v2(string lang, string groupentityid ,  int IsPaymentDetail = 0 , int CountryID = 0 , double lat = 0, double lng = 0 , string ApiSources = "MobileApp" , string CallingArea = "" , string For_TEST = "1")
         {
             var showPaydetails = 0;
             
@@ -66,7 +66,9 @@ namespace DataLayer.Data
                 new SqlParameter("@CountryID", CountryID),
                 new SqlParameter("@lat", lat),
                 new SqlParameter("@lng", lng),
-                new SqlParameter("@CallingArea", CallingArea)                
+                new SqlParameter("@CallingArea", CallingArea),
+                new SqlParameter("@FOR_TEST", For_TEST)
+
             };
 
 

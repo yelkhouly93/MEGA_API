@@ -10,6 +10,8 @@ using System.Text;
 
 
 
+
+
 namespace DataLayer.Data
 {
     public class Login2DB
@@ -488,7 +490,7 @@ namespace DataLayer.Data
         }
 
 
-
+        
         public UserInfo_New ValidatePatientPassword(string Lang, string PatientPwd, string nationalId, ref int erStatus, ref string msg)
         {
             _db.param = new SqlParameter[]
@@ -515,6 +517,28 @@ namespace DataLayer.Data
 
 
             return userInfo2;
+        }
+
+        public UserPwdDetails Validate_Patient_PWD_V4_SP(string Lang, string PatientPwd, string nationalId, ref int erStatus, ref string msg)
+        {
+            _db.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@PatientPwd", PatientPwd),
+                new SqlParameter("@NationalId", nationalId),
+                new SqlParameter("@Er_Status", SqlDbType.Int),
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 1000)
+            };
+            _db.param[3].Direction = ParameterDirection.Output;
+            _db.param[4].Direction = ParameterDirection.Output;
+
+            var dt = _db.ExecuteSPAndReturnDataTable("DBO.[Validate_Patient_PWD_V4_SP]").ToModelObject< UserPwdDetails>();
+
+            erStatus = Convert.ToInt32(_db.param[3].Value);
+            msg = _db.param[4].Value.ToString();
+
+
+            return dt;
         }
 
 

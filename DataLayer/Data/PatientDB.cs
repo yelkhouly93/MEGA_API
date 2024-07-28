@@ -647,10 +647,6 @@ namespace DataLayer.Data
 
         public void SaveAppointment_V2(string lang, int hospitalID, int clinicId, int physicianId, DateTime selectedDate, int patientID, DateTime timeFrom, DateTime timeTo, int scheduleDayId, int EarlyReminder, int HeardAboutUsId,string sources,int SlotType, ref int Er_Status, ref string Msg, ref int IsVideoAppointment, ref string DoctorName , string agent_UserName ="" , string agent_UserID = "")
         {
-
-           
-
-
             string DB_SP_Name = "DBO.[Save_Appointment_V2_SP]";
 
             if (sources.ToLower() == "saleforce")
@@ -735,10 +731,10 @@ namespace DataLayer.Data
                     Msg = "يوجد بالفعل موعد واحد لنفس التخصص لنفس اليوم";
                 }
 
-                if (Er_Status != 0)
-                {
-                    Msg = "تم حفظ الموعد";
-                }
+                //if (Er_Status != 0)
+                //{
+                //    Msg = "تم حفظ الموعد";
+                //}
             }
         }
 
@@ -1205,6 +1201,28 @@ namespace DataLayer.Data
             };
 
             DataTable dt = DB.ExecuteSPAndReturnDataTable("dbo.Get_OTPVerified_SP");
+
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                return dt.Rows[0].ItemArray.GetValue(0).ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public string VerifyOTP_Mobile(string patientPhone, string VerificationCode , int CountryID)
+        {
+
+            DB.param = new SqlParameter[]
+            {                
+                new SqlParameter("@CellNo", patientPhone),
+                new SqlParameter("@VerificationCode", VerificationCode),
+                new SqlParameter("@CountryID", CountryID)
+            };
+
+            DataTable dt = DB.ExecuteSPAndReturnDataTable("dbo.Get_OTPVerified_Mobile_V4_SP");
 
             if (dt != null && dt.Rows.Count > 0)
             {
@@ -2023,6 +2041,57 @@ namespace DataLayer.Data
             errMessage = DB.param[6].Value.ToString();
         }
 
+        public void Save_PatientPwd_V4(string Lang, int hospitaId, string registrationNo, string Patient_NationalID, string Patient_PWd, ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@lang", Lang),
+                new SqlParameter("@BranchId", hospitaId),
+                new SqlParameter("@RegistrationNo", registrationNo),
+                new SqlParameter("@NationalId", Patient_NationalID),
+                new SqlParameter("@Pwd", Patient_PWd),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 200)
+            };
+            DB.param[5].Direction = ParameterDirection.Output;
+            DB.param[6].Direction = ParameterDirection.Output;
+
+            var flag = DB.ExecuteSP("dbo.[Save_Update_Patient_UserPwd_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[5].Value);
+            errMessage = DB.param[6].Value.ToString();
+        }
+
+        public void Save_PatientPwd_NewForUAE(string Lang, int hospitaId, string registrationNo, string Patient_NationalID, string Patient_PWd, ref int errStatus, ref string errMessage)
+        {
+            try
+			{
+                DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@lang", Lang),
+                new SqlParameter("@BranchId", hospitaId),
+                new SqlParameter("@RegistrationNo", registrationNo),
+                new SqlParameter("@NationalId", Patient_NationalID),
+                new SqlParameter("@Pwd", Patient_PWd),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 200)
+            };
+                DB.param[5].Direction = ParameterDirection.Output;
+                DB.param[6].Direction = ParameterDirection.Output;
+
+                var flag = DB.ExecuteSP("dbo.[Save_Update_Patient_UserPwd_V2_SP]");
+
+                errStatus = Convert.ToInt32(DB.param[5].Value);
+                errMessage = DB.param[6].Value.ToString();
+            }
+            catch(Exception ex)
+			{
+
+			}
+            
+        }
+        
+
 
         public DataTable GetAllAppointmentList(string lang, int hospitalID, DateTime Todate, DateTime FromDate , int RegistrationID)
         {
@@ -2063,6 +2132,29 @@ namespace DataLayer.Data
 
             }
                         
+        }
+
+        public void AddPatient_Log_newUAE(int BranchID, string MRR, string SSN, string FirstName, string LastName, string MobileNumber, string Sources)
+        {
+            try
+            {
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@MRR", MRR),
+                    new SqlParameter("@SSN", SSN),
+                    new SqlParameter("@FirstName", FirstName),
+                    new SqlParameter("@LastName", LastName),
+                    new SqlParameter("@MobileNumber", MobileNumber),
+                    new SqlParameter("@Sources", Sources)
+                };
+                var flag = DB.ExecuteSP("[APILOG].[INSERT_ADD_PATIENT_Log]");
+            }
+            catch (Exception ex)
+            {
+
+            }
+
         }
 
         public string GetBranchName(int BranchID)

@@ -449,6 +449,40 @@ namespace DataLayer.Data
 
         }
 
+
+        public DataTable GetAllPhsiciansDataTable_UAE_MyDoctor(string lang, int hospitalId,string Doc_Near, bool MyDoctors = true)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", lang),
+                new SqlParameter("@BranchId", hospitalId),                
+                new SqlParameter("@MyDoctors", MyDoctors),
+                new SqlParameter("@Doctor_Code_N_NearestSlot2", Doc_Near),
+                new SqlParameter("@RegistrationNo", -1)
+                
+            };
+
+            var allPhysiciansModel = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Doctors_SPV2]");
+            return allPhysiciansModel;
+
+        }
+
+
+        public DataTable GetAllPhsiciansDataTable_UAE_MyDoctor(string lang, int hospitalId, bool MyDoctors = true)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", lang),
+                new SqlParameter("@BranchId", hospitalId),                
+                new SqlParameter("@MyDoctors", MyDoctors),
+            };
+
+            var allPhysiciansModel = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Doctors_SPV2]");
+            return allPhysiciansModel;
+
+        }
+
+
         public DataTable GetPhsiciansAdvanceSearchDT(string lang, string hospitalId, string clinicId, string SpecialityName, string SubSpecialty, string AssistArea,string SpokenLanguage,string GeneralSearch, int pageno = -1, int pagesize = 10 , string ApiSources = "MobileApp" , int Isvideo = 0)
         {
             

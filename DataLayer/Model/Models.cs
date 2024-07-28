@@ -62,6 +62,15 @@ namespace DataLayer.Model
         public object response { get; set; }
         public string error_type { get; set; }
 
+
+    }
+
+    public class GenericResponse_NEWUAE_registration
+    {
+        public bool Error { get; set; }
+        public string Message { get; set; }
+        public string Mrn { get; set; }
+
     }
 
     public class DamPerscriptionResponse
@@ -491,6 +500,10 @@ namespace DataLayer.Model
 
     public class UserInfo_New
     {
+        public UserInfo_New ()
+		{
+            this.CountryId = 2;
+		}
         public string address { get; set; }
         public DateTime birthday { get; set; }
         public string email { get; set; }
@@ -528,8 +541,22 @@ namespace DataLayer.Model
         public string Branch_Name { get; set; }
         public string Branch_Id { get; set; }
         public string Branch_Name_ar { get; set; }
+
+        public int CountryId { get; set; }
+
+        public string CurrentCity { get; set; }
+        public string IdType { get; set; }
+        public string IdExpiry { get; set; }
+
     }
 
+
+    public class UserPwdDetails
+	{
+        public string RegId { get; set; }
+        public int BranchID { get; set; }
+
+    }
 
     public class LoginInfoList
     {
@@ -728,6 +755,15 @@ namespace DataLayer.Model
         public string name_ar { get; set; }
     }
 
+    public class RegistePatientResponseSuccess_NEw_After_UAE
+    {
+        public string phone { get; set; }
+        public string registration_no { get; set; }
+        public string national_id { get; set; }
+        public string name { get; set; }
+        public string name_ar { get; set; }
+    }
+
     public class ResendVerificationModel
     {
         public int Id { get; set; }
@@ -791,6 +827,20 @@ namespace DataLayer.Model
         public string ftp_path { get; set; }
         public int report_id { get; set; }
         public int test_id { get; set; }
+
+    }
+
+    public class PateintTests_New_V4
+    {
+        public string registration_no { get; set; }
+        public string report_type { get; set; }
+        public DateTime report_date { get; set; }
+        public string opip { get; set; }
+        public string test_name { get; set; }
+        public string report_filename { get; set; }
+        public string ftp_path { get; set; }
+        public string report_id { get; set; }
+        public string test_id { get; set; }
 
     }
 
@@ -1355,6 +1405,12 @@ namespace DataLayer.Model
         public string Nationality { get; set; }
         public string image_url { get; set; }
 
+        public int CountryId { get; set; }
+        public string CurrentCity { get; set; }
+        public string IdType { get; set; }
+        public string IdExpiry { get; set; }
+        
+
     }
 
     public class PatientVisit
@@ -1387,5 +1443,40 @@ namespace DataLayer.Model
             public string insuranceId { get; set; }
             public string idExpiryDate { get; set; }
 	}
+    
 
+    public class Doctor_Code_N_NearestSlot
+	{
+        public string empcode { get; set; }
+        public string nearest_slot { get; set; }
+	}
+
+
+    public class UAE_SMS_Template
+    {
+        public UAE_SMS_Template ()
+		{
+            this.campaignName = "KSA campaign";
+            this.clientTxnId = "11234658798800";
+            this.contentType = "3.2";
+            this.desc = "This is the description for campaign";
+            this.dndCategory = "campaign";
+            this.msg = "test sms KSA";
+            this.msgCategory = "4.5";
+            this.priority = 1;
+            this.recipient = "966581178188";
+            this.senderAddr = "SGHUAE";
+        }
+        public string desc { get; set; }
+        public string campaignName { get; set; }
+        public string msgCategory { get; set; }
+        public string contentType { get; set; }
+        public string dndCategory { get; set; }
+        public int priority { get; set; }
+        public string clientTxnId { get; set; }
+        public string senderAddr { get; set; }
+        public string recipient { get; set; }
+        public string msg { get; set; }
+
+    }
 }
