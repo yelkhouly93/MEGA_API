@@ -1052,7 +1052,40 @@ namespace DataLayer.Model
 
     }
 
+    public class TestResultMain_Dammam
+    {
+        public TestResultMain_Dammam()
+		{
+            Weightage = 0;
+		}
+        public string testCode { get; set; }
+        public string testName { get; set; }
+        public string section { get; set; }
+        public string sample_name { get; set; }
+        public string collected_date { get; set; }
+        
+        public string parameter_name { get; set; }
+        public string result { get; set; }
+        public string unit { get; set; }
+        public string range_start { get; set; }
+        public string range_end { get; set; }
+        public string ResultValueCategory { get; set; }
+        public string rating { get; set; }
+        public string severityID { get; set; }
+        public int Weightage { get; set; }
 
+        public string interp { get; set; }
+
+    }
+
+    public class TestResultMain_Dammam_XRAY
+    {        
+        public string MRN { get; set; }
+        public string Collect_DATE { get; set; }
+        public string Results { get; set; }
+    }
+    
+    
     public class UserProfileURL
     {
         public string Image_URL { get; set; }

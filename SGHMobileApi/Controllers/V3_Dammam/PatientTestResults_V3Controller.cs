@@ -279,14 +279,14 @@ namespace SGHMobileApi.Controllers
                     return Ok(resp);
                 }
 
-                var PatientData = new List<PateintTests>();
+                //var PatientData = new List<PateintTests>();
                 if (hospitaId > 300 && hospitaId < 400)
 				{
                     // UAE
                     var UAEMRN = col["patient_reg_no"].ToString();
                     ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
                     var _NewData = _UAEApiCaller.GetPatientTestList_NewUAE(lang, hospitaId, UAEMRN, ref errStatus, ref errMessage);
-
+                    
                     if (_NewData != null && _NewData.Count > 0)
                     {
                         resp.status = 1;
@@ -303,24 +303,39 @@ namespace SGHMobileApi.Controllers
                 else if (hospitaId == 9)
                 {
                     LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                    PatientData = _loginApiCaller.GetPatientLabRadiologyByApi_NewDam(lang, registrationNo.ToString(), ref errStatus, ref errMessage);
+                    var _NewData = _loginApiCaller.GetPatientLabRadiologyByApi_NewDam_V4(lang, registrationNo.ToString(), ref errStatus, ref errMessage);
+                    if (_NewData != null && _NewData.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = _NewData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                    }
+                    return Ok(resp);
                 }
                 else
                 {
-                    PatientData = patientDb.GetPatientTestResultsNew(lang, hospitaId, registrationNo, ref errStatus, ref errMessage, ApiSource, EpisodeType, EpisodeID);
+                    var PatientData = patientDb.GetPatientTestResultsNew_V4(lang, hospitaId, registrationNo, ref errStatus, ref errMessage, ApiSource, EpisodeType, EpisodeID);
+                    if (PatientData != null && PatientData.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = PatientData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                    }
+                    return Ok(resp);
+
                 }
 
-                if (PatientData != null && PatientData.Count > 0)
-                {
-                    resp.status = 1;
-                    resp.msg = errMessage;
-                    resp.response = PatientData;
-                }
-                else
-                {
-                    resp.status = 0;
-                    resp.msg = errMessage;
-                }
+                
 
 
             }
@@ -344,14 +359,15 @@ namespace SGHMobileApi.Controllers
 
             //    )
 
-            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]))
+            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Report_type"]))
             {
                 var lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
                 
-                var testId = Convert.ToInt32(col["test_id"]);
-                var ReportType = "Lab";
+                //var testId = Convert.ToInt32(col["test_id"]);
+                var testId = col["test_id"].ToString();
 
+                var ReportType = "Lab";
                 if (!string.IsNullOrEmpty(col["Report_type"]))
                     ReportType = col["Report_type"].ToString();
 
@@ -364,38 +380,51 @@ namespace SGHMobileApi.Controllers
                 var apiCaller = new PatientLabResultsApiCaller();
 
 
-                //            if (hospitaId == 9)
-                //{
-                //                ORACLECS_DB _OraDb = new ORACLECS_DB();
-                //                string OraSQL = "";
-
-                //                var dataResults = _OraDb.EXECUTE_SQL_DT(OraSQL);
-                //                if (dataResults != null)
-                //	{
-                //                    resp.status = 1;
-                //                    resp.msg = "Data Found";
-                //                    resp.response = dataResults;
-                //                }
-                //                else
-                //	{
-                //                    resp.status = 0;
-                //                    resp.msg = "No data Found.";
-                //                }
-                //                return Ok(resp);
-                //            }
                 var allPatientResults = new TestResultMain();
 
                 if (hospitaId > 300 && hospitaId < 400)
 				{
 
-				}
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var _NewData = _UAEApiCaller.GetPatientTestResultsList_NewUAE(lang, hospitaId, testId, ref errStatus, ref errMessage);
+
+                    //allPatientResults = apiCaller.GetPatientLabResultsByApi_UAE(lang, hospitaId, testId, ref errStatus, ref errMessage);
+
+                    if (_NewData != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Data Found";
+                        resp.response = _NewData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No data Found.";
+                    }
+                    return Ok(resp);
+                }
                 else if (hospitaId == 9)
 				{
+					ORACLECS_DB _OraDb = new ORACLECS_DB();
+					string OraSQL = "";
 
+					var dataResults = _OraDb.GetPatientLabResultsByApi_Dam(testId.ToString() , ReportType );
+					if (dataResults != null )
+					{
+						resp.status = 1;
+						resp.msg = "Data Found";
+						resp.response = dataResults;
+					}
+					else
+					{
+						resp.status = 0;
+						resp.msg = "No data Found.";
+					}
+					return Ok(resp);
 				}
                 else
 				{
-                    allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);
+                    allPatientResults = apiCaller.GetPatientLabResultsByApi_V4(lang, hospitaId, testId, ref errStatus, ref errMessage);
                 }
 
                 //var allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);
@@ -420,6 +449,227 @@ namespace SGHMobileApi.Controllers
             }
 
 
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v4/testresult-pdf-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetTestResultDetailPDF_V4(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Report_type"]))
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var testId = col["test_id"];
+
+                var MRN = "";
+                if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+                    MRN = col["patient_reg_no"].ToString();
+
+                var ReportType = "Lab";
+                if (!string.IsNullOrEmpty(col["Report_type"]))
+                    ReportType = col["Report_type"].ToString();
+
+                resp.status = 0;
+                resp.msg = "No data Found.";
+
+
+                if (hospitaId > 300 && hospitaId < 400)
+                {
+
+                    if (string.IsNullOrEmpty(MRN))
+					{
+                        resp.status = 0;
+                        resp.msg = "Wrong MRN.";
+                        return Ok(resp);
+                    }
+                    
+                    int errStatus = 0;
+                    string errMessage = "";
+                    
+                    // As per New TestId from UAE 12-09-2024
+                    int underscoreIndex = testId.IndexOf('_');
+                    testId = testId.Substring(0, underscoreIndex);
+
+                    //testId = testId.Replace("_RAD", "").Replace("_LAB", "");
+                    
+
+
+                    if (ReportType.ToUpper() == "LAB")
+                        ReportType = "Lab"; 
+                    else
+                        ReportType = "Rad";
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var _NewData = _UAEApiCaller.GetPatientLabRAD_UAE_PDF(hospitaId, MRN, testId, ReportType, ref errStatus, ref errMessage);
+
+                    var tmpobj = new TestResultPDF();
+                    if (_NewData != null)
+					{
+                        if (!string.IsNullOrEmpty(_NewData.Base64))
+                        {
+                            var PdfURL = Util.Convert_Base64_to_PDF(_NewData.Base64, testId);
+                            tmpobj.ReportUrl = PdfURL;
+
+                            resp.status = 1;
+                            resp.msg = "Result found";
+                            resp.response = tmpobj;
+                            return Ok(resp);
+                        }
+
+                    }
+                    
+                    
+                    resp.status = 0;
+                    resp.msg = "No Result found";                    
+                    return Ok(resp);
+                }
+                else if (hospitaId == 9)
+				{
+                    var tmpobj = new TestResultPDF();
+                    string Str_Id = "Test_Id=" + testId.ToString();
+                    Str_Id += "&hospital_id=" + hospitaId.ToString();
+                    Str_Id += "&Report_type=" + ReportType.ToString();
+                    Str_Id += "&lang=EN" ;
+
+                    var ParmEnc = TripleDESImp.TripleDesEncrypt(Str_Id);
+                    var FinalURL = ConfigurationManager.AppSettings["LabResultURL_V4"].ToString() + ParmEnc;
+
+                    tmpobj.ReportUrl = Util.ConvertURL_to_PDF(FinalURL, testId.ToString());
+                    if (tmpobj.ReportUrl != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Result found";
+                        resp.response = tmpobj;
+
+                    }                   
+
+
+                    //resp.status = 0;
+                    //resp.msg = "No data Found.";
+                }
+                else
+				{
+                    var tmpobj = new TestResultPDF();
+                    string Str_Id = "Test_Id=" + testId.ToString();
+                    Str_Id += "&hospital_id=" + hospitaId.ToString();
+                    Str_Id += "&Report_type=" + ReportType.ToString();
+                    Str_Id += "&lang=EN";
+                    var ParmEnc = TripleDESImp.TripleDesEncrypt(Str_Id);
+                    var FinalURL = ConfigurationManager.AppSettings["LabResultURL_V4"].ToString() + ParmEnc;
+
+                    tmpobj.ReportUrl = Util.ConvertURL_to_PDF(FinalURL, testId.ToString());
+                    if (tmpobj.ReportUrl != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Result found";
+                        resp.response = tmpobj;
+
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "Resutls Empty";
+                    }
+                }
+                
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter";
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v4/testresult-pdf-get-STRING")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetTestResultDetailPDF_V4_STRING(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Report_type"]))
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var testId = col["test_id"];
+
+                var ReportType = "Lab";
+                if (!string.IsNullOrEmpty(col["Report_type"]))
+                    ReportType = col["Report_type"].ToString();
+
+                if (hospitaId > 300 && hospitaId < 400)
+                {
+                    resp.status = 0;
+                    resp.msg = "No data Found.";
+                }
+                else if (hospitaId == 9)
+                {
+                    var tmpobj = new TestResultPDF();
+                    string Str_Id = "Test_Id=" + testId.ToString();
+                    Str_Id += "&hospital_id=" + hospitaId.ToString();
+                    Str_Id += "&Report_type=" + ReportType.ToString();
+                    Str_Id += "&lang=EN";
+
+                    var ParmEnc = TripleDESImp.TripleDesEncrypt(Str_Id);
+                    var FinalURL = ConfigurationManager.AppSettings["LabResultURL_V4"].ToString() + ParmEnc;
+
+                    //tmpobj.ReportUrl = Util.ConvertURL_to_PDF(FinalURL, testId.ToString());
+                    tmpobj.ReportUrl = FinalURL;
+                    if (tmpobj.ReportUrl != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Result found";
+                        resp.response = tmpobj;
+
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "Resutls Empty";
+                    }
+
+
+                    resp.status = 0;
+                    resp.msg = "No data Found.";
+                }
+                else
+                {
+                    var tmpobj = new TestResultPDF();
+                    string Str_Id = "Test_Id=" + testId.ToString();
+                    Str_Id += "&hospital_id=" + hospitaId.ToString();
+                    Str_Id += "&Report_type=" + ReportType.ToString();
+                    Str_Id += "&lang=EN";
+                    var ParmEnc = TripleDESImp.TripleDesEncrypt(Str_Id);
+                    var FinalURL = ConfigurationManager.AppSettings["LabResultURL_V4"].ToString() + ParmEnc;
+
+                    tmpobj.ReportUrl = Util.ConvertURL_to_PDF(FinalURL, testId.ToString());
+                    if (tmpobj.ReportUrl != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Result found";
+                        resp.response = tmpobj;
+
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "Resutls Empty";
+                    }
+                }
+
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter";
+            }
             return Ok(resp);
         }
 

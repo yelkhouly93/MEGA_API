@@ -70,6 +70,22 @@ namespace DataLayer.Data
 
         }
 
+        public DataTable GetSubClinicsDataTable(string lang, int hospitalID , int ClinicID)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@ClinicId", ClinicID)
+                };
+
+            var allClinicsDt
+                = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Sub_Clinics_SP]");
+
+            return allClinicsDt;
+
+        }
+
         public DataTable GetAllClinicsDataTable(string lang, int hospitalID, int pageno = -1, int pagesize = 10 , string ApiSources = "MobileApp")
         {                
             DB.param = new SqlParameter[]
@@ -108,6 +124,24 @@ namespace DataLayer.Data
 
             var allClinicsDt
                 = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Clinics_V2_SP]");
+
+            return allClinicsDt;
+
+        }
+
+        public DataTable GetAllClinicsDataTable_V3(string lang, string hospitalID, string GroupEntity, int pageno = -1, int pagesize = 10)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@GroupEntityId", GroupEntity),
+                    new SqlParameter("@PageNo", pageno),
+                    new SqlParameter("@PageSize", pagesize)
+                };
+
+            var allClinicsDt
+                = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Clinics_V3_SP]");
 
             return allClinicsDt;
 

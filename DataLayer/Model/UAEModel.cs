@@ -267,4 +267,41 @@ namespace DataLayer.Model
 		public string latitude { get; set; }
 		public string longitude { get; set; }
 	}
+
+	public class TestResultParameter_UAE
+	{
+		public string parameter_name { get; set; }
+		public string result { get; set; }
+		public string unit { get; set; }
+		public string range { get; set; }
+		public string resultValueCategory { get; set; }
+		public string rating { get; set; }
+		public string severityID { get; set; }
+		public string weightage { get; set; }
+	}
+	public class TestResult_details_UAE
+	{
+		public string testCode { get; set; }
+		public string testName { get; set; }
+		public string section { get; set; }
+		public string sample_name { get; set; }
+		public string collected_date { get; set; }
+		
+		public List<TestResultParameter_UAE> parameters { get; set; }
+
+	}
+
+	public class LabRad_PDF_UAE
+	{
+		public string PatientId { get; set; }
+		public string OrderNumber { get; set; }
+		public string Base64 { get; set; }
+	}
+	public class LabRad_PDF_UAE_Response
+	{
+		public string Error { get; set; }
+		public object Reports  { get; set; }		
+	}
+
+
 }

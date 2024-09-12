@@ -206,6 +206,63 @@ namespace SmartBookingService.Controllers
             return Ok(_resp);
         }
 
+        [HttpPost]
+        [Route("v3/clinics-get-all")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetAllClinics_Newall_v3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            _clinicDb = new ClinicDB();
+            var lang = "EN";
+            var pageNo = -1;
+            var pageSize = 10;
+            var hospitalid = "";
+            var groupentity = "";
+
+            if (col != null)
+            {
+                groupentity = null;
+                hospitalid = null;
+
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+                if (!string.IsNullOrEmpty(col["page_no"]))
+                    pageNo = Convert.ToInt32(col["page_no"]);
+                if (!string.IsNullOrEmpty(col["page_size"]))
+                    pageSize = Convert.ToInt32(col["page_size"]);
+
+
+                if (!string.IsNullOrEmpty(col["groupentity_id"]))
+                    groupentity = col["groupentity_id"];
+
+                if (!string.IsNullOrEmpty(col["hospital_id"]))
+                    hospitalid = col["hospital_id"];
+
+
+            }
+            else
+            {
+                groupentity = null;
+                hospitalid = null;
+            }
+
+            var allDataTable = _clinicDb.GetAllClinicsDataTable_V3(lang, hospitalid, groupentity, pageNo, pageSize);
+
+            if (allDataTable.Rows.Count > 0)
+            {
+                _resp.status = 1;
+                _resp.msg = "Success";
+                _resp.response = allDataTable;
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Fail";
+            }
+
+            return Ok(_resp);
+        }
+
 
         [HttpPost]
         [Route("v2/clinics-get")]
@@ -356,6 +413,70 @@ namespace SmartBookingService.Controllers
             }
             return Ok(_resp);
         }
+
+
+        [HttpPost]
+        [Route("v3/subclinics-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetSubClinics_New(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            _clinicDb = new ClinicDB();
+            
+            if (col != null && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["clinic_id"]))
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+
+                int hospitalId = 0;
+                int ClinicId = 0;
+                try
+                {
+                    if (!string.IsNullOrEmpty(col["hospital_id"]))
+                        hospitalId = Convert.ToInt32(col["hospital_id"]);
+                    
+                    if (!string.IsNullOrEmpty(col["clinic_id"]))
+                        ClinicId = Convert.ToInt32(col["clinic_id"]);
+                }
+                catch (Exception e)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Parameter in Wrong Format : -- " + e.Message;
+                    return Ok(_resp);
+                }
+
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    ApiSource = col["Sources"].ToString();
+
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    ApiSource = col["Source"];
+
+                DataTable allDataTable;                
+                allDataTable = _clinicDb.GetSubClinicsDataTable(lang, hospitalId, ClinicId);
+
+                if (allDataTable.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Success";
+                    _resp.response = allDataTable;
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Fail";
+                }
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters. Please Provide the Branch ID";
+            }
+            return Ok(_resp);
+        }
+
 
     }
 }

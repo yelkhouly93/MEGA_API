@@ -580,7 +580,7 @@ namespace SGHMobileApi.Common
             return false;
         }
 
-        private static string GetNewName()
+        public static string GetNewName()
         {
             string sName = Convert.ToString(DateTime.Now.Ticks);
             return (sName);
@@ -641,6 +641,49 @@ namespace SGHMobileApi.Common
 
             string pdfurl = ConfigurationManager.AppSettings["pdfurl"].ToString() + sFileName + ".pdf";
             return pdfurl;
+        }
+
+
+        public static string Convert_Base64_to_PDF(string base64String, string TestID)
+        {
+            string sFileName = GetNewName() + "_" + TestID;
+            if (string.IsNullOrWhiteSpace(base64String))
+            {
+                //throw new ArgumentException("Base64 string cannot be null or empty.", nameof(base64String));
+                Console.WriteLine($"Base64 string cannot be null or empty. {nameof(base64String)}");
+                return "";
+            }
+
+
+            string PDFPath = ConfigurationManager.AppSettings["PDFPath"].ToString() + sFileName + ".pdf";
+
+
+            try
+            {
+                // Decode the Base64 string
+                byte[] pdfData = Convert.FromBase64String(base64String);
+
+                // Write the byte array to the specified file path
+                File.WriteAllBytes(PDFPath, pdfData);
+
+                string pdfurl = ConfigurationManager.AppSettings["pdfurl"].ToString() + sFileName + ".pdf";
+                Console.WriteLine("PDF file saved successfully.");
+
+                return pdfurl;
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                //throw; // Re-throw the exception to handle it further up the call stack if needed
+                return "";
+            }
+
+
+            return "";
+
+
+            
         }
 
         public static bool IsDigitsOnly(string str)

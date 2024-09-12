@@ -1185,6 +1185,8 @@ namespace SmartBookingService.Controllers
 
                         LoginApiCaller _loginApiCaller = new LoginApiCaller();
                         userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                        if (userInfo != null)
+                            errStatus = 0;
                     }
                     else
                     {

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -1105,7 +1106,7 @@ namespace SmartBookingService.Controllers.ClientApi
                 for (var i = 0; i < _APIModal.Count; i++)
                 {
                     PateintTests _TempModalObj = new PateintTests();
-                    _TempModalObj.ftp_path = "https://cxmw.sghgroup.com.sa/TESTAPI/cs/index2.html"; // FOr Dammam Fixed
+                    _TempModalObj.ftp_path = "https://cxmw.sghgroup.net/DoctorsProfile/CS/index2.html"; // FOr Dammam Fixed
 
                     var temOPID = "OP";
 
@@ -1675,7 +1676,7 @@ namespace SmartBookingService.Controllers.ClientApi
             var _patientData_Dam = new List<LabTest_List_Modal>();
             _patientData_Dam = _NewData as List<LabTest_List_Modal>;
 
-            var _userInfo = MapLabRadioINfoModel_NewUAE(_patientData_Dam, hospitalID);
+            var _userInfo = MapLabRadioINfoModel_NewUAE(_patientData_Dam, hospitalID).OrderByDescending(o => o.report_date).ToList(); ;
             return _userInfo;
 
         }
@@ -1710,6 +1711,195 @@ namespace SmartBookingService.Controllers.ClientApi
 			return _ListObj;
         }
 
+
+
+
+		public TestResultMain GetPatientTestResultsList_NewUAE(string lang, int hospitalID, string TestID, ref int Er_Status, ref string Msg)
+		{
+			HttpStatusCode status;
+
+			var BranchName = GetBranchName(hospitalID);
+
+			string BaseAPIUrl = "";
+
+			var content = new[]{
+					new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
+					new KeyValuePair<string, string>("test_id", TestID)
+			};
+
+			var Parameters = "?hospital_id=" + BranchName.ToString();
+			Parameters += "&test_id=" + TestID;
+
+			//AppointmentPostResponse
+			BaseAPIUrl = "https://app.saudigerman.com/Services/api/test-resultdetails-get" + Parameters;
+
+			var resp = new GenericResponse();
+			var _NewData = RestUtility.CallAPI_POST_UAE<List<TestResult_details_UAE>>(BaseAPIUrl, content, out resp, true);
+
+
+			var _patientData_Dam = new List<TestResult_details_UAE>();
+			_patientData_Dam = _NewData as List<TestResult_details_UAE>;
+
+			
+            var _userInfo = MapTestResultModelToTestResultMain_UAE(_patientData_Dam);           
+
+            return _userInfo;
+
+		}
+
+        private TestResultMain MapTestResultModelToTestResultMain_UAE(List<TestResult_details_UAE> testOrders)
+        {  
+
+            TestResultMain testResultMain = new TestResultMain();
+            List<TestResultParameter> testParameters = new List<TestResultParameter>();
+
+            testResultMain.testCode = testOrders[0].testCode;
+            testResultMain.testName = testOrders[0].testName;
+            testResultMain.section = testOrders[0].section;
+
+            testResultMain.sample_name = testOrders[0].sample_name;
+            testResultMain.collected_date = testOrders[0].collected_date;
+
+
+            // For Testing
+            var icount = testOrders[0].parameters.Count();
+            //var itst = 1;
+
+            if (testOrders.Count > 0)
+			{
+                foreach (var testParam in testOrders)
+				{
+                    if (testParam.parameters.Count > 0 )
+					{
+
+                        foreach (var param in testParam.parameters)
+                        {
+
+                            TestResultParameter parameter = new TestResultParameter();
+
+                            if (param.parameter_name == "Sendout File Result")
+                            {
+                                continue;
+                            }
+
+
+                            parameter.parameter_name = param.parameter_name ?? "";
+                            parameter.result = param.result ?? "";
+                            parameter.unit = param.unit ?? "";
+                            parameter.range = param.range ?? "";
+                            parameter.ResultValueCategory = param.resultValueCategory ?? "N";
+
+                            //parameter.severityID = "N";
+                            parameter.rating = param.rating;
+                            parameter.severityID = param.rating;
+
+                            if (parameter.result != "")
+                            {
+                                var tempResult = parameter.result;
+
+                                if (tempResult.Substring(0, 1) == ".")
+                                {
+                                    parameter.result = "0" + tempResult;
+                                }
+                                else if (tempResult.EndsWith("."))
+                                {
+                                    parameter.result = tempResult + "0";
+                                }
+                            }
+
+
+
+                            if (param.rating == null || param.rating.Trim() == "")
+                                parameter.severityID = "N";
+
+                            parameter.Weightage = 0;
+
+                            if (parameter.severityID == "N")
+                                parameter.Weightage = 0;
+                            else if (parameter.severityID == "H")
+                                parameter.Weightage = 50;
+                            else if (parameter.severityID == "L")
+                                parameter.Weightage = 50;
+                            else if (parameter.severityID == "P")
+                                parameter.Weightage = 100;
+
+
+                            if (parameter.parameter_name == "RAD. REPORT")
+                                parameter.parameter_name = "RADIOLOGY REPORT";
+
+                            parameter.parameter_name = parameter.parameter_name.Replace(":", "").Replace(".", "");
+
+
+
+
+                            testParameters.Add(parameter);
+
+                            //itst += 1;
+
+                        }
+                    }
+				}                    
+			}
+            
+
+            testParameters = testParameters.OrderByDescending(o => o.Weightage).ToList();
+
+            testResultMain.parameters = testParameters;
+
+            return testResultMain;
+
+        }
+
+
+
+        public LabRad_PDF_UAE GetPatientLabRAD_UAE_PDF(int hospitalID,string MRN, string TestID,string ReportType, ref int Er_Status, ref string Msg)
+        {
+            HttpStatusCode status;
+
+            var BranchName = GetBranchName(hospitalID);
+
+            string BaseAPIUrl = "";
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("FacilityId", BranchName.ToString()),
+                    new KeyValuePair<string, string>("PatientId", MRN),
+                    new KeyValuePair<string, string>("OrderId", TestID),
+                    new KeyValuePair<string, string>("ReportType", ReportType),
+                    
+            };
+
+            var Parameters = "?FacilityId=" + BranchName.ToString();
+            Parameters += "&PatientId=" + MRN;
+            Parameters += "&OrderId=" + TestID;
+            Parameters += "&ReportType=" + ReportType;
+
+            //AppointmentPostResponse
+            BaseAPIUrl = "https://app.saudigerman.com/Services/api/GetReports" + Parameters;
+
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE_LABPDF<List<LabRad_PDF_UAE>>(BaseAPIUrl, content, true);
+
+
+            var _LabRaDData = new List <LabRad_PDF_UAE>();
+            _LabRaDData = _NewData as List<LabRad_PDF_UAE>;
+            if (_LabRaDData != null)
+			{
+                var tempObj = new LabRad_PDF_UAE();
+                tempObj.Base64 = _LabRaDData[0].Base64;
+                tempObj.OrderNumber = _LabRaDData[0].OrderNumber;
+                tempObj.PatientId = _LabRaDData[0].PatientId;
+                return tempObj;
+            }   
+
+            return null;
+            
+            
+            
+
+        }
+
+
+        
 
     }
 }

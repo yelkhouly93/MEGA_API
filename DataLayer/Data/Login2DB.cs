@@ -75,7 +75,7 @@ namespace DataLayer.Data
 
         public UserInfo_New ValidateLoginUser_New(string lang, int hospitalId, string pCellNo, string registrationNo, string nationalId, ref int erStatus, ref string msg,string ApiSources="MobileApp")
         {
-            // AHsna New Testing ONLY  ************ Start *****************
+            
             CustomDBHelper _db2 = new CustomDBHelper("RECEPTION");
             _db2.param = new SqlParameter[]
                 {
@@ -98,7 +98,7 @@ namespace DataLayer.Data
             var DataDT = _db2.ExecuteSPAndReturnDataTable(DB_SP_Name);
             var userInfoModel2 = DataDT.ToListObject<UserInfo2Model_New>();
             var userInfo2 = MapUserInfoModelToUserInf_New(userInfoModel2);
-            // AHsna New Testing ONLY  ************ END *****************
+            
 
 
 

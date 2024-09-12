@@ -810,7 +810,7 @@ namespace SmartBookingService.Controllers.ClientApi
                 for (var i = 0; i < _APIModal.Count; i++)
                 {
                     PateintTests _TempModalObj = new PateintTests();
-                    _TempModalObj.ftp_path  = "https://cxmw.sghgroup.com.sa/TESTAPI/cs/index2.html"; // FOr Dammam Fixed
+                    _TempModalObj.ftp_path  = "https://cxmw.sghgroup.net/DoctorsProfile/CS/index2.html"; // FOr Dammam Fixed
                     
                     var temOPID = "OP";
                     
@@ -840,6 +840,77 @@ namespace SmartBookingService.Controllers.ClientApi
             }
             return _ListObj;
         }
+
+
+
+
+        public List<PateintTests_New_V4> GetPatientLabRadiologyByApi_NewDam_V4(string lang, string MRN, ref int Er_Status, ref string Msg)
+        {
+
+            HttpStatusCode status;
+            //patientData_Dam _userInfo = new patientData_Dam();
+
+            string RegistrationUrl = "http://130.11.2.213:30005/getLabOrders?mrn=" + MRN;
+            var _NewData = RestUtility.CallAPI_Perscription<List<Medical_Perscription_Dam>>(RegistrationUrl, null);
+            var _patientLabData_Dam = _NewData as List<Medical_Perscription_Dam>;
+            var _MapLabDATA = MapLabRadioINfoModel_NewDamma_V4(_patientLabData_Dam, "LAB").OrderByDescending(o => o.report_date).ToList();
+
+            RegistrationUrl = "http://130.11.2.213:30005/getRadiologyOrders?mrn=" + MRN;
+            var _NewDataXray = RestUtility.CallAPI_Perscription<List<Medical_Perscription_Dam>>(RegistrationUrl, null);
+            var _patientXRAYData_Dam = _NewDataXray as List<Medical_Perscription_Dam>;
+            var _MapXRAYDATA = MapLabRadioINfoModel_NewDamma_V4(_patientXRAYData_Dam, "XRay").OrderByDescending(o => o.report_date).ToList();
+
+            var FinalData = new List<PateintTests_New_V4>();
+            FinalData.AddRange(_MapLabDATA);
+            FinalData.AddRange(_MapXRAYDATA);
+
+            return FinalData.OrderByDescending(o => o.report_date).ToList();
+
+        }
+
+        private List<PateintTests_New_V4> MapLabRadioINfoModel_NewDamma_V4(List<Medical_Perscription_Dam> _APIModal, string ReportType)
+        {
+            string formatString = "yyyyMMddHHmmss";
+            List<PateintTests_New_V4> _ListObj = new List<PateintTests_New_V4>();
+
+            if (_APIModal != null && _APIModal.Count > 0)
+            {
+                for (var i = 0; i < _APIModal.Count; i++)
+                {
+                    PateintTests_New_V4 _TempModalObj = new PateintTests_New_V4();
+                    //_TempModalObj.ftp_path = "https://cxmw.sghgroup.net/DoctorsProfile/CS/index2.html"; // FOr Dammam Fixed
+                    _TempModalObj.ftp_path = _APIModal[i].orders[0].ftpPath;
+
+                    var temOPID = "OP";
+
+                    if (_APIModal[i].opip == "I")
+                        temOPID = "IP";
+                    _TempModalObj.opip = temOPID;
+
+                    _TempModalObj.registration_no = _APIModal[i].fileNumber;// FOr Dammam Fixed                    
+                    _TempModalObj.report_filename = _APIModal[i].orders[0].dose + " " + _APIModal[i].orders[0].dispensingUnit;
+
+                    //_TempModalObj.report_id = 0; // Currently Fixed For Dammam
+                    //_TempModalObj.test_id = 0; // Currently Fixed For Dammam
+                    _TempModalObj.report_id = _APIModal[i].orders[0].orderLine.ToString(); // Currently Fixed For Dammam
+                    _TempModalObj.test_id = _APIModal[i].orders[0].orderLine.ToString(); // Currently Fixed For Dammam
+
+
+                    _TempModalObj.report_type = ReportType;
+
+                    _TempModalObj.test_name = _APIModal[i].orders[0].procedureName;
+
+                    DateTime dt = DateTime.ParseExact(_APIModal[i].orders[0].requestDate, formatString, null);
+                    _TempModalObj.report_date = dt;
+
+
+                    _ListObj.Add(_TempModalObj);
+                }
+            }
+            return _ListObj;
+        }
+
+
 
 
         // For Family Listing

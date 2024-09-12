@@ -69,7 +69,8 @@ namespace DataLayer.Model
         public string procedureLoc { get; set; }
         public int orderLine { get; set; }
 
-        
+        public string ftpPath { get; set; }
+
 
 
     }

@@ -1435,6 +1435,79 @@ namespace DataLayer.Data
             }
         }
 
+        public List<PateintTests_New_V4> GetPatientTestResultsNew_V4(string lang, int hospitalId, int resgistrationNo, ref int Er_Status, ref string Msg, string ApiSources = "MobileApp", string EpisodeType = "OP", int EpisodeID = 0)
+        {
+            try
+            {
+                List<PateintTests_New_V4> _listOfPatientDiagnosis = new List<PateintTests_New_V4>();
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchId", hospitalId),
+                    new SqlParameter("@RegistrationNo ", resgistrationNo),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 500),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeID)
+                };
+                DB.param[2].Direction = ParameterDirection.Output;
+                DB.param[3].Direction = ParameterDirection.Output;
+
+                string DB_SP_Name = "[dbo].[Get_PatientLABnRADResults_V2_SP]";
+
+                if (ApiSources.ToLower() == "saleforce")
+                    DB_SP_Name = "[SF].[Get_PatientLABnRADResults_V2_SP]";
+
+                var _patientTestModel = DB.ExecuteSPAndReturnDataTable(DB_SP_Name).ToListObject<PateintTestsModel>();
+
+                _listOfPatientDiagnosis = MapPatientTestResultsModelToPatientTestResults_V4(_patientTestModel);
+
+                Er_Status = Convert.ToInt32(DB.param[2].Value);
+                Msg = DB.param[3].Value.ToString();
+
+                return _listOfPatientDiagnosis;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        private List<PateintTests_New_V4> MapPatientTestResultsModelToPatientTestResults_V4(List<PateintTestsModel> _patientDaignosisModel)
+        {
+            try
+            {
+                List<PateintTests_New_V4> _listOfPatientDiagnosis = new List<PateintTests_New_V4>();
+
+                if (_patientDaignosisModel != null && _patientDaignosisModel.Count > 0)
+                {
+                    _patientDaignosisModel.ForEach(p =>
+                    {
+                        _listOfPatientDiagnosis.Add(new PateintTests_New_V4()
+                        {
+                            registration_no = p.RegistrationNo.ToString(),
+                            report_type = p.ReportType,
+                            report_date = p.ReportDate,
+                            test_name = p.TestName,
+                            opip = p.OPIP,
+                            report_filename = p.ReportFileName,
+                            ftp_path = p.FTPPath,
+                            report_id = p.GROUP_ReportId.ToString(),
+                            test_id = p.GROUP_TestId.ToString()
+                        });
+                    });
+                }
+
+                return _listOfPatientDiagnosis;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
         private List<Reservation> MapVidCallAppointsModelToVidCallReservations(List<ReservationModel> patientVideoCallAppointments)
         {
             List<Reservation> _reservationList = new List<Reservation>();
@@ -1579,6 +1652,134 @@ namespace DataLayer.Data
 
                 Er_Status = Convert.ToInt32(DB.param[2].Value);
                 Msg = DB.param[3].Value.ToString();
+
+                return _patientPrescriptionModel;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        public DataTable GetPatient_RefillPrescriptionDT(string lang, int hospitalId, string resgistrationNo, ref int Er_Status, ref string Msg, string ApiSources = "MobileApp", int EpisodeId = 0, string EpisodeType = "OP")
+        {
+            try
+            {
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchId", hospitalId),
+                    new SqlParameter("@RegistrationNo", resgistrationNo),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 500),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeId)
+
+                };
+                DB.param[2].Direction = ParameterDirection.Output;
+                DB.param[3].Direction = ParameterDirection.Output;
+
+
+
+                string DB_SP_Name = "[DBO].[GetPatientPrescriptions_Refill_List]";
+
+                //if (ApiSources.ToLower() == "saleforce")
+                //    DB_SP_Name = "[SF].[Get_PatientPrescription_SP]";
+
+                var _patientPrescriptionModel = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+                Er_Status = Convert.ToInt32(DB.param[2].Value);
+                Msg = DB.param[3].Value.ToString();
+
+                return _patientPrescriptionModel;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+
+        public DataTable GetPatient_RefillRequestDT(string lang, int hospitalId, string resgistrationNo, ref int Er_Status, ref string Msg, string ApiSources = "MobileApp", int EpisodeId = 0, string EpisodeType = "OP")
+        {
+            try
+            {
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchId", hospitalId),
+                    new SqlParameter("@RegistrationNo", resgistrationNo)
+                };
+
+                string DB_SP_Name = "[DBO].[GetPatientPrescriptions_Refill_Request_List]";
+
+                //if (ApiSources.ToLower() == "saleforce")
+                //    DB_SP_Name = "[SF].[Get_PatientPrescription_SP]";
+
+                var _patientPrescriptionModel = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+                Er_Status = 1;
+                Msg = "";
+
+                return _patientPrescriptionModel;
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+
+        public DataTable Save_Patient_RefillRequest(int hospitalId, string resgistrationNo, 
+             int Visit_Id
+            ,string Doctor_Name
+            ,string Drug_Name
+            ,string DEPT_NAME
+            ,int PrescriptionId
+            ,int DrugId
+            ,ref int Er_Status
+            ,ref string Msg
+            ,string ApiSources = "MobileApp")
+        {
+            try
+            {
+                DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchId", hospitalId),
+                    new SqlParameter("@Registration_No", resgistrationNo),
+                    new SqlParameter("@Visit_Id", Visit_Id),
+                    new SqlParameter("@Doctor_Name", Doctor_Name),
+                    new SqlParameter("@Drug_Name", Drug_Name),
+                    new SqlParameter("@DEPT_NAME", DEPT_NAME),
+                    new SqlParameter("@PrescriptionId", PrescriptionId),
+                    new SqlParameter("@DrugId", DrugId),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 500),
+                };
+                DB.param[8].Direction = ParameterDirection.Output;
+                DB.param[9].Direction = ParameterDirection.Output;
+
+                //DB.ExecuteNonQuerySP("dbo.SAVE_Agreement_Acceptance_SP");
+
+                string DB_SP_Name = "[DBO].[Save_PatientPrescriptions_Refill_Request_SP]";
+
+                
+
+                //if (ApiSources.ToLower() == "saleforce")
+                //    DB_SP_Name = "[SF].[Get_PatientPrescription_SP]";
+
+                var _patientPrescriptionModel = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+
+                Er_Status = Convert.ToInt32(DB.param[8].Value);
+                if (DB.param[9].Value != null)
+                    Msg = DB.param[9].Value.ToString();
+
+                //Er_Status = 1;
+                //Msg = "";
 
                 return _patientPrescriptionModel;
 

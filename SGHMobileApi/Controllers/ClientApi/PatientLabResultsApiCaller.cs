@@ -18,7 +18,7 @@ namespace SmartBookingService.Controllers.ClientApi
     {
         CustomDBHelper DB = new CustomDBHelper("RECEPTION");
 
-        public TestResultMain GetPatientLabResultsByApi(string lang, int hospitalID, int testId, ref int Er_Status, ref string Msg)
+        public TestResultMain GetPatientLabResultsByApi(string lang, int hospitalID, long testId, ref int Er_Status, ref string Msg)
         {
 
             HttpStatusCode status;
@@ -35,10 +35,47 @@ namespace SmartBookingService.Controllers.ClientApi
             {
                 testResult = MapTestResultModelToTestResultMain(testOrders);
             }
-            
-
             return testResult;
+        }
 
+        public TestResultMain GetPatientLabResultsByApi_V4(string lang, int hospitalID, string testId, ref int Er_Status, ref string Msg)
+        {
+
+            HttpStatusCode status;
+            TestResultMain testResult = new TestResultMain();
+
+            string apiBasic = ConfigurationManager.AppSettings["MobileWebApi_LabResult"];
+            string apiKey = ConfigurationManager.AppSettings["MobileWebApi_ApiToken"];
+
+            string GetLabResultUrl = apiBasic + testId.ToString();
+
+            var testOrders = RestUtility.CallService<TestResult>(GetLabResultUrl, null, "", "POST", "", "", out status, apiKey) as TestResult;
+
+            if (testOrders.responseCode == 0)
+            {
+                testResult = MapTestResultModelToTestResultMain(testOrders);
+            }
+            return testResult;
+        }
+
+        public TestResultMain GetPatientLabResultsByApi_UAE(string lang, int hospitalID, string testId, ref int Er_Status, ref string Msg)
+        {
+
+            HttpStatusCode status;
+            TestResultMain testResult = new TestResultMain();
+
+            string apiBasic = ConfigurationManager.AppSettings["MobileWebApi_LabResult"];
+            string apiKey = ConfigurationManager.AppSettings["MobileWebApi_ApiToken"];
+
+            string GetLabResultUrl = apiBasic + testId.ToString();
+
+            var testOrders = RestUtility.CallService<TestResult>(GetLabResultUrl, null, "", "POST", "", "", out status, apiKey) as TestResult;
+
+            if (testOrders.responseCode == 0)
+            {
+                testResult = MapTestResultModelToTestResultMain(testOrders);
+            }
+            return testResult;
         }
 
         private TestResultMain MapTestResultModelToTestResultMain(TestResult testOrders)
