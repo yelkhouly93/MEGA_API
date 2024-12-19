@@ -798,6 +798,136 @@ namespace RestClient
         }
 
 
+        public static object CallAPI_POST_UAE_Doctors<T>(string url, object requestBodyObject, out GetDoctorPostResponse responseOut, bool IsForUAE = false) where T : class
+        {
+            try
+            {
+                responseOut = new GetDoctorPostResponse();
+                // Initialize an HttpWebRequest for the current URL.
+                var webReq = (HttpWebRequest)WebRequest.Create(url);
+
+                webReq.Method = "POST";
+                webReq.Accept = "application/json";
+
+
+
+                var apiToken = GetToken("UAE");
+
+                if (apiToken != null)
+                {
+                    webReq.Headers["Authorization"] = "Bearer " + apiToken;
+                }
+
+                //Serialize request object as JSON and write to request body
+                if (requestBodyObject != null)
+                {
+
+                    var requestBody = JsonConvert.SerializeObject(requestBodyObject);
+
+                    webReq.ContentLength = requestBody.Length;
+                    webReq.ContentType = "application/json";
+
+                    var streamWriter = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII);
+                    streamWriter.Write(requestBody);
+                    streamWriter.Close();
+                }
+
+                responseOut = null;
+                var response = webReq.GetResponse();
+
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (response == null)
+                {
+
+                    return null;
+                }
+
+                status = ((HttpWebResponse)response).StatusCode;
+
+                var streamReader = new StreamReader(response.GetResponseStream());
+
+                var responseContent = streamReader.ReadToEnd().Trim();
+
+                if (status == HttpStatusCode.OK)
+                {
+
+                    //AHSAN NEW Change 
+                    var resp = new GetDoctorPostResponse();
+
+                    resp = JsonConvert.DeserializeObject<GetDoctorPostResponse>(responseContent);
+
+                    //var jsonObject = JsonConvert.DeserializeObject<T>(responseContent);
+
+
+
+                    responseOut = resp;
+
+                    if (resp.Error == "False" || resp.Error == "false" || resp.Error == "" || resp.Error == null)
+                    {
+                        var jsonObject2 = JsonConvert.DeserializeObject<T>(resp.Doctors.ToString());
+                        return jsonObject2;
+                    }
+                    else
+                    {
+                        //var Errorresp = new ErrorResponse_ERROR();
+
+                        //Errorresp = JsonConvert.DeserializeObject<ErrorResponse_ERROR>(resultContent);
+                        return null;
+
+                    }
+                }
+
+
+
+
+
+
+
+
+
+                return null;
+
+
+                //var jsonObject = JsonConvert.DeserializeObject<T>(responseContent);
+
+                //return jsonObject;
+            }
+            catch (WebException wex)
+            {
+                if (wex.Response != null)
+                {
+                    using (var errorResponse = (HttpWebResponse)wex.Response)
+                    {
+                        using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                        {
+                            string errorContennt = reader.ReadToEnd().Trim();
+                            var jsonObject = JsonConvert.DeserializeObject<PostResponse>(errorContennt);
+
+                            var status = ((System.Net.HttpWebResponse)(wex.Response)).StatusCode;
+                            Msg = jsonObject.errorMessage;
+                            var resp = new GetDoctorPostResponse();
+                            //resp.status = (int)status;
+                            //resp.msg = Msg;
+                            responseOut = resp;
+                            //return jsonObject;
+                            return null;
+                        }
+                    }
+
+                }
+
+                //status = HttpStatusCode.InternalServerError;
+                var resp2 = new GetDoctorPostResponse();
+                //resp2.status = (int)HttpStatusCode.InternalServerError;
+                //resp2.msg = "InternalServerError";
+                responseOut = resp2;
+
+                return null;
+            }
+
+        }
+
 
 
         public static object CallAPI_POST_UAE_Add_Patient<T>(string url, object requestBodyObject, out GenericResponse_NEWUAE_registration responseOut, bool IsForUAE = false) where T : class

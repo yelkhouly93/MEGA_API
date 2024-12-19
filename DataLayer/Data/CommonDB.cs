@@ -300,6 +300,83 @@ namespace DataLayer.Data
             return dataTable;
         }
 
+
+        public List<ReportRequest_List> GetRequestList_V3(int MRN, int branchId, string Lang)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@MRN", MRN),
+                new SqlParameter("@BranchID", branchId),
+                new SqlParameter("@Lang", Lang)
+            };
+
+            var dataTableSet = DB.ExecuteSPAndReturnDataSet("dbo.[Get_ReportRequest_V3_SP]");
+            var DataList = MappingReportRequestList(dataTableSet);
+            return DataList;
+        }
+
+        private List<ReportRequest_List> MappingReportRequestList(DataSet patientDataset)
+        {
+            try
+            {                
+                var DataList = new List<ReportRequest_List>();                
+
+                if (patientDataset != null && patientDataset.Tables[0] != null && patientDataset.Tables[0].Rows.Count > 0)
+                {
+                    var ReportrequestTable = patientDataset.Tables[0].ToListObject<ReportRequest_List>();
+                    foreach (var row in ReportrequestTable)
+                    {
+                        var ReportData = new ReportRequest_List();
+
+                        ReportData.AddDate = row.AddDate;
+                        ReportData.BranchID = row.BranchID;
+                        ReportData.BranchName= row.BranchName;
+                        ReportData.Comments = row.Comments;
+                        ReportData.CStatusID = row.CStatusID;
+                        ReportData.ID = row.ID;
+                        ReportData.IsActive = row.IsActive;
+                        ReportData.LastUpdateDate = row.LastUpdateDate;
+                        ReportData.RegistrationNo = row.RegistrationNo;
+                        ReportData.RequestDetails = row.RequestDetails;
+                        ReportData.RequestType = row.RequestType;
+                        ReportData.RTypeID = row.RTypeID;
+                        ReportData.StatusName = row.StatusName;
+
+                        // NOW Adding Attachment list
+                        DataRow[] RRsubDataTableRow = patientDataset.Tables[1].Select("RequestID=" + row.ID);
+                        if (RRsubDataTableRow != null)
+                        {
+                            var AttachList = new List<ReportRequest_attachments>();
+                            foreach (DataRow Subrow in RRsubDataTableRow)
+                            {
+                                var Attatch = new ReportRequest_attachments();
+
+                                Attatch.Attachment_URL = Subrow["Attachment_URL"].ToString();
+                                Attatch.ID = (int)Subrow["ID"];
+                                Attatch.RequestID = (int)Subrow["RequestID"];
+                                Attatch.FileName = Subrow["FileName"].ToString();
+
+                                AttachList.Add(Attatch);
+                            }
+                            ReportData.Attachments = AttachList;
+                        }
+                        DataList.Add(ReportData);
+                    }
+                }
+
+                return DataList;
+
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+
+        }
+
+
         public void SENT_OTP(int hospitalId, string pCellNo, string registrationNo, string nationalId,int reason_code ,  ref int activationNo, ref int erStatus, ref string msg)
         {
 

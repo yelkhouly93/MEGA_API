@@ -303,5 +303,92 @@ namespace DataLayer.Model
 		public object Reports  { get; set; }		
 	}
 
+	public class GetDoctorPostResponse
+	{
+		public string Error { get; set; }
+
+		public object Doctors { get; set; }
+	}
+
+	public class Doctors_UAE
+	{
+		public string DepartmentId { get; set; }
+		public string DepartmentName { get; set; }
+		public string DoctorId { get; set; }
+		public string DoctorName { get; set; }
+		public string BranchId { get; set; }
+		public string NearestAvailableSlot { get; set; }
+	}
+
+
+	public class UAE_SMS_Template
+	{
+		public UAE_SMS_Template()
+		{
+			this.campaignName = "KSA campaign";
+			this.clientTxnId = "11234658798800";
+			this.contentType = "3.2";
+			this.desc = "This is the description for campaign";
+			this.dndCategory = "campaign";
+			this.msg = "test sms KSA";
+			this.msgCategory = "4.5";
+			this.priority = 1;
+			this.recipient = "966581178188";
+			this.senderAddr = "SGHUAE";
+		}
+		public string desc { get; set; }
+		public string campaignName { get; set; }
+		public string msgCategory { get; set; }
+		public string contentType { get; set; }
+		public string dndCategory { get; set; }
+		public int priority { get; set; }
+		public string clientTxnId { get; set; }
+		public string senderAddr { get; set; }
+		public string recipient { get; set; }
+		public string msg { get; set; }
+
+	}
+
+
+	public class Doctor_Code_N_NearestSlot
+	{
+		public string empcode { get; set; }
+		public string nearest_slot { get; set; }
+	}
+
+
+
+	public class InvoiceDetails_UAE
+	{
+		public string BillType { get; set; }
+		public string VisitId { get; set; }
+		public string VisitType { get; set; }
+		public string PackageStatus { get; set; }
+		public string ServiceType { get; set; }
+		public string BillDateTime { get; set; }
+		public string BillNo { get; set; }
+		public string CaseType { get; set; }
+		public string CustomerName { get; set; }
+		public string DoctorId { get; set; }
+		public string DoctorName { get; set; }
+		public string DepartmentId { get; set; }
+		public string DepartmentName { get; set; }
+		public string CustomerType { get; set; }
+		public string MRN { get; set; }
+		public string GrossAmount { get; set; }
+		public string DiscountAmount { get; set; }
+		public string NetAmount { get; set; }
+		public string CompanyResponsibility { get; set; }
+		public string PatientResponsibility { get; set; }
+	}
+
+
+	public class INVOICE_PDF_UAE
+	{
+		public string Facility { get; set; }
+		public string BillNo { get; set; }
+		public string BillType { get; set; }
+		public string Base64 { get; set; }
+	}
 
 }

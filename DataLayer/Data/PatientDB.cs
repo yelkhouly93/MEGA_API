@@ -1734,13 +1734,8 @@ namespace DataLayer.Data
         }
 
 
-        public DataTable Save_Patient_RefillRequest(int hospitalId, string resgistrationNo, 
-             int Visit_Id
-            ,string Doctor_Name
-            ,string Drug_Name
-            ,string DEPT_NAME
-            ,int PrescriptionId
-            ,int DrugId
+        public DataTable Save_Patient_RefillRequest(int hospitalId, string resgistrationNo
+             ,string RowIDs            
             ,ref int Er_Status
             ,ref string Msg
             ,string ApiSources = "MobileApp")
@@ -1751,17 +1746,12 @@ namespace DataLayer.Data
                 {
                     new SqlParameter("@BranchId", hospitalId),
                     new SqlParameter("@Registration_No", resgistrationNo),
-                    new SqlParameter("@Visit_Id", Visit_Id),
-                    new SqlParameter("@Doctor_Name", Doctor_Name),
-                    new SqlParameter("@Drug_Name", Drug_Name),
-                    new SqlParameter("@DEPT_NAME", DEPT_NAME),
-                    new SqlParameter("@PrescriptionId", PrescriptionId),
-                    new SqlParameter("@DrugId", DrugId),
+                    new SqlParameter("@RowIDs", RowIDs),                   
                     new SqlParameter("@status", SqlDbType.Int),
                     new SqlParameter("@msg", SqlDbType.NVarChar, 500),
                 };
-                DB.param[8].Direction = ParameterDirection.Output;
-                DB.param[9].Direction = ParameterDirection.Output;
+                DB.param[3].Direction = ParameterDirection.Output;
+                DB.param[4].Direction = ParameterDirection.Output;
 
                 //DB.ExecuteNonQuerySP("dbo.SAVE_Agreement_Acceptance_SP");
 
@@ -1774,9 +1764,9 @@ namespace DataLayer.Data
 
                 var _patientPrescriptionModel = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
 
-                Er_Status = Convert.ToInt32(DB.param[8].Value);
-                if (DB.param[9].Value != null)
-                    Msg = DB.param[9].Value.ToString();
+                Er_Status = Convert.ToInt32(DB.param[3].Value);
+                if (DB.param[4].Value != null)
+                    Msg = DB.param[4].Value.ToString();
 
                 //Er_Status = 1;
                 //Msg = "";
@@ -2029,11 +2019,32 @@ namespace DataLayer.Data
                     new SqlParameter("@Lang", lang),
                     new SqlParameter("@BranchId", hospitalID),
                     new SqlParameter("@RegistrationNo", RegistrationNo),
-                    new SqlParameter("@VisitId", VisitId)                    
+                    new SqlParameter("@VisitId", VisitId)
                 };
 
             var allReportList
                 = DB.ExecuteSPAndReturnDataTable("DBO.[Get_MedicalReports_SP]").ToListObject< PreDefineMedReport>();
+
+            // MAP
+            //var MapReport = MapDefineMedicalReport(allReportList);
+
+
+            return allReportList;
+        }
+
+        public DataTable GetPreDefineMedicalReports_Temp(string lang, int hospitalID, int RegistrationNo, int VisitId = 0)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalID),
+                    new SqlParameter("@RegistrationNo", RegistrationNo),
+                    new SqlParameter("@VisitId", VisitId),
+                    new SqlParameter("@ForListing", "0")
+                };
+
+            var allReportList
+                = DB.ExecuteSPAndReturnDataTable("DBO.[Get_MedicalReports_SP]");
 
             // MAP
             //var MapReport = MapDefineMedicalReport(allReportList);
@@ -2568,6 +2579,70 @@ namespace DataLayer.Data
             return allDataDt;
 
         }
+
+        public DataTable GetPatientMissedAppointmentList_UAE(string lang, int hospitalID, int RegistrationNo , List<Get_Missed_Appointments_UAE> UAETable)
+        {
+            if (UAETable.Count > 0)
+            {
+                DataTable dataTable = new DataTable();
+                dataTable.Columns.Add("Lang", typeof(string));
+                dataTable.Columns.Add("Id", typeof(int));
+                dataTable.Columns.Add("BranchID", typeof(int));
+                dataTable.Columns.Add("apptDatetime", typeof(string));
+                dataTable.Columns.Add("RegistrationNo", typeof(string));
+                dataTable.Columns.Add("Doctor_ID", typeof(string));                
+                
+                foreach (var model in UAETable)
+                {
+                    dataTable.Rows.Add(lang, model.id, hospitalID
+                        , model.appDateTime, model.registrationno, model.doctor_Id                        
+                    );
+                }
+
+                var returnDataTable =  DB.ExecuteSP_With_DataTable_AndReturnDataTable("[dbo].[Get_MissAppoitment_List_UAE_SP]", "@UAEDoctors", dataTable);
+                return returnDataTable;
+            }
+            return null;
+        }
+
+
+        
+        public void  Save_AppoitmentLogs (int BranchID , string AppointmentID , string MRN,int OperatorId ,string AppoitmentStatus,string Sources , int Doctor_Id)
+		{
+            DB.param = new SqlParameter[]
+                {                    
+                    new SqlParameter("@BranchId", BranchID),
+                    new SqlParameter("@AppointmentId", AppointmentID),
+                    new SqlParameter("@RegistrationNo", MRN),
+                    new SqlParameter("@OperatorId", OperatorId),
+                    new SqlParameter("@AppoitmentStatus", AppoitmentStatus),
+                    new SqlParameter("@Sources", Sources),
+                    new SqlParameter("@Doctor_Id", Doctor_Id),
+                    
+                };
+
+            var allDataDt
+                = DB.ExecuteSP ("[Logs].[Add_Appointment_Logs]");
+
+            //
+
+        }
+
+
+
+        public DataTable GeT_InPatient_Visit(string Lang, string PatientMRN, int BranchID)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", Lang),
+                new SqlParameter("@RegistrationNo", PatientMRN),
+                new SqlParameter("@BranchID", BranchID)                    
+            };
+            
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_InPatientVisit_SP]");
+            return ReturnDataTable;
+        }
+
 
 
     }

@@ -1476,40 +1476,129 @@ namespace DataLayer.Model
             public string insuranceId { get; set; }
             public string idExpiryDate { get; set; }
 	}
-    
 
-    public class Doctor_Code_N_NearestSlot
+    public class InsuranceApprovalList
 	{
-        public string empcode { get; set; }
-        public string nearest_slot { get; set; }
-	}
-
-
-    public class UAE_SMS_Template
-    {
-        public UAE_SMS_Template ()
+        public InsuranceApprovalList()
 		{
-            this.campaignName = "KSA campaign";
-            this.clientTxnId = "11234658798800";
-            this.contentType = "3.2";
-            this.desc = "This is the description for campaign";
-            this.dndCategory = "campaign";
-            this.msg = "test sms KSA";
-            this.msgCategory = "4.5";
-            this.priority = 1;
-            this.recipient = "966581178188";
-            this.senderAddr = "SGHUAE";
+            this.ServiceName = "";
+            this.ReferenceNumber ="";
         }
-        public string desc { get; set; }
-        public string campaignName { get; set; }
-        public string msgCategory { get; set; }
-        public string contentType { get; set; }
-        public string dndCategory { get; set; }
-        public int priority { get; set; }
-        public string clientTxnId { get; set; }
-        public string senderAddr { get; set; }
-        public string recipient { get; set; }
-        public string msg { get; set; }
+        public DateTime VisitDateTime { get; set; }
+        public string VisitSpecialty { get; set; }
+        public string VisitDoctor { get; set; }
+        public string VisitId { get; set; }
+        public string ApprovalRequestId { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string RegistrationNo { get; set; }
+        public string InsuranceComp { get; set; }
+        public string DoctorId { get; set; }
+        public string FinalApprovalStatus { get; set; }
+        public DateTime ApprovalDateTime { get; set; }
+        public string ItemCode { get; set; }
+        public string ItemName { get; set; }
+        public string ServiceName { get; set; }
+        public string ReferenceNumber { get; set; }
+    }
+    
+    public class GetSys_MedicalReport
+    {
+        public string visitType { get; set; }
+        public string reportType { get; set; }
+        public string registrationNo { get; set; }
+        public int EPISODE_NO { get; set; }
+        public int VisitID { get; set; }
+        public DateTime visitDateTime { get; set; }
+        public DateTime fromDate { get; set; }
+        public DateTime toDate { get; set; }
+        public int noOfDays { get; set; }
+        public string TREATMENT { get; set; }
+        public string RECOMMENDATIONS { get; set; }
+        public string doctorName { get; set; }
+        public string departmentName { get; set; }
+        public string patientName { get; set; }
+        public string patientNationality { get; set; }
+        public string patientBranch { get; set; }
+        public string patientDOB { get; set; }
+        public string patientGender { get; set; }
+
+        public string Reason_AR { get; set; }
 
     }
+
+    public class Get_Missed_Appointments_UAE
+	{
+        public string id { get; set; }
+        public string registrationno { get; set; }
+        public string branch_Id { get; set; }
+        public string appDateTime { get; set; }
+        public string doctor_Id { get; set; }
+        public string doctorFullName { get; set; }
+        public string position { get; set; }
+        public string specialty { get; set; }
+        public string subspecialty { get; set; }
+        public string docCode { get; set; }
+    }
+    public class Get_Missed_Appointments
+    {
+        public int id { get; set; }
+        public string registrationno { get; set; }
+        public string branch_Id { get; set; }
+        public DateTime appDateTime { get; set; }
+        public int doctor_Id { get; set; }
+        public string doctorFullName { get; set; }
+        public string position { get; set; }
+        public string specialty { get; set; }
+        public string subspecialty { get; set; }
+        public string docCode { get; set; }
+    }
+
+
+    public class Invoice_Get
+	{
+        public string id { get; set; }
+        public string BillNo { get; set; }
+        public string DoctorName { get; set; }
+        public string DepartmentName { get; set; }
+        public string Billdatetime { get; set; }        
+        public string InvoiceAmount { get; set; }
+        public string BillTime { get; set; }
+        public string VisitType { get; set; }
+
+    }
+
+    public class ReportRequest_List
+    {
+        public int ID { get; set; }
+
+        public int RTypeID { get; set; }
+        public string RequestType { get; set; }
+
+        public string RequestDetails { get; set; }
+        public string Comments { get; set; }
+
+        public string RegistrationNo { get; set; }
+
+        public int BranchID { get; set; }
+        public string BranchName { get; set; }
+        
+        
+        public int CStatusID { get; set; }
+        public string StatusName { get; set; }
+
+        public int IsActive { get; set; }
+        public DateTime AddDate { get; set; }
+        public DateTime LastUpdateDate { get; set; }
+        public List<ReportRequest_attachments> Attachments { get; set; }
+    }
+    public class ReportRequest_attachments
+    {
+        public int ID { get; set; }
+        public int RequestID { get; set; }
+        public string FileName { get; set; }
+        public string Attachment_URL { get; set; }
+    }
+
+
+
 }

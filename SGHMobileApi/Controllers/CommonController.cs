@@ -1145,6 +1145,53 @@ namespace SGHMobileApi.Controllers
         }
 
         [HttpPost]
+        [Route("v3/ReportRequest-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetReportRequest_V3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["hospital_id"]))
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var PMrn = Convert.ToInt32(col["patient_reg_no"]);
+                var branchID = Convert.ToInt32(col["hospital_id"]);
+
+                
+                
+                var allReportList = CDB.GetRequestList_V3(PMrn, branchID, lang);
+
+
+                if (allReportList != null && allReportList.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Record(s) Found";
+                    _resp.response = allReportList;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found";
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
+
+        [HttpPost]
         [Route("v2/Send-OTP")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult SendOTPRequest(FormDataCollection col)

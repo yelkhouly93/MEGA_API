@@ -140,4 +140,40 @@ namespace DataLayer.Model
         int code { get; }
 
     }
+
+    public class InsuranceApprovals_Dam
+    {        
+        public DateTime visitDateTime { get; set; }
+        public string visitSpecialty { get; set; }
+        public string visitDoctor { get; set; }
+        public int visitId { get; set; }
+        public int approvalRequestId { get; set; }
+        public DateTime createdAt { get; set; }
+        public string registrationNo { get; set; }
+        public string insuranceComp { get; set; }
+        public string doctorId { get; set; }
+        public DateTime approvalDateTime { get; set; }
+        public string finalApprovalStatus { get; set; }
+        public string itemCode { get; set; }
+        public string itemName { get; set; }
+
+    }
+    public class MedicalReport_Damm
+    {
+        public int EPISODE_NO { get; set; }
+        public string PATIENT_NAME { get; set; }
+        public string FILE_ID { get; set; }
+        public string DOBG { get; set; }
+        public string SEX { get; set; }
+        public string VISIT_START_DATE { get; set; }
+        public string NAT { get; set; }
+        public string DIAG_OPD { get; set; }
+        public string HISTORY_MED { get; set; }
+        public string PHY_EXAM { get; set; }
+        public string INVESTIGATION_MED { get; set; }
+        public string RECOMMENDATION_MED { get; set; }
+        public string DOC_TRANS { get; set; }
+        public string DOC_SPEC { get; set; }
+    }
+
 }

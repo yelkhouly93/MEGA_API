@@ -179,5 +179,84 @@ namespace SmartBookingService.Controllers
             return Ok(_resp);
         }
 
+
+        [HttpPost]
+        [Route("v3/hospitals-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetHospitalsList_v3(FormDataCollection col)
+        {
+
+            _resp = new GenericResponse();
+            _hospitalDb = new HospitalDB();
+            var groupentityid = "";
+            var lang = "EN";
+            var Ispayment = 0;
+            var longitude = 0.00;
+            var latitude = 0.00;
+            var CallingArea = "";
+            var For_TEST = "1";
+
+            var CountryID = 0;
+
+            if (col != null)
+            {
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+
+                if (!string.IsNullOrEmpty(col["groupentity_id"]))
+                    groupentityid = col["groupentity_id"];
+
+                if (!string.IsNullOrEmpty(col["PaymentDetails"]))
+                    Ispayment = Convert.ToInt32(col["PaymentDetails"]);
+
+                if (!string.IsNullOrEmpty(col["country_ID"]))
+                    CountryID = Convert.ToInt32(col["country_ID"]);
+
+
+                if (!string.IsNullOrEmpty(col["latitude"]))
+                    latitude = Convert.ToDouble(col["latitude"]);
+
+                if (!string.IsNullOrEmpty(col["longitude"]))
+                    longitude = Convert.ToDouble(col["longitude"]);
+
+                if (!string.IsNullOrEmpty(col["Area"]))
+                    CallingArea = col["Area"].ToString();
+
+                if (!string.IsNullOrEmpty(col["FOR_TEST"]))
+                    For_TEST = col["FOR_TEST"].ToString();
+
+
+            }
+            else
+            {
+                groupentityid = null;
+                lang = null;
+            }
+
+
+            var ApiSource = "";
+            if (!string.IsNullOrEmpty(col["Sources"]))
+                ApiSource = col["Sources"].ToString();
+
+
+            var allHospitals = _hospitalDb.GetAllHospitalsDataTable_v3(lang, groupentityid, Ispayment, CountryID, latitude, longitude, ApiSource, CallingArea, For_TEST);
+            //_expandoList = _dbCommonDb.MappingDT_dynamicList(allHospitals);
+
+            if (allHospitals.Rows.Count > 0)
+            {
+                _resp.status = 1;
+                _resp.msg = "Success";
+                _resp.response = allHospitals;
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Fail";
+            }
+
+            return Ok(_resp);
+        }
+
     }
 }

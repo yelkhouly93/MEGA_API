@@ -532,6 +532,54 @@ namespace DataLayer.Data
 
         }
 
+
+        public DataTable GetPhsiciansAdvanceSearchDT_NEW(string lang, string hospitalId, string clinicId, string SpecialityName, string SubSpecialty, string AssistArea, string SpokenLanguage, string GeneralSearch, int pageno = -1, int pagesize = 10, string ApiSources = "MobileApp", int Isvideo = 0 , string NeartestString = "")
+        {
+            string DB_SP_Name = "DBO.[Get_DoctorsAdvanceSrch_SP_AhsanTEST]";
+
+            if (ApiSources.ToLower() == "saleforce")
+            {
+                DB.param = new SqlParameter[]
+               {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalId),
+                    new SqlParameter("@DeptId", clinicId),
+                    new SqlParameter("@DeptUniName", SpecialityName),
+                    new SqlParameter("@SubSpecialty", SubSpecialty),
+                    new SqlParameter("@AssistArea", AssistArea),
+                    new SqlParameter("@SpokenLanguage", SpokenLanguage),
+                    new SqlParameter("@CommonSearchParam", GeneralSearch),
+                    new SqlParameter("@PageNo", pageno),
+                    new SqlParameter("@PageSize", pagesize)
+               };
+                DB_SP_Name = "SF.[Get_DoctorsAdvanceSrch_SP]";
+            }
+            else
+            {
+                DB.param = new SqlParameter[]
+               {
+                    new SqlParameter("@Lang", lang),
+                    new SqlParameter("@BranchId", hospitalId),
+                    new SqlParameter("@DeptId", clinicId),
+                    new SqlParameter("@DeptUniName", SpecialityName),
+                    new SqlParameter("@SubSpecialty", SubSpecialty),
+                    new SqlParameter("@AssistArea", AssistArea),
+                    new SqlParameter("@SpokenLanguage", SpokenLanguage),
+                    new SqlParameter("@CommonSearchParam", GeneralSearch),
+                    new SqlParameter("@PageNo", pageno),
+                    new SqlParameter("@PageSize", pagesize),
+                    new SqlParameter("@VideoAppointmentAvailability", Isvideo),
+                    new SqlParameter("@Doctor_Code_N_NearestSlot2", NeartestString)
+
+               };
+            }
+
+
+            var allPhysiciansModel = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+            return allPhysiciansModel;
+
+        }
+
         public DataTable GetPhsiciansBySpecialityDataTable(string lang, string hospitalId, string clinicId, string SpecialityName, int pageno = -1, int pagesize = 10,string ApiSources = "MobileApp")
         {
             DB.param = new SqlParameter[]

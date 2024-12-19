@@ -1215,7 +1215,7 @@ namespace SGHMobileApi.Controllers
 
 
         [HttpPost]
-        [Route("v2/patient-missed-appointments-list")]
+        [Route("v2/patient-missed-appointments-list-Notification")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult GetPatientMissedApointmentList(FormDataCollection col)
         {
@@ -1239,28 +1239,56 @@ namespace SGHMobileApi.Controllers
                 if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
                 {
                     _resp.status = 0;
+                    _resp.msg = "No Record Found";
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var StrpatientMrn = col["patient_reg_no"];
+                    var PatientData = _UAEApiCaller.GetPatientMissedAppoitmentByApi_UAE(lang, hospitalId, StrpatientMrn.ToString());
+                    
+                    if (PatientData != null && PatientData.Count > 0)
+                    {
+                        var returnData = patientDb.GetPatientMissedAppointmentList_UAE(lang, hospitalId, registrationNo, PatientData);
+
+                        if (returnData != null && returnData.Rows.Count > 0)
+						{
+                            _resp.status = 1;
+                            _resp.msg = "Record(s) Found";
+                            _resp.response = returnData;
+                        }
+                    }
+
+
+                    return Ok(_resp);
+
+                }
+                else
+				{
+                    _resp.status = 0;
                     if (lang == "EN")
                         _resp.msg = "Sorry this service not available";
                     else
                         _resp.msg = "عذرا هذه الخدمة غير متوفرة";
                     return Ok(_resp);
-                }
-
-                var allAppointmnetList = patientDb.GetPatientMissedAppointmentList(lang, hospitalId, registrationNo);
-
-
-                if (allAppointmnetList != null && allAppointmnetList.Rows.Count > 0)
-                {
-                    _resp.status = 1;
-                    _resp.msg = "Record(s) Found";
-                    _resp.response = allAppointmnetList;
 
                 }
-                else
-                {
-                    _resp.status = 0;
-                    _resp.msg = "No Record Found";
-                }
+
+                _resp.status = 0;
+                _resp.msg = "No Record Found";
+
+                // KSA NOT not Implemented
+                //var allAppointmnetList = patientDb.GetPatientMissedAppointmentList(lang, hospitalId, registrationNo);
+                //if (allAppointmnetList != null && allAppointmnetList.Rows.Count > 0)
+                //{
+                //    _resp.status = 1;
+                //    _resp.msg = "Record(s) Found";
+                //    _resp.response = allAppointmnetList;
+
+                //}
+                //else
+                //{
+                //    _resp.status = 0;
+                //    _resp.msg = "No Record Found";
+                //}
 
             }
             else

@@ -959,168 +959,6 @@ namespace SmartBookingService.Controllers
 
 
         [HttpPost]
-        [Route("v3/Patient-InsuranceInfo-get")]
-        [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult PatientInsuranceInfo(FormDataCollection col)
-        {
-            var resp = new GenericResponse();
-            resp.status = 0;
-            resp.msg = "";
-            //try
-            //{
-            if (!string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["hospital_id"]))
-            {
-                var hospitalId = Convert.ToInt32(col["hospital_id"]);
-                var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
-                var lang = "EN";
-                if (!string.IsNullOrEmpty(col["lang"]))
-                    lang = col["lang"];
-
-                //if (hospitalId == 9)
-                //{
-                //    resp.status = 0;
-                //    resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
-                //    return Ok(resp);
-                //}
-
-                int errStatus = 0;
-                string errMessage = "";
-                resp.status = 0;
-                resp.msg = "No Record Found";
-
-                if (hospitalId == 9)
-				{   
-                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                    var PatientData = _loginApiCaller.GetPatientInsuranceByApi_NewDam(lang, patientMrn.ToString(), ref errStatus, ref errMessage);
-
-                    if (PatientData != null && PatientData.Count > 0)
-                    {
-                        resp.status = 1;
-                        resp.msg = "Record(s) Found";
-                        resp.response = PatientData;
-                    }
-                }
-                else
-				{
-                    InsuranceDB _InsuranceDB = new InsuranceDB();
-                    var PatientInsuranceDT = _InsuranceDB.GetPatientInsuranceInfo_DT(hospitalId, patientMrn, ref errStatus, ref errMessage);
-                    if (PatientInsuranceDT != null && PatientInsuranceDT.Rows.Count > 0)
-                    {
-                        resp.status = 1;
-                        resp.msg = "Record(s) Found";
-                        resp.response = PatientInsuranceDT;
-                    }
-                }
-
-                                
-            }
-            else
-            {
-                resp.status = 0;
-                resp.msg = "Missing Parameter!";
-            }
-
-
-            return Ok(resp);
-            //}
-            //catch (Exception ex)
-            //{
-            //    var test = ex;
-            //}
-
-            //return Ok();
-        }
-
-
-        [HttpPost]
-        [Route("v4/Patient-InsuranceInfo-get")]
-        [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult PatientInsuranceInfo_V4(FormDataCollection col)
-        {
-            var resp = new GenericResponse();
-            resp.status = 0;
-            resp.msg = "";
-            //try
-            //{
-            if (!string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["hospital_id"]))
-            {
-                var hospitalId = Convert.ToInt32(col["hospital_id"]);
-                var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
-                
-                var lang = "EN";
-                if (!string.IsNullOrEmpty(col["lang"]))
-                    lang = col["lang"];
-
-                //if (hospitalId == 9)
-                //{
-                //    resp.status = 0;
-                //    resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
-                //    return Ok(resp);
-                //}
-
-                int errStatus = 0;
-                string errMessage = "";
-                resp.status = 0;
-                resp.msg = "No Record Found";
-
-                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
-                {
-                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
-                    var StrpatientMrn = col["patient_reg_no"];
-                    var PatientData = _UAEApiCaller.GetPatientInsuranceByApi_NewUAE(lang, hospitalId, StrpatientMrn.ToString(), ref errStatus, ref errMessage);
-                    if (PatientData != null && PatientData.Count > 0)
-                    {
-                        resp.status = 1;
-                        resp.msg = "Record(s) Found";
-                        resp.response = PatientData;
-                    }
-
-                }
-                else if (hospitalId == 9)
-                {
-                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
-                    var PatientData = _loginApiCaller.GetPatientInsuranceByApi_NewDam(lang, patientMrn.ToString(), ref errStatus, ref errMessage);
-
-                    if (PatientData != null && PatientData.Count > 0)
-                    {
-                        resp.status = 1;
-                        resp.msg = "Record(s) Found";
-                        resp.response = PatientData;
-                    }
-                }
-                else
-                {
-                    InsuranceDB _InsuranceDB = new InsuranceDB();
-                    var PatientInsuranceDT = _InsuranceDB.GetPatientInsuranceInfo_DT(hospitalId, Convert.ToInt32(patientMrn), ref errStatus, ref errMessage);
-                    if (PatientInsuranceDT != null && PatientInsuranceDT.Rows.Count > 0)
-                    {
-                        resp.status = 1;
-                        resp.msg = "Record(s) Found";
-                        resp.response = PatientInsuranceDT;
-                    }
-                }
-
-
-            }
-            else
-            {
-                resp.status = 0;
-                resp.msg = "Missing Parameter!";
-            }
-
-
-            return Ok(resp);
-            //}
-            //catch (Exception ex)
-            //{
-            //    var test = ex;
-            //}
-
-            //return Ok();
-        }
-
-
-        [HttpPost]
         [Route("v4/patient-get")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult PatientGET_v4(FormDataCollection col)
@@ -1691,6 +1529,12 @@ namespace SmartBookingService.Controllers
                             str_New_MRN = registrationNo;
 
                             _UAEApiCaller.GenerateOTP_V3(registerPatient.HospitaId.ToString(), registerPatient.PatientPhone, str_New_MRN, registerPatient.PatientNationalId, "MobileApp", ref activationNo,ref status,ref msg);
+
+                            LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                            _loginApiCaller.GenerateOTP_V3(registerPatient.HospitaId.ToString(), registerPatient.PatientPhone, str_New_MRN, registerPatient.PatientNationalId, "MobileApp", ref activationNo, ref status, ref msg);
+
+
+
                         }
                         catch (Exception e)
                         {
@@ -2040,6 +1884,75 @@ namespace SmartBookingService.Controllers
             return Ok(_resp);
 
         }
+
+
+        [HttpPost]
+        [Route("v2/InPatient-Visit-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetInPatientVisitSign(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["patient_reg_no"])                
+                && !string.IsNullOrEmpty(col["hospital_id"])
+                )
+            {
+                var Lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    Lang = col["lang"];
+
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                if (hospitaId == 9)
+                {
+                    resp.status = 0;
+                    if (Lang == "EN")
+                        resp.msg = "Sorry this service not available";
+                    else
+                        resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    resp.status = 0;
+                    if (Lang == "EN")
+                        resp.msg = "Sorry this service not available";
+                    else
+                        resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
+
+
+                var registrationNo = col["patient_reg_no"];
+
+                int errStatus = 0;
+                string errMessage = "No record Found";
+                PatientDB _patientDb = new PatientDB();
+                var _DataList = _patientDb.GeT_InPatient_Visit(Lang, registrationNo, hospitaId);
+
+                if (_DataList != null && _DataList.Rows.Count > 0)
+                {
+                    resp.status = 1;
+                    resp.msg = "Record Found";
+                    resp.response = _DataList;
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "No Record Found";
+                    resp.response = null;
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter!";
+            }
+            return Ok(resp);
+
+            //return Ok();
+        }
+
 
     }
 

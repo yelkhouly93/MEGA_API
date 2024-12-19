@@ -314,7 +314,7 @@ namespace SGHMobileApi.Controllers
         //            int errStatus = 0;
         //            string errMessage = "";
 
-        //            var allDataTable = _NotificationDb.Get_Notification_MissAppointment_DT(lang, hospitalId, patient_reg_no, Source, ref errStatus, ref errMessage);
+                    //var allDataTable = _NotificationDb.Get_Notification_MissAppointment_DT(lang, hospitalId, patient_reg_no, Source, ref errStatus, ref errMessage);
 
         //            if (allDataTable.Rows.Count > 0)
         //            {

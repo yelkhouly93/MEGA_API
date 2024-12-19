@@ -220,6 +220,21 @@ namespace DataLayer.Data
             return dataTable;
         }
 
+        public int PaymentConfirmation_FailedTransaction(string OnlineTrasactionID, string PaidAmount, int TrackID,int BranchId)
+        {
+            DB.param = new SqlParameter[]
+            {                
+                new SqlParameter("@OnlineTransactionId", OnlineTrasactionID),
+                new SqlParameter("@PaidAmount", PaidAmount),
+                new SqlParameter("@TrackId", TrackID),
+                new SqlParameter("@BranchId", BranchId)                
+            };
+
+            DB.ExecuteSPAndReturnDataTable("dbo.Save_OnlinePaymentFailedLog_SP");
+
+            return 0;
+        }
+
 
     }
 }

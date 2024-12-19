@@ -240,6 +240,84 @@ namespace DataLayer.Common
             }
         }
 
+        //public new DataTable ExecuteSP_With_DataTable_AndReturnDataTable(string SPName = "" ,string TablePrameterName,  DataTable dataTable)
+        //{
+
+        //    using (SqlConnection connection = new SqlConnection(base.SqlConnectionString))
+        //    {
+        //        connection.Open();
+
+        //        using (SqlCommand command = new SqlCommand(SPName, connection))
+        //        {
+        //            command.CommandType = CommandType.StoredProcedure;
+
+        //            // Pass the structured data table as a parameter
+        //            SqlParameter tvpParam = command.Parameters.AddWithValue(TablePrameterName, dataTable);
+        //            tvpParam.SqlDbType = SqlDbType.Structured;
+
+        //            // Use SqlDataAdapter to fill a DataTable with the result
+        //            using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+        //            {
+        //                DataTable resultTable = new DataTable();
+        //                adapter.Fill(resultTable);
+        //                return resultTable; // Ensure your method signature supports returning DataTable
+        //            }
+        //        }
+        //    }
+        //    return null;
+        //}
+        public new DataTable ExecuteSP_With_DataTable_AndReturnDataTable(string SPName = "", string TableParameterName = "", DataTable dataTable = null)
+        {
+            if (string.IsNullOrWhiteSpace(SPName))
+                throw new ArgumentException("Stored Procedure name cannot be null or empty.", nameof(SPName));
+
+            if (string.IsNullOrWhiteSpace(TableParameterName))
+                throw new ArgumentException("Table parameter name cannot be null or empty.", nameof(TableParameterName));
+
+            if (dataTable == null)
+                throw new ArgumentNullException(nameof(dataTable), "DataTable cannot be null.");
+
+            DataTable resultTable = new DataTable();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(base.SqlConnectionString))
+                {
+                    connection.Open();
+
+                    using (SqlCommand command = new SqlCommand(SPName, connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        // Add the table-valued parameter
+                        SqlParameter tvpParam = command.Parameters.AddWithValue(TableParameterName, dataTable);
+                        tvpParam.SqlDbType = SqlDbType.Structured;
+
+                        // Fill the result into the DataTable
+                        using (SqlDataAdapter adapter = new SqlDataAdapter(command))
+                        {
+                            adapter.Fill(resultTable);
+                        }
+                    }
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                // Log SQL-related exceptions
+                Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // Log general exceptions
+                Console.WriteLine($"Error: {ex.Message}");
+                throw;
+            }
+
+            return resultTable;
+        }
+
+
 
         public new DataTable ExecuteSPAndReturnDataTable_WithDataTableInput(DataTable inputdataTable , string SPName = ""  )
         {

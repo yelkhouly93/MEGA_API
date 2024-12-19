@@ -449,6 +449,8 @@ namespace SmartBookingService.Controllers
 
                     if (APiResilts)
 					{
+                        var patientDb = new PatientDB();
+                        patientDb.Save_AppoitmentLogs(hospitaId,AppointmentID.ToString(), col["patient_reg_no"].ToString(), 1, "CANCELLED" , Sources , 0);
                         resp.status = 1;
                         resp.msg = "Appointment cancelled";
                         if (lang == "AR" || lang == "ar")
@@ -468,6 +470,10 @@ namespace SmartBookingService.Controllers
                     patientDb.CancelAppointment(lang, hospitaId, AppointmentID, registrationNo, ReasonID, Sources, ref errStatus, ref errMessage);
                     if (errStatus != 0)
                     {
+                        //var patientDb = new PatientDB();
+                        //patientDb.Save_AppoitmentLogs(hospitaId,AppointmentID, col["patient_reg_no"].ToString(), 1, "CANCELLED" , Sources);
+
+
                         resp.status = 1;
                         resp.msg = "Appointment cancelled";
                         if (lang == "AR" || lang == "ar")
@@ -756,6 +762,10 @@ namespace SmartBookingService.Controllers
                         var APiResilts = _UAEApiCaller.SaveAppointmentApi_NewUAE(bookModel , out responseOut);
                         if (APiResilts)
                         {
+                            var patientDb_N = new PatientDB();
+                            patientDb_N.Save_AppoitmentLogs(hospitaId, responseOut.AppId, col["patient_reg_no"].ToString(), 1, "BOOKED", sources , physicianId);
+
+
                             resp.msg = "Appoitment Save Successfull"; resp.status = 1;
                             resp.response = responseOut.AppId.ToString();
                         }
@@ -794,6 +804,10 @@ namespace SmartBookingService.Controllers
                         var APiResilts = _loginApiCaller.SaveAppointmentApi_NewDammam(physicianId.ToString(), ClinicCode, AppoitmentDateTime, userInfo.national_id, patientId.ToString(), out ReturnObject);
                         if (APiResilts)
                         {
+                            var patientDb_N = new PatientDB();
+                            patientDb_N.Save_AppoitmentLogs(hospitaId, "1", col["patient_reg_no"].ToString(), 1, "BOOKED", sources, physicianId);
+
+
                             errStatus = 1;
                             errMessage = "Appoitment Saved Successfully";
                         }
@@ -940,8 +954,13 @@ namespace SmartBookingService.Controllers
                 if (!string.IsNullOrEmpty(col["App_Time"]))
                     StartTime = col["App_Time"];
 
+                var intDoctorID = 0;
                 if (!string.IsNullOrEmpty(col["Docter_ID"]))
+				{
                     DocterID = col["Docter_ID"];
+                    intDoctorID = Convert.ToInt32(col["Docter_ID"]);
+                }
+                    
 
 
                 resp.status = 0;
@@ -995,6 +1014,10 @@ namespace SmartBookingService.Controllers
                     var APiResilts = _UAEApiCaller.CancelAppointmentApi_NewUAE(bookModel, out responseOut);
                     if (APiResilts)
                     {
+                        var patientDb_N = new PatientDB();
+                        patientDb_N.Save_AppoitmentLogs(hospitaId, AppointmentID.ToString(), col["patient_reg_no"].ToString(), 1, "CANCELLED", Sources , intDoctorID);
+
+
                         resp.msg = "Appoitment Cancelled Successfully"; resp.status = 1;
                         //resp.response = responseOut.AppId;
                     }
@@ -1025,6 +1048,8 @@ namespace SmartBookingService.Controllers
 
                     if (APiResilts)
                     {
+                        var patientDb_N = new PatientDB();
+                        patientDb_N.Save_AppoitmentLogs(hospitaId, AppointmentID.ToString(), col["patient_reg_no"].ToString(), 1, "CANCELLED", Sources, intDoctorID);
                         resp.status = 1;
                         resp.msg = "Appointment cancelled";
                         if (lang == "AR" || lang == "ar")
@@ -1146,6 +1171,9 @@ namespace SmartBookingService.Controllers
                             var APiResilts = _UAEApiCaller.ReschduleAppointmentApi_NewUAE(bookModel, out responseOut);
                             if (APiResilts)
                             {
+                                var patientDb_N = new PatientDB();
+                                patientDb_N.Save_AppoitmentLogs(hospitaId, responseOut.AppId.ToString(), col["patient_reg_no"].ToString(), 1, "RESCHEDULED", Sources , physicianId);
+
                                 resp.msg = "Reschedule Successfully"; 
                                 resp.status = 1;
                                 resp.response = responseOut.AppId;

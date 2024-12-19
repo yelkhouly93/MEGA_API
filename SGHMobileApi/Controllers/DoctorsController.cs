@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Formatting;
 using System.Runtime.CompilerServices;
 using System.Web.Http;
@@ -373,7 +374,7 @@ namespace SmartBookingService.Controllers
         [HttpPost]
         [Route("v2/doctors-AdvanceSearch")]
         [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult GetDoctors_AdvanceSearch(FormDataCollection col)
+        public IHttpActionResult GetDoctors_AdvanceSearch_Orignal(FormDataCollection col)
         {
             _resp = new GenericResponse();
             _physicianDb = new PhysicianDB();
@@ -430,7 +431,110 @@ namespace SmartBookingService.Controllers
             if (!string.IsNullOrEmpty(col["Sources"]))
                 ApiSource = col["Sources"].ToString();
 
+
             var allPhysician = _physicianDb.GetPhsiciansAdvanceSearchDT(lang, hospitalId, clinicId, SpecialityName, SubSpecialityName, AssistArea,SpokenLanguage, GeneralSearch, pageNo, pageSize, ApiSource , IsVideo);
+
+            if (allPhysician != null && allPhysician.Rows.Count > 0)
+            {
+                _resp.status = 1;
+                _resp.msg = "Record(s) Found";
+                _resp.response = allPhysician;
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Record not Failed";
+            }
+
+
+
+
+            return Ok(_resp);
+
+        }
+
+
+        [HttpPost]
+        [Route("v2/doctors-AdvanceSearch_test")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetDoctors_AdvanceSearch_NEW(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            _physicianDb = new PhysicianDB();
+
+            string hospitalId = null, clinicId = null, SpecialityName = null, SubSpecialityName = null,
+                AssistArea = null, SpokenLanguage = null, GeneralSearch = null;
+
+            var lang = "EN";
+            var pageNo = -1;
+            var pageSize = 10;
+            var IsVideo = 0;
+
+            if (col != null)
+            {
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                if (!string.IsNullOrEmpty(col["page_no"]))
+                    pageNo = Convert.ToInt32(col["page_no"]);
+
+                if (!string.IsNullOrEmpty(col["page_size"]))
+                    pageSize = Convert.ToInt32(col["page_size"]);
+
+                if (!string.IsNullOrEmpty(col["hospital_id"]))
+                    hospitalId = col["hospital_id"];
+
+                if (!string.IsNullOrEmpty(col["clinic_id"]))
+                    clinicId = col["clinic_id"];
+
+                if (!string.IsNullOrEmpty(col["Speciality_name"]))
+                    SpecialityName = col["Speciality_name"];
+
+
+                if (!string.IsNullOrEmpty(col["SubSpeciality"]))
+                    SubSpecialityName = col["SubSpeciality"];
+
+                if (!string.IsNullOrEmpty(col["AssistArea"]))
+                    AssistArea = col["AssistArea"];
+
+                if (!string.IsNullOrEmpty(col["SpokenLanguage"]))
+                    SpokenLanguage = col["SpokenLanguage"];
+
+                if (!string.IsNullOrEmpty(col["GeneralSearch"]))
+                    GeneralSearch = col["GeneralSearch"];
+
+
+                if (!string.IsNullOrEmpty(col["IsVideo"]))
+                    IsVideo = Convert.ToInt32(col["IsVideo"]);
+            }
+
+
+
+            var ApiSource = "MobileApp";
+            if (!string.IsNullOrEmpty(col["Sources"]))
+                ApiSource = col["Sources"].ToString();
+
+
+
+            //checked If From UAE BRANCH then PASS Nearest Appointment  15-09-2024
+            var ihospital = Convert.ToInt32(hospitalId);
+            var returnFormatedStr = "";
+            if (ihospital > 300 && ihospital < 400)
+            {
+                //_resp.response = allPhysician;
+
+                //string encodedString = "Allergy+%26+Clinical+Immunology";
+                //string decodedString = WebUtility.UrlDecode(encodedString);
+
+                ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                returnFormatedStr = _UAEApiCaller.GetDeptDoctorSlots_NewUAE(lang, ihospital, clinicId , SpecialityName);
+
+            }
+
+
+
+            var allPhysician = _physicianDb.GetPhsiciansAdvanceSearchDT_NEW(lang, hospitalId, clinicId, SpecialityName, SubSpecialityName, AssistArea, SpokenLanguage, GeneralSearch, pageNo, pageSize, ApiSource, IsVideo , returnFormatedStr);
 
             if (allPhysician != null && allPhysician.Rows.Count > 0)
             {

@@ -81,6 +81,39 @@ namespace DataLayer.Data
             return dt;
 
         }
+
+
+        public DataTable GetAllHospitalsDataTable_v3(string lang, string groupentityid, int IsPaymentDetail = 0, int CountryID = 0, double lat = 0, double lng = 0, string ApiSources = "MobileApp", string CallingArea = "", string For_TEST = "1")
+        {
+            var showPaydetails = 0;
+
+            if (IsPaymentDetail == 1)
+                showPaydetails = 1;
+
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", lang),
+                new SqlParameter("@GroupEntityId", groupentityid),
+                new SqlParameter("@IncludePaymentGW", showPaydetails),
+                new SqlParameter("@CountryID", CountryID),
+                new SqlParameter("@lat", lat),
+                new SqlParameter("@lng", lng),
+                new SqlParameter("@CallingArea", CallingArea),
+                new SqlParameter("@FOR_TEST", For_TEST)
+
+            };
+
+
+            string DB_SP_Name = "DBO.Get_Hospitals3_SP";
+
+            //if (ApiSources.ToLower() == "saleforce")
+            //    DB_SP_Name = "SF.Get_Hospitals2_SP";
+            var dt = DB.ExecuteSPAndReturnDataTable(DB_SP_Name);
+            //var totaldistance = GetDistance(21.607480, 39.156425, 21.597247317731494, 39.13322550523333);
+            return dt;
+
+        }
+
         private double GetDistance (double lat , double lng , double lat2, double lng2)
         {
             double e = lat * (Math.PI / 180);

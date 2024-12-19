@@ -508,8 +508,24 @@ namespace SGHMobileApi.Controllers
 
                 if (hospitalId == 9)
                 {
-                    resp.status = 0;
-                    resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    var PatientMRN = col["patient_reg_no"].ToString();
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();                    
+                    var _Data = _loginApiCaller.GetSysMedicalReport_SickLeaveByApi_NewDam(lang, PatientMRN);
+                    //Ahsan 
+
+                    if (_Data != null && _Data.Count>0)
+                    {
+                        var FinalReportList = MapDefineMedicalReport_Dammam(_Data, hospitalId , PatientMRN);
+
+                        resp.status = 1;
+                        resp.msg = "Record(s) Found";
+                        resp.response = FinalReportList;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No Record Found";
+                    }
                     return Ok(resp);
                 }
                 if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
@@ -532,6 +548,86 @@ namespace SGHMobileApi.Controllers
                     resp.status = 1;
                     resp.msg = "Report list found";
                     resp.response = FinalReportList;
+
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Report list not found";
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter";
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v2/GetSys-MedReports_TEMP")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPreDefineReports_TEMP(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+            {
+                var lang = col["lang"];
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+
+
+                if (hospitalId == 9)
+                {
+                    var PatientMRN = col["patient_reg_no"].ToString();
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    var _DataSick = _loginApiCaller.GetSysMedicalReport_SickLeaveByApi_NewDam(lang, PatientMRN);
+                    // AHSAN TEMP
+                    var _DataMedical = _loginApiCaller.GetSysMedicalReport_MedicalReportByApi_NewDam(lang, PatientMRN);
+
+                    var _Data = new List<GetSys_MedicalReport>();
+                    
+                    _Data.AddRange(_DataSick);
+                    _Data.AddRange(_DataMedical);
+
+
+                    if (_Data != null && _Data.Count > 0)
+                    {
+                        var FinalReportList = MapDefineMedicalReport_Dammam(_Data, hospitalId, PatientMRN);
+
+                        resp.status = 1;
+                        resp.msg = "Record(s) Found";
+                        resp.response = FinalReportList;
+                    }
+                    {
+                        resp.status = 0;
+                        resp.msg = "No Record Found";
+                    }
+                    return Ok(resp);
+                }
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    resp.status = 0;
+                    if (lang == "EN")
+                        resp.msg = "Sorry this service not available";
+                    else
+                        resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(resp);
+                }
+
+
+                var patientDb = new PatientDB();
+                var allReportList = patientDb.GetPreDefineMedicalReports_Temp(lang, hospitalId, registrationNo);
+
+
+                if (allReportList != null)
+                {
+                    //var FinalReportList = MapDefineMedicalReport(allReportList, hospitalId);
+                    resp.status = 1;
+                    resp.msg = "Report list found";
+                    resp.response = allReportList;
 
                 }
                 else
@@ -589,6 +685,51 @@ namespace SGHMobileApi.Controllers
             return _ObjList;
         }
 
+
+
+        private List<PreDefineMedReport> MapDefineMedicalReport_Dammam(List<GetSys_MedicalReport> PreDefineReport, int BranchID , string MRN)
+        {
+            List<PreDefineMedReport> _ObjList = new List<PreDefineMedReport>();
+            foreach (var row in PreDefineReport)
+            {
+                PreDefineMedReport _MedicalReport = new PreDefineMedReport();
+
+                _MedicalReport.FromDate = row.fromDate;
+                _MedicalReport.NoOfDays = row.noOfDays;
+                _MedicalReport.Reason_AR = row.Reason_AR;
+                _MedicalReport.RegistrationNo = Convert.ToInt32(MRN);
+                _MedicalReport.ReportType = row.reportType;
+                _MedicalReport.ToDate = row.toDate;
+                _MedicalReport.VisitID = row.EPISODE_NO;
+                _MedicalReport.VisitiDateTime = row.visitDateTime;
+                
+                //_MedicalReport.VisitType = row.visitType;
+                _MedicalReport.VisitType = "OP";
+
+                _MedicalReport.DepartmentName = row.departmentName;
+                _MedicalReport.DoctorName = row.doctorName;
+
+                
+
+                //_MedicalReport.URL = row.URL;
+                var VisitID = "Visit_Id=" + row.EPISODE_NO.ToString() + "&MRN=" + MRN + "&BranchId=" + BranchID;
+
+                var ParmEnc = TripleDESImp.TripleDesEncrypt(VisitID.ToString());
+                ParmEnc = ParmEnc.Replace("+", "$$$");
+
+                _MedicalReport.ReportID_pram = ParmEnc;
+
+                var FinalURL = ConfigurationManager.AppSettings["MEDReportURL"].ToString() + ParmEnc;
+
+                _MedicalReport.URL = FinalURL;
+
+                //_MedicalReport.URL = FinalURL;
+                _MedicalReport.URL = "";
+
+                _ObjList.Add(_MedicalReport);
+            }
+            return _ObjList;
+        }
 
 
 

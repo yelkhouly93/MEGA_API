@@ -229,12 +229,7 @@ namespace SGHMobileApi.Controllers
 
             if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]) 
                 && col["patient_reg_no"] != "0"
-                && !string.IsNullOrEmpty(col["Visit_Id"])
-                && !string.IsNullOrEmpty(col["Doctor_Name"])
-                && !string.IsNullOrEmpty(col["Drug_Name"])
-                && !string.IsNullOrEmpty(col["DEPT_NAME"])
-                && !string.IsNullOrEmpty(col["Prescription_Id"])
-                && !string.IsNullOrEmpty(col["Drug_Id"])
+                && !string.IsNullOrEmpty(col["RowIds"])                
                 )
             {
                 var lang = col["lang"];
@@ -243,34 +238,14 @@ namespace SGHMobileApi.Controllers
                 int errStatus = 0;
                 string errMessage = "";
                 PatientDB _patientDB = new PatientDB();
-
-                var Visit_Id = 0;
-                var Doctor_Name = "";
-                var Drug_Name = "";
-                var DEPT_NAME = "";
-                var Prescription_Id = 0;
-                var Drug_Id = 0;
-
-
                 var EpisodeId = 0;
                 var EpisodeType = "OP";
+                var RowIds = "";
                 try
                 {
                     hospitaId = Convert.ToInt32(col["hospital_id"]);
-                    registrationNo = col["patient_reg_no"];
-                    Visit_Id = Convert.ToInt32(col["Visit_Id"]);
-                    Doctor_Name = col["Doctor_Name"];
-                    Drug_Name = col["Drug_Name"];
-                    DEPT_NAME = col["DEPT_NAME"];
-                    Prescription_Id = Convert.ToInt32(col["Prescription_Id"]);
-                    Drug_Id = Convert.ToInt32(col["Drug_Id"]);
-
-                    //if (!string.IsNullOrEmpty(col["Episode_Id"]))
-                    //    EpisodeId = Convert.ToInt32(col["Episode_Id"]);
-
-                    //if (!string.IsNullOrEmpty(col["Episode_Type"]))
-                    //    EpisodeType = col["Episode_Type"].ToString();
-
+                    registrationNo = col["patient_reg_no"];                    
+                    RowIds = col["RowIds"];
                 }
                 catch (Exception e)
                 {
@@ -300,7 +275,7 @@ namespace SGHMobileApi.Controllers
                     ApiSource = col["Sources"].ToString();
 
 
-                var _allPatientMedDT = _patientDB.Save_Patient_RefillRequest(hospitaId, registrationNo,Visit_Id,Doctor_Name,Drug_Name,DEPT_NAME,Prescription_Id,Drug_Id, ref errStatus, ref errMessage, ApiSource);
+                var _allPatientMedDT = _patientDB.Save_Patient_RefillRequest(hospitaId, registrationNo, RowIds, ref errStatus, ref errMessage, ApiSource);
 
                 _resp.status = errStatus;
                 _resp.msg = errMessage;

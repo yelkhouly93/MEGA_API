@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -327,13 +328,7 @@ namespace SmartBookingService.Controllers.ClientApi
             //var _patientPerscriptionData_Dam = new List<Medical_Perscription_Dam>();
             var _patientPerscriptionData_Dam = _NewData as List<Medical_Perscription_Dam>;
 
-            var _MapDATA = MapPerscriptionINfoModel_NewDamma(_patientPerscriptionData_Dam).OrderByDescending(o =>o.Prescription_Date).ToList ();
-
-            //List<Order> SortedList = objListOrder.OrderBy(o => o.OrderDate).ToList();
-            //if (status == HttpStatusCode.OK)
-            //{
-            //    //_userInfo = MapUserInfoModelToUserInf(_data);
-            //}
+            var _MapDATA = MapPerscriptionINfoModel_NewDamma(_patientPerscriptionData_Dam).OrderByDescending(o =>o.Prescription_Date).ToList ();            
             return _MapDATA;
 
         }
@@ -1070,7 +1065,8 @@ namespace SmartBookingService.Controllers.ClientApi
 
             if (_APIModal != null && _APIModal.Count > 0)
             {
-                for (var i = 0; i < _APIModal.Count; i++)
+                //for (var i = 0; i < _APIModal.Count; i++)
+                for (var i = 0; i < 1; i++) // Just Only One Top One
                 {
                     PatientInsurance _TempModalObj = new PatientInsurance();
                     _TempModalObj.category = _APIModal[i].purchaserDesc;
@@ -1110,6 +1106,99 @@ namespace SmartBookingService.Controllers.ClientApi
             }
             return _ListObj;
         }
+
+
+        public List<InsuranceApprovalList> GetPatientInsurnaceApprovalByApi_NewDam(string lang, string MRN)
+        {
+
+            HttpStatusCode status;
+            //patientData_Dam _userInfo = new patientData_Dam();
+
+            string RegistrationUrl = "http://130.11.2.213/ords/sghd/AUTH/AUTH/AUTH/" + MRN;
+            var _NewData = RestUtility.CallAPI<List<InsuranceApprovalList>>(RegistrationUrl, null);
+
+            var _Data = new List<InsuranceApprovalList>();
+            _Data = _NewData as List<InsuranceApprovalList>;
+
+            return _Data;
+        }
+        public List<GetSys_MedicalReport> GetSysMedicalReport_SickLeaveByApi_NewDam(string lang, string MRN)
+        {
+
+            HttpStatusCode status;
+            //patientData_Dam _userInfo = new patientData_Dam();
+
+            string RegistrationUrl = "http://130.11.2.213/ords/sghd/SICK//REPORT/" + MRN;
+            var _NewData = RestUtility.CallAPI<List<GetSys_MedicalReport>>(RegistrationUrl, null);
+
+            var _Data = new List<GetSys_MedicalReport>();
+            _Data = _NewData as List<GetSys_MedicalReport>;
+
+            return _Data;
+        }
+
+
+
+        public List<GetSys_MedicalReport> GetSysMedicalReport_MedicalReportByApi_NewDam(string lang, string MRN)
+        {
+            HttpStatusCode status;
+            string RegistrationUrl = "http://130.11.2.213/ords/sghd/MEDICAL//REPORT/" + MRN;
+            var _NewData = RestUtility.CallAPI<List<MedicalReport_Damm>>(RegistrationUrl, null);
+            var _Data = new List<MedicalReport_Damm>();
+            _Data = _NewData as List<MedicalReport_Damm>;
+            var _MapData = MapMedicalReport_NewDamma(_Data);
+            return _MapData;
+        }
+
+
+        private List<GetSys_MedicalReport> MapMedicalReport_NewDamma(List<MedicalReport_Damm> _userInfoModel)
+        {
+            List<GetSys_MedicalReport> _userInfo = new List<GetSys_MedicalReport>();
+
+            if (_userInfoModel != null && _userInfoModel.Count > 0)
+            {
+                for (var i = 0; i < _userInfoModel.Count; i++)
+                {
+                    GetSys_MedicalReport _TempModalObj = new GetSys_MedicalReport();              
+
+                    if (_userInfoModel[i].FILE_ID.ToString() != "" && _userInfoModel[i].FILE_ID.ToString() != "0")
+                    {
+                        _TempModalObj.departmentName = "";
+                        _TempModalObj.doctorName = _userInfoModel[i].DOC_TRANS;
+                        _TempModalObj.EPISODE_NO = _userInfoModel[i].EPISODE_NO;
+                        //_TempModalObj.fromDate = _userInfoModel[i].VISIT_START_DATE;
+                        _TempModalObj.fromDate = DateTime.ParseExact(_userInfoModel[i].VISIT_START_DATE, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture);
+                        
+                        //_TempModalObj.noOfDays = "";
+                        _TempModalObj.patientBranch = "SGH-Dammam Branch";
+                        _TempModalObj.patientDOB = _userInfoModel[i].DOBG;
+                        _TempModalObj.patientGender= _userInfoModel[i].SEX;
+                        _TempModalObj.patientName = _userInfoModel[i].PATIENT_NAME.ToString();
+                        _TempModalObj.patientNationality= _userInfoModel[i].NAT.ToString(); 
+
+                        _TempModalObj.Reason_AR ="";
+                        _TempModalObj.RECOMMENDATIONS = _userInfoModel[i].RECOMMENDATION_MED.ToString();
+                        _TempModalObj.registrationNo = _userInfoModel[i].FILE_ID.ToString();
+                        _TempModalObj.reportType = "Medical Report";
+                        _TempModalObj.toDate= DateTime.ParseExact(_userInfoModel[i].VISIT_START_DATE, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture); ;
+
+
+                        _TempModalObj.TREATMENT= _userInfoModel[i].INVESTIGATION_MED;
+                        _TempModalObj.visitDateTime = DateTime.ParseExact(_userInfoModel[i].VISIT_START_DATE, "dd-MM-yyyy HH:mm", CultureInfo.InvariantCulture); ;
+
+                        _TempModalObj.VisitID= _userInfoModel[i].EPISODE_NO;
+
+                        _TempModalObj.visitType = "OP";
+
+
+                        _userInfo.Add(_TempModalObj);
+                    }
+
+                }
+            }
+            return _userInfo;
+        }
+
 
 
 

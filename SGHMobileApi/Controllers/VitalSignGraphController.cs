@@ -103,7 +103,7 @@ namespace SGHMobileApi.Controllers
 
                     var DataDb = new VitalSignDB();
                     var SpDatatable = DataDb.GET_Patient_My_VitalSign_DT(lang, patientId, hospitaId );
-                    if (SpDatatable != null && SpDatatable.Rows.Count > 0)
+                    if (SpDatatable != null )
                     {
                         resp.status = 1;
                         resp.msg = "Record Found";
@@ -127,57 +127,274 @@ namespace SGHMobileApi.Controllers
         }
 
 
+        //[HttpPost]
+        //[Route("v2/Patient-My-VitalSign-Details-Get")]
+        //[ResponseType(typeof(List<GenericResponse>))]
+        //public IHttpActionResult PatientMyVitalSignDetails(FormDataCollection col)
+        //{
+        //    GenericResponse resp = new GenericResponse();
+            
+        //        if (!string.IsNullOrEmpty(col["hospital_id"]) 
+        //            && !string.IsNullOrEmpty(col["patient_reg_no"])
+        //            && !string.IsNullOrEmpty(col["Vital"])
+        //            )
+        //        {
+        //            var lang = "EN";
+        //            if (!string.IsNullOrEmpty(col["lang"]))
+        //                lang = col["lang"];
+
+        //            var hospitaId = Convert.ToInt32(col["hospital_id"]);
+        //            var patientId = Convert.ToInt32(col["patient_reg_no"]);
+        //            var VitalSign = col["Vital"];
+
+        //            if (!Util.OasisBranches.Contains(hospitaId))
+        //            {
+        //                var DataDb = new VitalSignDB();
+        //                var SpDatatable = DataDb.GET_Patient_My_VitalSign_Detail_DT(lang, patientId ,  hospitaId ,VitalSign);
+        //                if (SpDatatable != null && SpDatatable.Rows.Count > 0)
+        //                {
+        //                    resp.status = 1;
+        //                    resp.msg = "Record Found";
+        //                    resp.response = SpDatatable;
+        //                }
+        //                else
+        //                {
+        //                    resp.status = 0;
+        //                    resp.msg = "NO Record Found";
+        //                }
+        //            }
+        //            else
+        //            {
+        //                resp.status = 0;
+        //                resp.msg = "NO Record Found";
+        //            }
+        //        }
+        //        else
+        //        {
+        //            resp.status = 0;
+        //            resp.msg = "Failed : Missing Parameters";
+        //        }
+
+            
+
+
+
+
+        //    return Ok(resp);
+        //}
+
         [HttpPost]
-        [Route("v2/Patient-My-VitalSign-Details-Get")]
+        [Route("v2/Patient-Device-VitalSign-Get")]
         [ResponseType(typeof(List<GenericResponse>))]
-        public IHttpActionResult PatientMyVitalSignDetails(FormDataCollection col)
+        public IHttpActionResult PatientDeviceVitalSignGet(FormDataCollection col)
         {
             GenericResponse resp = new GenericResponse();
-            
-                if (!string.IsNullOrEmpty(col["hospital_id"]) 
-                    && !string.IsNullOrEmpty(col["patient_reg_no"])
-                    && !string.IsNullOrEmpty(col["Vital"])
-                    )
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var patientId = Convert.ToInt32(col["patient_reg_no"]);
+
+                var DataDb = new VitalSignDB();
+                var SpDatatable = DataDb.GET_Patient_My_VitalSign_DT(lang, patientId, hospitaId);
+                if (SpDatatable != null)
                 {
-                    var lang = "EN";
-                    if (!string.IsNullOrEmpty(col["lang"]))
-                        lang = col["lang"];
-
-                    var hospitaId = Convert.ToInt32(col["hospital_id"]);
-                    var patientId = Convert.ToInt32(col["patient_reg_no"]);
-                    var VitalSign = col["Vital"];
-
-                    if (!Util.OasisBranches.Contains(hospitaId))
-                    {
-                        var DataDb = new VitalSignDB();
-                        var SpDatatable = DataDb.GET_Patient_My_VitalSign_Detail_DT(lang, patientId ,  hospitaId ,VitalSign);
-                        if (SpDatatable != null && SpDatatable.Rows.Count > 0)
-                        {
-                            resp.status = 1;
-                            resp.msg = "Record Found";
-                            resp.response = SpDatatable;
-                        }
-                        else
-                        {
-                            resp.status = 0;
-                            resp.msg = "NO Record Found";
-                        }
-                    }
-                    else
-                    {
-                        resp.status = 0;
-                        resp.msg = "NO Record Found";
-                    }
+                    resp.status = 1;
+                    resp.msg = "Record Found";
+                    resp.response = SpDatatable;
                 }
                 else
                 {
                     resp.status = 0;
-                    resp.msg = "Failed : Missing Parameters";
+                    resp.msg = "NO Record Found";
                 }
 
-            
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed : Missing Parameters";
+            }
 
 
+            return Ok(resp);
+        }
+
+        [HttpPost]
+        [Route("v2/Patient-Device-VitalSign-Save")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientDeviceVitalSignSave(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"])
+                && !string.IsNullOrEmpty(col["Vital_Name"])
+                && !string.IsNullOrEmpty(col["Vital_Value"])
+                && !string.IsNullOrEmpty(col["Sources"])
+                )
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var patientId = col["patient_reg_no"];
+                var VitalName = col["Vital_Name"];
+                var VitalValue = col["Vital_Value"];
+                var Source = col["Sources"];
+
+                var VitalValue2 = "";
+                var DeviceName = "";
+                
+
+                if (!string.IsNullOrEmpty(col["Vital_Value2"]))
+                    VitalValue2 = col["Vital_Value2"].ToString();
+
+                if (!string.IsNullOrEmpty(col["Device_Name"]))
+                    DeviceName = col["Device_Name"].ToString();
+
+                int iStatus = 0;
+                string ErrorMsg = "";
+
+                var DataDb = new VitalSignDB();
+                var SpDatatable = DataDb.Save_Patient_Divice_VitalSign(patientId, hospitaId , VitalName,VitalValue , VitalValue2 , DeviceName , Source ,  ref iStatus , ref ErrorMsg);
+
+
+                    resp.status = iStatus;
+                    resp.msg = ErrorMsg;
+                    return Ok(resp);    
+            //if (SpDatatable != null && SpDatatable.Rows.Count > 0)
+            //{
+            //    resp.status = 1;
+            //    resp.msg = "Record Found";
+            //    resp.response = SpDatatable;
+            //}
+            //else
+            //{
+            //    resp.status = 0;
+            //    resp.msg = "NO Record Found";
+            //}
+
+        }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed : Missing Parameters";
+            }
+
+
+            return Ok(resp);
+        }
+
+        [HttpPost]
+        [Route("v2/Patient-VitalSign-Bulk-Save")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientDeviceVitalSignSave_Bulk(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"])                
+                && !string.IsNullOrEmpty(col["Sources"])
+                )
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"].ToString();
+                
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var patientId = col["patient_reg_no"];                
+                var Source = col["Sources"];
+
+                
+                var DeviceName = "";
+                var HEIGHT = "";
+                var HEART_RATE = "";
+                var BODY_TEMPERATURE = "";                
+                var BLOOD_PRESSURE_DIASTOLIC = "";
+                var BLOOD_PRESSURE_SYSTOLIC =   "";
+                var BLOOD_OXYGEN = "";
+                var STEPS = "";
+                var ACTIVE_ENERGY_BURNED = "";
+                var BLOOD_GLUCOSE = "";
+                var BODY_FAT_PERCENTAGE = "";
+                var BODY_MASS_INDEX = "";
+                var SLEEP_IN_BED = "";                
+                var WATER = "";
+                var WEIGHT = "";
+
+
+                if (!string.IsNullOrEmpty(col["HEIGHT"]))
+                    HEIGHT = col["HEIGHT"].ToString();
+
+                if (!string.IsNullOrEmpty(col["HEART_RATE"]))
+                    HEART_RATE = col["HEART_RATE"].ToString();
+
+                if (!string.IsNullOrEmpty(col["BODY_TEMPERATURE"]))
+                    BODY_TEMPERATURE = col["BODY_TEMPERATURE"].ToString();
+
+                if (!string.IsNullOrEmpty(col["BLOOD_PRESSURE_DIASTOLIC"]))
+                    BLOOD_PRESSURE_DIASTOLIC = col["BLOOD_PRESSURE_DIASTOLIC"].ToString();
+
+
+                if (!string.IsNullOrEmpty(col["BLOOD_PRESSURE_SYSTOLIC"]))
+                    BLOOD_PRESSURE_SYSTOLIC = col["BLOOD_PRESSURE_SYSTOLIC"].ToString();
+
+                if (!string.IsNullOrEmpty(col["BLOOD_OXYGEN"]))
+                    BLOOD_OXYGEN = col["BLOOD_OXYGEN"].ToString();
+
+                if (!string.IsNullOrEmpty(col["STEPS"]))
+                    STEPS = col["STEPS"].ToString();
+
+                if (!string.IsNullOrEmpty(col["ACTIVE_ENERGY_BURNED"]))
+                    ACTIVE_ENERGY_BURNED = col["ACTIVE_ENERGY_BURNED"].ToString();
+
+                if (!string.IsNullOrEmpty(col["BLOOD_GLUCOSE"]))
+                    BLOOD_GLUCOSE = col["BLOOD_GLUCOSE"].ToString();
+
+                if (!string.IsNullOrEmpty(col["BODY_FAT_PERCENTAGE"]))
+                    BODY_FAT_PERCENTAGE = col["BODY_FAT_PERCENTAGE"].ToString();
+
+                if (!string.IsNullOrEmpty(col["BODY_MASS_INDEX"]))
+                    BODY_MASS_INDEX = col["BODY_MASS_INDEX"].ToString();
+
+                if (!string.IsNullOrEmpty(col["SLEEP_IN_BED"]))
+                    SLEEP_IN_BED = col["SLEEP_IN_BED"].ToString();
+
+                if (!string.IsNullOrEmpty(col["WATER"]))
+                    WATER = col["WATER"].ToString();
+
+                if (!string.IsNullOrEmpty(col["WEIGHT"]))
+                    WEIGHT = col["WEIGHT"].ToString();
+
+                if (!string.IsNullOrEmpty(col["Device_Name"]))
+                    DeviceName = col["Device_Name"].ToString();
+
+                int iStatus = 0;
+                string ErrorMsg = "";
+
+                var DataDb = new VitalSignDB();
+                var SpDatatable = DataDb.Save_Patient_Divice_VitalSign_BULK(patientId, hospitaId,DeviceName,Source,
+                    HEIGHT,HEART_RATE,BODY_TEMPERATURE,BLOOD_PRESSURE_DIASTOLIC,BLOOD_PRESSURE_SYSTOLIC,
+                    BLOOD_OXYGEN,STEPS,ACTIVE_ENERGY_BURNED,BLOOD_GLUCOSE,BODY_FAT_PERCENTAGE,BODY_MASS_INDEX,SLEEP_IN_BED,
+                    WEIGHT, WATER,ref iStatus, ref ErrorMsg);
+
+
+                resp.status = iStatus;
+                resp.msg = ErrorMsg;
+                return Ok(resp);
+                //if (SpDatatable != null && SpDatatable.Rows.Count > 0)
+                //{
+                //    resp.status = 1;
+                //    resp.msg = "Record Found";
+                //    resp.response = SpDatatable;
+                //}
+                //else
+                //{
+                //    resp.status = 0;
+                //    resp.msg = "NO Record Found";
+                //}
+
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed : Missing Parameters";
+            }
 
 
             return Ok(resp);

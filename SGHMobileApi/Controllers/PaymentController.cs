@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using System.Configuration;
 using RestClient;
 using System.Net;
+using SmartBookingService.Controllers.ClientApi;
 
 namespace SGHMobileApi.Controllers
 {
@@ -106,6 +107,112 @@ namespace SGHMobileApi.Controllers
 
         }
 
+        [HttpPost]
+        [Route("v3/Invoice-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientInvoiceList_V3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var fromdate = "";
+                if (!string.IsNullOrEmpty(col["fromdate"]))
+                    fromdate = col["fromdate"];
+
+                var todate = "";
+                if (!string.IsNullOrEmpty(col["todate"]))
+                    todate = col["todate"];
+
+                var InvoiceType = "";
+                if (!string.IsNullOrEmpty(col["InvoiceType"]))
+                    InvoiceType = col["InvoiceType"];
+                
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+
+
+
+                var EpisodeType = "OP";
+                var EpisodeID = 0;
+
+                if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                    EpisodeType = col["Episode_Type"];
+                if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                    EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    var BillType = "";
+                    if (!string.IsNullOrEmpty(col["InvoiceType"]))
+                        BillType = col["InvoiceType"];
+                    else
+					{
+                        _resp.status = 0;
+                        _resp.msg = "Missing Parameter";
+                        return Ok(_resp);
+
+                    }
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var StrpatientMrn = col["patient_reg_no"];
+                    var PatientData = _UAEApiCaller.GetPatientInvoiceByApi_NewUAE(lang, hospitalId, StrpatientMrn.ToString(), BillType);
+                    if (PatientData != null && PatientData.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = PatientData;
+                    }
+                    return Ok(_resp);
+
+                    //_resp.status = 0;
+                    //if (BillType == "EN")
+                    //    _resp.msg = "Sorry this service not available";
+                    //else
+                    //    _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    //return Ok(_resp);
+                }
+                else if (hospitalId == 9) /*for Dammam BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+
+                }
+                else
+				{
+                    var allData = _paymentDb.GetPatientBillList(lang, hospitalId, registrationNo, fromdate, todate, InvoiceType, EpisodeType, EpisodeID);
+
+                    if (allData != null && allData.Rows.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Success";
+                        _resp.response = allData;
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "No Record Found:";
+                    }
+                }
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
 
 
         [HttpPost]
@@ -134,6 +241,93 @@ namespace SGHMobileApi.Controllers
                     resp.msg = "Inovice found";
                     resp.response = tmpobj;
 
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "No Invoice Found";
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter";
+            }
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
+        [Route("v3/Invoice-pdf-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetTestResultDetailPDF_V3(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["Bill_id"]) && !string.IsNullOrEmpty(col["hospital_id"]))
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var BillId = col["Bill_id"];
+                var tmpobj = new InvoicePDF();
+                var InvoiceType = "";
+
+
+                if (hospitaId >= 301 && hospitaId < 400)
+				{
+                    if (!string.IsNullOrEmpty(col["InvoiceType"]))
+                        InvoiceType = col["InvoiceType"];
+                    else
+					{
+                        resp.status = 0;
+                        resp.msg = "Missing Paramter";                        
+                        return Ok(resp);
+                    }
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var _NewData = _UAEApiCaller.GetPatientInvoice_UAE_PDF(hospitaId, BillId, InvoiceType);
+
+                    tmpobj = new InvoicePDF();
+
+                    if (_NewData != null)
+                    {
+                        if (!string.IsNullOrEmpty(_NewData.Base64))
+                        {
+                            var PdfURL = Util.Convert_Base64_to_PDF(_NewData.Base64, BillId+"_"+ _NewData.Facility);
+                            tmpobj.InvoiceUrl = PdfURL;
+
+                            resp.status = 1;
+                            resp.msg = "Result found";
+                            resp.response = tmpobj;
+                            return Ok(resp);
+                        }
+
+                    }
+
+
+                    resp.status = 0;
+                    resp.msg = "No Result found";
+                    return Ok(resp);
+                }
+                else if (hospitaId == 9)
+				{
+                    resp.status = 0;
+                    resp.msg = "Service not Available";
+                    return Ok(resp);
+                }
+
+
+                string Str_Id = "OpBillID=" + BillId + "&BranchId=" + hospitaId.ToString();
+                var ParmEnc = TripleDESImp.TripleDesEncrypt(Str_Id);
+                var FinalURL = ConfigurationManager.AppSettings["InvoiceURL"].ToString() + ParmEnc;
+
+                tmpobj.InvoiceUrl = Util.ConvertURL_to_PDF(FinalURL, BillId.ToString());
+                //tmpobj.InvoiceUrl = "https://cxmw.sghgroup.com.sa/doctorsprofile/INVpdf/FOInvoiceDuplicateZATCA.pdf";
+                if (tmpobj.InvoiceUrl != null)
+                {
+                    resp.status = 1;
+                    resp.msg = "Inovice found";
+                    resp.response = tmpobj;
                 }
                 else
                 {
@@ -329,6 +523,117 @@ namespace SGHMobileApi.Controllers
             return Ok(_resp);
 
         }
+
+
+
+        // GET: Payment confirmation With Status 
+        [HttpPost]
+        [Route("v3/payment-confirmation")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PaymentConfirmation_V3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["appointment_id"]) 
+                && !string.IsNullOrEmpty(col["bill_type"]) 
+                && !string.IsNullOrEmpty(col["hospital_id"])
+                && !string.IsNullOrEmpty(col["OnlineTransaction_id"])
+                && !string.IsNullOrEmpty(col["Payment_Method"])
+                && !string.IsNullOrEmpty(col["Payment_Status"])
+                )
+            {
+
+                var appointment_id = Convert.ToInt32(col["appointment_id"]);
+                var hospitalID = Convert.ToInt32(col["hospital_id"]);
+                var BillType = col["bill_type"];
+
+
+                var PaymentStatus = col["Payment_Status"];
+
+                var OnlineTrasactionID = "";
+                var PaidAmount = "0";
+                // New Logic tracking ID on 08-05-2023 TRACKING ID
+                var TrackID = 0;
+
+
+                if (hospitalID >= 301 && hospitalID < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available";
+                    return Ok(_resp);
+                }
+
+
+                var PaymentMethod = "V2/API";
+                if (!string.IsNullOrEmpty(col["OnlineTransaction_id"]))
+                    OnlineTrasactionID = col["OnlineTransaction_id"];
+
+                if (!string.IsNullOrEmpty(col["Paid_Amount"]))
+                    PaidAmount = col["Paid_Amount"];
+
+                if (!string.IsNullOrEmpty(col["Payment_Method"]))
+                    PaymentMethod = col["Payment_Method"];
+
+                if (!string.IsNullOrEmpty(col["TracK_ID"]))
+                    TrackID = Convert.ToInt32(col["TracK_ID"].ToString());
+
+
+                var Status = 0;
+                var Msg = "";
+
+                if (BillType != "I" && BillType != "C")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Wrong BillType Format- It should be 'C' For Cash and 'I' for insurance";
+                    return Ok(_resp);
+                }
+
+                SaveBillReturn ReturnObj = new SaveBillReturn ();
+
+                if (PaymentStatus == "Success")
+				{
+                    ReturnObj = _paymentDb.PaymentConfirmation_GenerateBill(hospitalID, appointment_id, BillType, 1, OnlineTrasactionID, PaidAmount, PaymentMethod, TrackID, ref Status, ref Msg);
+                    //if (Status == 1 && datatableAmount.Rows.Count > 0)
+                    if (Status == 1 && ReturnObj != null)
+                    {
+                        if (ReturnObj.GenerateEInvoice == "1")
+                        {
+                            var tempReturnHIS = GenerateInovice_HIS(hospitalID, ReturnObj.BillNo, false);                          
+                        }
+                        _resp.status = 1;
+                        _resp.msg = Msg;
+                        _resp.response = ReturnObj;
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = Msg;
+                    }
+                }
+                else
+				{
+                    // Payment Failed
+                    _paymentDb.PaymentConfirmation_FailedTransaction(OnlineTrasactionID,PaidAmount,TrackID, hospitalID);
+                    _resp.status = 0;
+                    _resp.msg = "Payment Failed , and Record Saved";
+                }
+
+                
+
+               
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters_Test";
+            }
+
+            return Ok(_resp);
+
+        }
+
+
 
         // Genrated Payment Tracking ID
         [HttpPost]
@@ -605,6 +910,115 @@ namespace SGHMobileApi.Controllers
             return Ok(_resp);
 
         }
+
+
+        [HttpPost]
+        [Route("v3/payment-Services-confirmation")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PaymentServicesConfirmation_V3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["Visit_id"]) && !string.IsNullOrEmpty(col["bill_type"]) && !string.IsNullOrEmpty(col["hospital_id"])
+                && !string.IsNullOrEmpty(col["Service_Ids"]) && !string.IsNullOrEmpty(col["Department_Ids"]) && !string.IsNullOrEmpty(col["Item_Ids"]) && !string.IsNullOrEmpty(col["OnlineTransaction_id"]) && !string.IsNullOrEmpty(col["Payment_Method"])
+                && !string.IsNullOrEmpty(col["Payment_Status"])
+                )
+            {
+                var BillType = col["bill_type"];
+
+                if (BillType != "I" && BillType != "C")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Wrong BillType Format- It should be 'C' For Cash and 'I' for insurance";
+                    return Ok(_resp);
+                }
+
+                var Visit_id = Convert.ToInt32(col["Visit_id"]);
+                var hospitalID = Convert.ToInt32(col["hospital_id"]);
+
+                var PaymentStatus = col["Payment_Status"];
+
+                if (hospitalID >= 301 && hospitalID < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+
+                    _resp.msg = "Sorry this service not available";
+
+                    return Ok(_resp);
+                }
+
+                var Service_Ids = col["Service_Ids"];
+                var Department_Ids = col["Department_Ids"];
+                var Item_Ids = col["Item_Ids"];
+
+                var OnlineTrasactionID = "";
+                var PaidAmount = "0";
+                var PaymentMethod = "V2/API";
+                var VisitTypeId = 1;
+
+                if (!string.IsNullOrEmpty(col["OnlineTransaction_id"]))
+                    OnlineTrasactionID = col["OnlineTransaction_id"];
+
+                if (!string.IsNullOrEmpty(col["Paid_Amount"]))
+                    PaidAmount = col["Paid_Amount"];
+
+                if (!string.IsNullOrEmpty(col["VisitType_id"]))
+                    VisitTypeId = Convert.ToInt32(col["VisitType_id"]);
+
+
+                if (!string.IsNullOrEmpty(col["Payment_Method"]))
+                    PaymentMethod = col["Payment_Method"];
+
+                var TrackID = 0;
+                if (!string.IsNullOrEmpty(col["TracK_ID"]))
+                    TrackID = Convert.ToInt32(col["TracK_ID"].ToString());
+
+
+                var Status = 0;
+                var Msg = "";
+
+
+                if (PaymentStatus == "Success")
+				{
+
+                    var ReturnObj = _paymentDb.PaymentServicesConfirmation_GenerateBill(hospitalID, Visit_id, VisitTypeId, BillType, Service_Ids, Department_Ids, Item_Ids, 1, OnlineTrasactionID, PaidAmount, PaymentMethod, TrackID, ref Status, ref Msg);
+
+
+                    if (Status == 1 && ReturnObj != null)
+                    {
+                        Generate_ALL_HIS_SERVICES_Inovice(ReturnObj, hospitalID);
+                        _resp.status = 1;
+                        _resp.msg = Msg;
+                        _resp.response = ReturnObj;
+
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = Msg;
+                    }
+                }
+                else
+				{
+                    // Payment Failed
+                    _paymentDb.PaymentConfirmation_FailedTransaction(OnlineTrasactionID, PaidAmount, TrackID, hospitalID);
+                    _resp.status = 0;
+                    _resp.msg = "Payment Failed , and Record Saved";
+                }
+                    
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
 
         public void Generate_ALL_HIS_SERVICES_Inovice(List<SaveBillReturn> ObjList , int hospitalID)
         {
