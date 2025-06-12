@@ -661,6 +661,284 @@ namespace RestClient
 
         }
 
+
+        public static object CallAPI_POST_UAE_SickLeavePDF<T>(string url, object requestBodyObject, bool IsForUAE = true) where T : class
+        {
+            try
+            {
+
+                // Initialize an HttpWebRequest for the current URL.
+                var webReq = (HttpWebRequest)WebRequest.Create(url);
+
+                webReq.Method = "POST";
+                webReq.Accept = "application/json";
+
+
+
+
+                if (IsForUAE)
+                {
+                    var apiToken = GetToken("UAE");
+
+                    if (apiToken != null)
+                    {
+                        webReq.Headers["Authorization"] = "Bearer " + apiToken;
+                    }
+                }
+
+
+
+                //Serialize request object as JSON and write to request body
+                if (requestBodyObject != null)
+                {
+
+                    var requestBody = JsonConvert.SerializeObject(requestBodyObject);
+
+                    webReq.ContentLength = requestBody.Length;
+                    webReq.ContentType = "application/json";
+
+                    var streamWriter = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII);
+                    streamWriter.Write(requestBody);
+                    streamWriter.Close();
+                }
+
+
+                var response = webReq.GetResponse();
+
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (response == null)
+                {
+
+                    return null;
+                }
+
+                status = ((HttpWebResponse)response).StatusCode;
+
+                var streamReader = new StreamReader(response.GetResponseStream());
+
+                var responseContent = streamReader.ReadToEnd().Trim();
+
+
+                
+
+
+
+                if (status == HttpStatusCode.OK)
+                {
+                    //AHSAN NEW Change 
+                    var resp = new GenericResponse();
+                    resp = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
+                    
+                    var responseOut = resp;
+                    if (resp.status == 1)
+                    {                        
+                        if (resp.response != null)
+                        {
+                            var tempstr = resp.response.ToString();
+                            var temo22 = JsonConvert.DeserializeObject<dynamic>(resp.response.ToString());
+                            var firstObject = temo22[0];
+                            return firstObject;
+                        }
+                    }
+                    return null;
+                }
+                else
+                {
+                    //var resp = new GenericResponse();
+                    //resp.status = (int)status;
+                    //resp.msg = Msg;
+                    //responseOut = resp;
+                    return null;
+                }
+
+                return null;
+            }
+            catch (WebException wex)
+            {
+                if (wex.Response != null)
+                {
+                    using (var errorResponse = (HttpWebResponse)wex.Response)
+                    {
+                        using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                        {
+                            string errorContennt = reader.ReadToEnd().Trim();
+                            var jsonObject = JsonConvert.DeserializeObject<PostResponse>(errorContennt);
+
+                            var status = ((System.Net.HttpWebResponse)(wex.Response)).StatusCode;
+                            Msg = jsonObject.errorMessage;
+                            var resp = new GenericResponse();
+                            resp.status = (int)status;
+                            resp.msg = Msg;
+
+                            //return jsonObject;
+                            return null;
+                        }
+                    }
+
+                }
+
+                //status = HttpStatusCode.InternalServerError;
+                var resp2 = new GenericResponse();
+                resp2.status = (int)HttpStatusCode.InternalServerError;
+                try
+                {
+                    resp2.msg = wex.Message;
+
+                }
+                catch (Exception ex)
+                {
+                    resp2.msg = "UAE InternalServerError";
+                }
+
+                return null;
+            }
+
+        }
+
+
+
+        public static object CallAPI_POST_UAE_INVOICE<T>(string url, object requestBodyObject, bool IsForUAE = true) where T : class
+        {
+            try
+            {
+
+                // Initialize an HttpWebRequest for the current URL.
+                var webReq = (HttpWebRequest)WebRequest.Create(url);
+
+                webReq.Method = "POST";
+                webReq.Accept = "application/json";
+
+
+
+
+                if (IsForUAE)
+                {
+                    var apiToken = GetToken("UAE");
+
+                    if (apiToken != null)
+                    {
+                        webReq.Headers["Authorization"] = "Bearer " + apiToken;
+                    }
+                }
+
+
+
+                //Serialize request object as JSON and write to request body
+                if (requestBodyObject != null)
+                {
+
+                    var requestBody = JsonConvert.SerializeObject(requestBodyObject);
+
+                    webReq.ContentLength = requestBody.Length;
+                    webReq.ContentType = "application/json";
+
+                    var streamWriter = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII);
+                    streamWriter.Write(requestBody);
+                    streamWriter.Close();
+                }
+
+
+                var response = webReq.GetResponse();
+
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (response == null)
+                {
+
+                    return null;
+                }
+
+                status = ((HttpWebResponse)response).StatusCode;
+
+                var streamReader = new StreamReader(response.GetResponseStream());
+
+                var responseContent = streamReader.ReadToEnd().Trim();
+
+                if (status == HttpStatusCode.OK)
+                {
+
+                    //AHSAN NEW Change 
+                    var resp = new GenericResponse();
+
+                    resp = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
+                    //var jsonObject = JsonConvert.DeserializeObject<T>(resp.response);
+
+
+                    if (resp.response != null)
+                    {
+                        //var jsonObject = (T)resp.response;
+                        if (resp.response != null)
+                        {
+                            //var jsonObject3 = JsonConvert.DeserializeObject<List<LabRad_PDF_UAE>>(resp.Reports.ToString());
+                            var jsonObject2 = JsonConvert.DeserializeObject<T>(resp.response.ToString());
+                            return jsonObject2;
+                        }
+
+                    }
+                    else
+                    {
+                        //var Errorresp = new ErrorResponse_ERROR();
+
+                        //Errorresp = JsonConvert.DeserializeObject<ErrorResponse_ERROR>(resultContent);
+                        return null;
+
+                    }
+                }
+                else
+                {
+                    //var resp = new GenericResponse();
+                    //resp.status = (int)status;
+                    //resp.msg = Msg;
+                    //responseOut = resp;
+                    return null;
+                }
+
+                return null;
+            }
+            catch (WebException wex)
+            {
+                if (wex.Response != null)
+                {
+                    using (var errorResponse = (HttpWebResponse)wex.Response)
+                    {
+                        using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                        {
+                            string errorContennt = reader.ReadToEnd().Trim();
+                            var jsonObject = JsonConvert.DeserializeObject<PostResponse>(errorContennt);
+
+                            var status = ((System.Net.HttpWebResponse)(wex.Response)).StatusCode;
+                            Msg = jsonObject.errorMessage;
+                            var resp = new GenericResponse();
+                            resp.status = (int)status;
+                            resp.msg = Msg;
+
+                            //return jsonObject;
+                            return null;
+                        }
+                    }
+
+                }
+
+                //status = HttpStatusCode.InternalServerError;
+                var resp2 = new GenericResponse();
+                resp2.status = (int)HttpStatusCode.InternalServerError;
+                try
+                {
+                    resp2.msg = wex.Message;
+
+                }
+                catch (Exception ex)
+                {
+                    resp2.msg = "UAE InternalServerError";
+                }
+
+                return null;
+            }
+
+        }
+
+
         public static object CallAPI_POST_UAE_Appointment<T>(string url, object requestBodyObject, out AppointmentPostResponse responseOut, bool IsForUAE = false) where T : class
         {
             try

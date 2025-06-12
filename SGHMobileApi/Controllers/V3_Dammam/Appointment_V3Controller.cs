@@ -1257,16 +1257,16 @@ namespace SmartBookingService.Controllers
                             //    Util.GenerateVideoCallUrl(lang, hospitaId, scheduleDayId, patientId, timeTo.AddHours(2), doctorName, ref errMessage, ref errStatus);
                             //}
                             resp.status = 1;
-                            //resp.msg = errMessage;
+                            resp.msg = errMessage;
                             //testing
-                            resp.msg = "Reschedule Successfully";
+                            //resp.msg = "Reschedule Successfully";
                             resp.response = errStatus;
                         }
                         else
                         {
                             resp.status = 0;
-                            //resp.msg = errMessage;
-                            resp.msg = "Reschedule Failed";
+                            resp.msg = errMessage;
+                            //resp.msg = "Reschedule Failed";
                         }
                     }
                     catch (Exception ex)

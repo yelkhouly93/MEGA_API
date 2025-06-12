@@ -81,6 +81,74 @@ namespace SGHMobileApi.Controllers
 
 
         [HttpPost]
+        [Route("v3/Agreement-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetLegalAgreement_V3(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["AgreementName"]))
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+
+                var AggrementName = "";
+                if (!string.IsNullOrEmpty(col["AgreementName"]))
+                    AggrementName = col["AgreementName"];
+
+                
+
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+
+
+                var MRN = "";
+                if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+                    MRN = col["patient_reg_no"];
+
+
+                if (AggrementName == "Mobile_Policy" || AggrementName == "Mobile_TMC")
+                {
+                    if (string.IsNullOrEmpty(col["patient_reg_no"]))
+					{
+                        _resp.status = 0;
+                        _resp.msg = "Please provide the Patient MRN";
+                        return Ok(_resp);
+                    }
+
+                }
+
+
+                var allData = _AggreementDb.GetAgreementContent_v3(lang, hospitalId, AggrementName , MRN);
+
+
+                if (allData != null && allData.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = "Success";
+                    _resp.response = allData;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "No Record Found:";
+                }
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
+
+        [HttpPost]
         [Route("v2/Agreement-Acceptance-Save")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult SaveLegalAgreement(FormDataCollection col)
@@ -99,7 +167,9 @@ namespace SGHMobileApi.Controllers
                     ActionId = Convert.ToInt32 (col["ActionId"]);
 
                 var hospitalId = Convert.ToInt32(col["hospital_id"]);
-                var MRN = Convert.ToInt32(col["patient_reg_no"]);
+                //var MRN = Convert.ToInt32(col["patient_reg_no"]);
+
+                var MRN = col["patient_reg_no"];
                 var Source = col["Source"]; 
 
 
@@ -123,6 +193,9 @@ namespace SGHMobileApi.Controllers
 
         }
 
+
+
+        
 
 
     }

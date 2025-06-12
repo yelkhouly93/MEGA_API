@@ -730,9 +730,6 @@ namespace SGHMobileApi.Controllers
                     {
                         IdType = "MRN";
                         IdValue = patientMrn.ToString();
-
-
-
                     }
                     else
                     {
@@ -1134,38 +1131,356 @@ namespace SGHMobileApi.Controllers
         }
 
 
-   //     [HttpPost]
-   //     [Route("v4/UAE-SMS")]
-   //     [ResponseType(typeof(List<GenericResponse>))]
-   //     public IHttpActionResult TEST_UAE_SMS(FormDataCollection col)
-   //     {
-   //         var resp = new GenericResponse();
-   //         if (!string.IsNullOrEmpty(col["mobile"]) && !string.IsNullOrEmpty(col["sms_text"])
-   //             )
-			//{
+        public RegistrationData_PatientAdd OpenPatientFile (RegisterPatientUAE PatientData)
+		{
+            var ObjectReturn = new RegistrationData_PatientAdd();
+
+            var CountryID = PatientData.CountryId;
+
+            var PatientMRN = "";
+
+            if (CountryID == 3) /*for UAE*/
+            {
+                var registerPatientUAE = new RegisterPatientUAE();
+                registerPatientUAE.CurrentCity = PatientData.CurrentCity;
+                registerPatientUAE.HospitaId = PatientData.HospitaId;
+                registerPatientUAE.IdExpiry = PatientData.IdExpiry;
+                registerPatientUAE.IdType = PatientData.IdType;
+                registerPatientUAE.PatientAddress = PatientData.PatientAddress;
+                registerPatientUAE.PatientBirthday = PatientData.PatientBirthday;
+                registerPatientUAE.PatientEmail = PatientData.PatientEmail;
+                registerPatientUAE.PatientFamilyName = PatientData.PatientFamilyName;
+                registerPatientUAE.PatientFirstName = PatientData.PatientFirstName;
+                registerPatientUAE.PatientGender = PatientData.PatientGender;
+
+                if (!String.IsNullOrEmpty(PatientData.PatientId))
+				{
+                    registerPatientUAE.PatientId = PatientData.PatientId.ToString();
+                }
+                else
+				{
+                    registerPatientUAE.PatientId = null;
+
+                }
                 
-   //             var mobileNumber = Convert.ToInt64(col["mobile"]);
-   //             var smsText = col["sms_text"].ToString();
 
-			//	//var sms1 = (new SmsApi().SendSms(mobileNumber, smsText));
+                registerPatientUAE.PatientLastName = PatientData.PatientLastName;
+                registerPatientUAE.PatientMaritalStatusId = PatientData.PatientMaritalStatusId;
+                registerPatientUAE.PatientMiddleName = PatientData.PatientMiddleName;
+                registerPatientUAE.PatientNationalId = PatientData.PatientNationalId;
+                registerPatientUAE.PatientNationalityId = PatientData.PatientNationalityId;
+                registerPatientUAE.PatientPhone = PatientData.PatientPhone;
+                registerPatientUAE.PatientTitleId = PatientData.PatientTitleId;
+                registerPatientUAE.skipDuplicateCheck = false;
 
-			//	//resp.error_type = sms1.ErrorMessage.ToString();
-			//	//resp.msg = sms1.Response.ToString();
-			//	//if (sms1.ErrorFlag)
-			//	//	resp.status = 1;
-			//	//else
-			//	//	resp.status = 0;
+                ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                RegistrationPostResponse ReturnObject;
+                var APiResilts = _UAEApiCaller.PatientAddApi_NewUAE(registerPatientUAE, out ReturnObject);
 
-			//}
-			//else
-   //         {
-   //             resp.error_type = "Missing Parameters";
-   //             resp.msg = "Missing Parameters.";
-   //             resp.status = 0;
-   //         }
+                if (APiResilts && !string.IsNullOrEmpty(ReturnObject.Mrn))
+                {   
+                    PatientMRN = ReturnObject.Mrn;
+                }
+                else
+                {
+                    return null;
+                }
 
-   //         return Ok(resp);
-   //     }
+
+            }
+            else  // Currently For KSA
+            {
+                if (PatientData.HospitaId == 9)
+                {   
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    PostResponse_AddPatient ReturnObject;
+                    var APiResilts = _loginApiCaller.PatientAddApi_NewDammam_ForRegistration(PatientData, out ReturnObject);
+
+                    if (APiResilts)
+                    {
+                        PatientMRN = ReturnObject.data.mrn;
+                    }
+                    else
+					{
+                        return null;
+					}                    
+                }
+                else
+                {
+                    var patientDb = new PatientDB();
+                    var NEwIntregistrationNo = 0;
+                    var status = 0;
+                    var msg = "";
+                    var successType = "";                    
+                    var activationNo = 0;
+                    var errorType = "";
+
+                    var registerPatientResFailure = patientDb.RegisterNewPatient_V5(PatientData, ref status, ref msg, ref errorType, ref successType, ref NEwIntregistrationNo, ref activationNo, "MobileApp");
+                                       
+                    
+                    if (status != 1)
+                    {
+                        return null;
+                    }
+                    else
+					{
+                        PatientMRN = NEwIntregistrationNo.ToString();
+                    }
+                }
+
+            }
+
+            if (string.IsNullOrEmpty(PatientMRN))
+			{
+                return null;
+			}
+
+            ObjectReturn.BranchID = PatientData.HospitaId;
+            ObjectReturn.PatientNationalID = PatientData.PatientNationalId;
+            ObjectReturn.PatientPhone = PatientData.PatientPhone;
+            ObjectReturn.RegistrationID = PatientMRN;
+
+            return ObjectReturn;
+        }
+
+        [HttpPost]
+        [Route("v5/verify-otp")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetVerificationCode_V5(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["verification_code"]) && !string.IsNullOrEmpty(col["patient_reg_no"])
+                && !string.IsNullOrEmpty(col["country_ID"])
+                && !string.IsNullOrEmpty(col["Reason_Code"])
+                )
+            {
+                // Ahsan testing Change only Given MRN on Verification
+                var loginDb = new Login2DB();
+
+                var lang = "EN";
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                var Countryid = Convert.ToInt32(col["country_ID"]);
+                var patientMrn = col["patient_reg_no"];
+                var patientPhone = col["patient_phone"];
+                var patientNationalId = col["patient_national_id"];
+                var verificationCode = col["verification_code"];
+
+                var CodeReason = Convert.ToInt32(col["Reason_Code"]);
+
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var errStatus = 0;
+                var errMessage = "";
+                var IsVerified = false;
+                var patientDb = new PatientDB();
+
+                if (CodeReason == 6)
+				{
+                    // Validate the OTP First then Create the Patient File in Respective Branch
+                    var verifiedCode2 = patientDb.VerifyOTP_ForRegistation(hospitalId, patientMrn, patientPhone, verificationCode , 6);
+                    if ((verifiedCode2 != null && verifiedCode2 == verificationCode))
+                    {
+                        // Now Create the Patient File in the Branch
+                        IsVerified = true;
+                        var PatientRegistrationData =  patientDb.Add_PatientFile(patientMrn);
+
+                        if (PatientRegistrationData != null)
+						{
+                            var PData = OpenPatientFile(PatientRegistrationData);
+
+                            if (PData != null)
+							{
+                                hospitalId = PData.BranchID;
+                                patientMrn = PData.RegistrationID;
+                                patientNationalId = PData.PatientNationalID;
+                            }
+                            else
+							{
+                                resp.msg = "Failed, To Create File! Please try to Open File Again";
+                                resp.status = 0;
+                                return Ok(resp);
+                            }
+
+                            
+                        }
+                        else
+						{
+                            resp.msg = "Failed, NO Data Found! Please try to Open File Again";
+                            resp.status = 0;
+                            return Ok(resp);
+                        }                        
+                    }
+
+                }
+
+                //UserInfo userInfo = loginDb.ValidateLoginUser(lang, hospitalId, null, patientMrn, patientNationalId, ref activationNo, ref errStatus, ref errMessage);
+                var userInfo = new UserInfo_New();
+                if (hospitalId == 9)
+                {
+                    var apiCaller = new PatientApiCaller();
+                    var IdType = "";
+                    var IdValue = "";
+                    IdType = "MRN";
+                    IdValue = patientMrn.ToString();
+
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                    // TESTING
+                    //userInfo.phone = "0581178188";
+
+                }
+                else
+                {
+                    if (Countryid == 2) /*for KSa BRANCHES*/
+                    {
+                        userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, patientMrn, patientNationalId, ref errStatus, ref errMessage);
+                    }
+                    else if (Countryid == 3) /*for UAE BRANCHES*/
+                    {
+                        ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                        var IdType = "";
+                        var IdValue = "";
+                        IdType = "MRN";
+                        IdValue = patientMrn.ToString();
+                        userInfo = _UAEApiCaller.GetPatientDataByApi_NewUAE(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage);
+                    }
+
+                }
+
+
+
+                
+                //var dt = patientDb.GetPatientDataDT(lang, hospitalId, Convert.ToInt32(patientMrn), ref errStatus, ref errMessage);
+
+                if (string.IsNullOrEmpty(col["patient_reg_no"]))
+                {
+                    // Get MRN using 
+                    patientMrn = userInfo.registration_no;
+
+                }
+                if (string.IsNullOrEmpty(col["patient_phone"]))
+                {
+                    // Get PHONE using 
+                    patientPhone = userInfo.phone;
+
+                }
+
+                var verifiedCode = "";
+                if (!IsVerified)
+                    verifiedCode  = patientDb.VerifyOTP(hospitalId, patientMrn, patientPhone, verificationCode);
+
+                if ((verifiedCode != null && verifiedCode == verificationCode ) || IsVerified)
+                {
+
+                    //var dt = patientDb.GetPatientDataDT_V2(lang, hospitalId, Convert.ToInt32 (patientMrn), ref errStatus, ref errMessage);
+                    resp.response = userInfo;
+                    resp.msg = "OTP Verified";
+                    resp.status = 1;
+                }
+                else
+                {
+                    //resp.error_type = "invalid_or_mismatched_otp";
+                    //resp.msg = "OTP Not Verified V3 - 1";
+                    //resp.status = 0;
+                    if (verifiedCode == "EXPIRED")
+                    {
+                        resp.error_type = "Exceed Limit";
+                        resp.msg = "Verification Limit Exceed, Please Login Again!";
+                        resp.status = 0;
+
+
+                    }
+                    else
+                    {
+                        resp.error_type = "invalid_or_mismatched_otp";
+                        resp.msg = "OTP Not Verified....";
+                        resp.status = 0;
+
+                    }
+                }
+            }
+            else if (!string.IsNullOrEmpty(col["verification_code"]) && !string.IsNullOrEmpty(col["patient_phone"]))
+            {
+                //new Change Logic For Mobile Only                 
+                var patientDb = new PatientDB();
+                var lang = "EN";
+                var hospitalId = 0;   //Optional
+
+                var patientPhone = col["patient_phone"];
+                var verificationCode = col["verification_code"];
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                if (!string.IsNullOrEmpty(col["hospital_id"]))
+                    hospitalId = Convert.ToInt32(col["hospital_id"]);
+
+
+                var errStatus = 0;
+                var errMessage = "";
+
+                var verifiedCode = patientDb.VerifyOTP_MobileOnly(patientPhone, verificationCode);
+
+                if (verifiedCode != null && verifiedCode == verificationCode)
+                {
+                    resp.msg = "OTP Verified";
+                    resp.status = 1;
+
+                    var userInfo = patientDb.GetPatientList_ByMobile(lang, patientPhone, hospitalId, ref errStatus, ref errMessage);
+                    resp.response = userInfo;
+                }
+                else
+                {
+                    resp.error_type = "invalid_or_mismatched_otp";
+                    resp.msg = "OTP Not Verified..";
+                    resp.status = 0;
+                }
+            }
+            else
+            {
+                resp.error_type = "Missing Parameters";
+                resp.msg = "OTP Not Verified.";
+                resp.status = 0;
+            }
+
+            return Ok(resp);
+        }
+
+
+
+
+        //     [HttpPost]
+        //     [Route("v4/UAE-SMS")]
+        //     [ResponseType(typeof(List<GenericResponse>))]
+        //     public IHttpActionResult TEST_UAE_SMS(FormDataCollection col)
+        //     {
+        //         var resp = new GenericResponse();
+        //         if (!string.IsNullOrEmpty(col["mobile"]) && !string.IsNullOrEmpty(col["sms_text"])
+        //             )
+        //{
+
+        //             var mobileNumber = Convert.ToInt64(col["mobile"]);
+        //             var smsText = col["sms_text"].ToString();
+
+        //	//var sms1 = (new SmsApi().SendSms(mobileNumber, smsText));
+
+        //	//resp.error_type = sms1.ErrorMessage.ToString();
+        //	//resp.msg = sms1.Response.ToString();
+        //	//if (sms1.ErrorFlag)
+        //	//	resp.status = 1;
+        //	//else
+        //	//	resp.status = 0;
+
+        //}
+        //else
+        //         {
+        //             resp.error_type = "Missing Parameters";
+        //             resp.msg = "Missing Parameters.";
+        //             resp.status = 0;
+        //         }
+
+        //         return Ok(resp);
+        //     }
 
 
 

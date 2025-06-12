@@ -374,7 +374,7 @@ namespace SmartBookingService.Controllers.ClientApi
             return _ListObj;
         }
 
-        public void GenerateOTP_V3 (string hospitalID ,string MOBILE_NO,string MRN,string NationalId,string Source, ref int activationNo, ref int Er_Status, ref string Msg , int CountryId = 0)
+        public void GenerateOTP_V3 (string hospitalID ,string MOBILE_NO,string MRN,string NationalId,string Source, ref int activationNo, ref int Er_Status, ref string Msg , int CountryId = 0 , int ReasonCode = 1)
 		{
             DB.param = new SqlParameter[]
                 {
@@ -386,7 +386,8 @@ namespace SmartBookingService.Controllers.ClientApi
                 new SqlParameter("@ACtivationNo", SqlDbType.Int),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
                 new SqlParameter("@Msg", SqlDbType.NVarChar, 500),
-                new SqlParameter("@CountryID", CountryId)
+                new SqlParameter("@CountryID", CountryId),
+                new SqlParameter("@VerificationCodeReason", ReasonCode)
                 };
             DB.param[5].Direction = ParameterDirection.Output;
             DB.param[6].Direction = ParameterDirection.Output;
@@ -638,6 +639,91 @@ namespace SmartBookingService.Controllers.ClientApi
                 ,secondNameAr =""
                 ,thirdName = ""
                 ,thirdNameAr = ""                
+            };
+            var _NewData = RestUtility.CallAPI_POST<PostResponse_AddPatient>(RegistrationUrl, _accData, out status);
+
+            ReturnObject = new PostResponse_AddPatient();
+            ReturnObject = _NewData as PostResponse_AddPatient;
+
+            if (status == HttpStatusCode.OK)
+                return true;
+
+            return false;
+
+        }
+
+
+        public bool PatientAddApi_NewDammam_ForRegistration(RegisterPatientUAE registerPatient, out PostResponse_AddPatient ReturnObject)
+        {
+            HttpStatusCode status;
+            string RegistrationUrl = "http://130.11.2.213:30005/createPatient";
+            CreatePatient _accData = new CreatePatient();
+
+            //ReturnObject = new PostResponse();
+            var NationalityCode = 0;
+            GetNationalityCode(registerPatient.HospitaId, registerPatient.PatientNationalityId, ref NationalityCode);
+
+
+            var TempPcell = registerPatient.PatientPhone.ToString();
+
+            // change the the Format to
+            TempPcell = TempPcell.Replace("%2B966", "");
+            TempPcell = TempPcell.Replace("+", "");
+
+            //TempPcell = TempPcell.Substring(0,3).Replace("966", "");                            
+            if (TempPcell.Substring(0, 5) == "00966")
+            {
+                TempPcell = TempPcell.Substring(5, TempPcell.Length - 5);
+            }
+            if (TempPcell.Substring(0, 3) == "966")
+            {
+                TempPcell = TempPcell.Substring(3, TempPcell.Length - 3);
+            }
+            var FirstChar = TempPcell.Substring(0, 1);
+            if (FirstChar != "0")
+            {
+                TempPcell = "0" + TempPcell;
+            }
+
+
+            string formatString = "yyyy-MM-dd";
+            //string DOB = DateTime.ParseExact(, formatString, null).ToString();
+            string DOB = registerPatient.PatientBirthday.ToString("yyyy-MM-dd");
+            //_TempModalObj.appDate = DateTime.ParseExact(_APIModal[i].appDate, formatString, null).ToString(); ;
+
+
+            var PGENDER = "M";
+            if (registerPatient.PatientGender == 1)
+                PGENDER = "F";
+            _accData = new CreatePatient()
+            {
+                familyName = registerPatient.PatientLastName
+                ,
+                familyNameAr = ""
+                ,
+                firstName = registerPatient.PatientFirstName
+                ,
+                firstNameAr = ""
+                ,
+                gender = PGENDER
+                ,
+                nationality = NationalityCode.ToString()
+                ,
+                patient_document_id = registerPatient.PatientNationalId.ToString()
+                ,
+                phone = TempPcell
+                ,
+                dateofbirth = DOB
+                ,
+                religion = "8"
+                ,
+                secondName = registerPatient.PatientMiddleName
+                ,
+                secondNameAr = ""
+                ,
+                thirdName = ""
+                ,
+                thirdNameAr = ""
             };
             var _NewData = RestUtility.CallAPI_POST<PostResponse_AddPatient>(RegistrationUrl, _accData, out status);
 

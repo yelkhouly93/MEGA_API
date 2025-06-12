@@ -27,7 +27,20 @@ namespace DataLayer.Data
             return dataTable;
         }
 
-        public void SaveAgrrementAcceptance(int BranchID, string AgrrementName, int MRN, int ActionId,string Source, ref int errStatus, ref string errMessage)
+        public DataTable GetAgreementContent_v3(string lang, int BranchId, string AggrementName , string MRN = null)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@Lang", lang),
+                new SqlParameter("@BranchId", BranchId),
+                new SqlParameter("@AgreementName", AggrementName),
+                new SqlParameter("@MRN", MRN)
+            };
+            var dataTable = DB.ExecuteSPAndReturnDataTable("dbo.Get_Agreement_Detail_SP");
+            return dataTable;
+        }
+
+        public void SaveAgrrementAcceptance(int BranchID, string AgrrementName, string MRN, int ActionId,string Source, ref int errStatus, ref string errMessage)
         {
             DB.param = new SqlParameter[]
             {

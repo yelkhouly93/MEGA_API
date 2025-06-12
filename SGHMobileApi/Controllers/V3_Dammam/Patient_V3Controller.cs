@@ -1127,18 +1127,12 @@ namespace SmartBookingService.Controllers
                     }
                     else
 					{
-
                         if (BookinghospitalId == 9) // Booking IN DAMMAM
                         {
                             // Call dammam API Function fill list
-
-
-
                             if (hospitalId == 9) // Patient From Damam
                             {
-
                                 //var apiCaller = new PatientApiCaller();
-                                
                                 userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
                                 IdType = "MOB";
                                 IdValue = userInfo.phone.ToString();
@@ -1683,6 +1677,297 @@ namespace SmartBookingService.Controllers
                     //resp.msg = msg;
                     //resp.response = registerPatientResFailure;
                     //resp.status = 0;
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed! Missing Parameters";
+            }
+
+
+            return Ok(resp);
+        }
+
+        [HttpPost]
+        [Route("v5/patient-add")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PostNewPatientRegistration_V5(FormDataCollection col)
+        {
+            var registerPatient = new RegisterPatient2();
+            List<RegistePatientResponseFailure> registerPatientResFailure;
+            
+            RegisterPatientResponse resp = new RegisterPatientResponse();
+            
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_first_name"]) && !string.IsNullOrEmpty(col["patient_last_name"])
+                && !string.IsNullOrEmpty(col["patient_phone"]) && !string.IsNullOrEmpty(col["patient_national_id"]) && !string.IsNullOrEmpty(col["patient_birthday"])
+                && !string.IsNullOrEmpty(col["patient_gender"]) && !string.IsNullOrEmpty(col["patient_nationality_id"]) && !string.IsNullOrEmpty(col["patient_marital_status_id"])
+                && !string.IsNullOrEmpty(col["country_ID"])
+                )
+            {
+                var CountryID = Convert.ToInt32(col["country_ID"]);
+                var str_New_MRN = "";
+
+                if (CountryID == 3) /*for UAE*/
+                {
+                    if (
+                        string.IsNullOrEmpty(col["Current_City"])
+                        || string.IsNullOrEmpty(col["patient_address"])
+                        || string.IsNullOrEmpty(col["IdType"])
+                        || string.IsNullOrEmpty(col["IdExpiry"])
+                        )
+                    {
+                        resp.status = 0;
+                        resp.msg = "Failed! Missing Parameters";
+                        return Ok(resp);
+
+                    }
+                }
+
+
+                var checkdateTime = Convert.ToDateTime(col["patient_birthday"]);
+                var YEARPART = checkdateTime.Year;
+                if (YEARPART <= 1900)
+                {
+                    resp.status = 0;
+                    resp.msg = "Birth Date should be in Gregorian : -- ";
+                    return Ok(resp);
+                }
+                // Testing
+                //registerPatient.PatientMaritalStatusId = 6;
+                try
+                {
+                    registerPatient.HospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                    registerPatient.PatientBirthday = Convert.ToDateTime(col["patient_birthday"]);
+
+
+                    registerPatient.PatientGender = Convert.ToInt32(col["patient_gender"]);
+                    registerPatient.PatientNationalityId = Convert.ToInt32(col["patient_nationality_id"]);
+                    if (CountryID == 2) /*for KSA*/
+                        try
+                        {
+                            registerPatient.PatientMaritalStatusId = Convert.ToInt32(col["patient_marital_status_id"]);
+                        }
+                        catch (Exception e)
+                        {
+                            registerPatient.PatientMaritalStatusId = 6;
+
+                        }
+                    else
+                    {
+                        if (col["patient_marital_status_id"].ToString().ToLower() == "married")
+                            registerPatient.PatientMaritalStatusId = 2;
+                        else
+                            registerPatient.PatientMaritalStatusId = 1;
+                    }
+
+                }
+                catch (Exception e)
+                {
+                    resp.status = 0;
+                    resp.msg = "Parameter in Wrong Format : -- " + e.Message;
+                    return Ok(resp);
+                }
+
+
+                //var Sources = "MobileApp";
+                var Sources = ConfigurationManager.AppSettings["API_SOURCE_KEY"].ToString();
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    Sources = col["Sources"];
+
+
+                registerPatient.Lang = col["lang"];
+
+                if (!string.IsNullOrEmpty(col["patient_middle_name"]))
+                {
+                    registerPatient.PatientMiddleName = col["patient_middle_name"];
+                }
+                else
+                    registerPatient.PatientMiddleName = "";
+
+
+
+
+                registerPatient.PatientTitleId = 0; // Convert.ToInt32(col["patient_title_id"]);
+                registerPatient.PatientFirstName = col["patient_first_name"];
+
+                registerPatient.PatientLastName = col["patient_last_name"];
+                registerPatient.PatientFamilyName = null; // col["patient_family_name"];
+                registerPatient.PatientPhone = col["patient_phone"];
+                
+                registerPatient.PatientNationalId = col["patient_national_id"];
+
+                 
+
+                if (!string.IsNullOrEmpty(col["patient_email"]))
+                    registerPatient.PatientEmail = col["patient_email"].ToString();
+                else
+                    registerPatient.PatientEmail = null; // col["patient_email"];
+
+
+                if (!string.IsNullOrEmpty(col["patient_address"]))
+                    registerPatient.PatientAddress = col["patient_address"].ToString();
+                else
+                    registerPatient.PatientAddress = null; // col["patient_address"];
+
+                //registerPatient.PatientMaritalStatusId = 0; // Convert.ToInt32(col["patient_marital_status_id"]);
+
+                registerPatient.skipDuplicateCheck = false;
+                //registerPatient.PatientNationalityId = Convert.ToInt32(col["Nationality_id"]);
+
+                var Patient_Pwd = "";
+
+                if (!string.IsNullOrEmpty(col["Patient_Pwd"]))
+                    Patient_Pwd = col["Patient_Pwd"];
+
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var status = 0;
+                var msg = "";
+                var successType = "";
+                var registrationNo = "";
+                var activationNo = 0;
+                var errorType = "";
+
+                var patientDb = new PatientDB();
+
+                if (CountryID == 3) /*for UAE*/
+                {
+                    var Countey_city = col["Current_City"].ToString();
+                    var IDType = Convert.ToInt32(col["IdType"].ToString());
+                    var IdExpiry = Convert.ToDateTime(col["IdExpiry"]);
+
+                    var registerPatientUAE = new RegisterPatientUAE();
+                    registerPatientUAE.CurrentCity = Countey_city;
+                    registerPatientUAE.HospitaId = registerPatient.HospitaId;
+                    registerPatientUAE.IdExpiry = IdExpiry;
+                    registerPatientUAE.IdType = IDType;
+                    registerPatientUAE.PatientAddress = registerPatient.PatientAddress;
+                    registerPatientUAE.PatientBirthday = registerPatient.PatientBirthday;
+                    registerPatientUAE.PatientEmail = registerPatient.PatientEmail;
+                    registerPatientUAE.PatientFamilyName = registerPatient.PatientFamilyName;
+                    registerPatientUAE.PatientFirstName = registerPatient.PatientFirstName;
+                    registerPatientUAE.PatientGender = registerPatient.PatientGender;
+                    registerPatientUAE.PatientId = registerPatient.PatientId.ToString();
+                    registerPatientUAE.PatientLastName = registerPatient.PatientLastName;
+                    registerPatientUAE.PatientMaritalStatusId = registerPatient.PatientMaritalStatusId;
+                    registerPatientUAE.PatientMiddleName = registerPatient.PatientMiddleName;
+                    registerPatientUAE.PatientNationalId = registerPatient.PatientNationalId;
+                    registerPatientUAE.PatientNationalityId = registerPatient.PatientNationalityId;
+                    registerPatientUAE.PatientPhone = registerPatient.PatientPhone;
+                    registerPatientUAE.PatientTitleId = registerPatient.PatientTitleId;
+                    registerPatientUAE.skipDuplicateCheck = registerPatient.skipDuplicateCheck;
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    RegistrationPostResponse ReturnObject;
+                    //var APiResilts = _UAEApiCaller.PatientAddApi_NewUAE(registerPatientUAE, out ReturnObject);
+                    //var status = 0;
+                    //var msg = "";
+
+              
+
+                    var APiResilts = patientDb.Save_Patient_RegistrationData(registerPatientUAE.HospitaId, registerPatientUAE.PatientFirstName , registerPatientUAE.PatientMiddleName 
+                        , registerPatientUAE.PatientLastName, registerPatientUAE.PatientFamilyName, registerPatientUAE.PatientPhone, registerPatientUAE.PatientEmail
+                        , registerPatientUAE.PatientNationalId , registerPatientUAE.PatientBirthday.ToString(), registerPatientUAE.PatientGender, registerPatientUAE.PatientAddress
+                        , registerPatientUAE.PatientNationalityId, registerPatientUAE.PatientMaritalStatusId , registerPatientUAE.IdExpiry.ToString() , registerPatientUAE.IdType
+                        , registerPatientUAE.CurrentCity, CountryID , Patient_Pwd, ref status, ref msg
+                        );
+
+                    if (status > 0 )
+                    {
+                        int tempRegId = status;
+                            registrationNo = status.ToString();
+                            str_New_MRN = registrationNo;
+                            LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                            _loginApiCaller.GenerateOTP_V3(registerPatient.HospitaId.ToString(), registerPatient.PatientPhone, str_New_MRN, registerPatient.PatientNationalId, "MobileApp", ref activationNo, ref status, ref msg , CountryID , 6);
+
+                        // Encrpt the Data here For condition if 1 record Found
+                        var PhoneNumber = registerPatient.PatientPhone;                        
+                        var OTP = activationNo.ToString();
+                        string MsgContent = "";
+                        MsgContent = ConfigurationManager.AppSettings["SMS_InitalText_UAE"].ToString() + OTP + " ";
+                        MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+                        //Util.SendTestSMS(PhoneNumber, MsgContent);
+                        var CBC = new CommonDB();
+                        CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                        
+                        var RetunData = new RegistrationData_MW();
+
+                        RetunData.BranchID = registerPatient.HospitaId;
+                        RetunData.DataID = tempRegId;
+                        RetunData.PatientNationalID = registerPatient.PatientNationalId;
+                        RetunData.PatientPhone = registerPatient.PatientPhone;
+
+
+                        resp.msg = "OTP has been send to Register Mobile Number";
+                        resp.response = RetunData;
+                        resp.status = 1;
+                        return Ok(resp);
+
+                    }
+                    else // failed 
+                    {
+                        resp.error_type = "Failed";
+                        resp.msg = "Failed to Add Record, Please Try again";
+                        resp.response = "";
+                        resp.status = 0;
+                        return Ok(resp);
+                    }
+
+
+                }
+                else  // Currently For KSA
+                {   
+                        status = 0;
+                        LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                        PostResponse_AddPatient ReturnObject;
+
+                        var APiResilts = patientDb.Save_Patient_RegistrationData(registerPatient.HospitaId, registerPatient.PatientFirstName, registerPatient.PatientMiddleName
+                        , registerPatient.PatientLastName, registerPatient.PatientFamilyName, registerPatient.PatientPhone, registerPatient.PatientEmail
+                        , registerPatient.PatientNationalId, registerPatient.PatientBirthday.ToString(), registerPatient.PatientGender, registerPatient.PatientAddress
+                        , registerPatient.PatientNationalityId, registerPatient.PatientMaritalStatusId, "", 0
+                        , "", CountryID, Patient_Pwd, ref status, ref msg
+                        );
+                        
+                        if (status > 0)
+                        {
+                            // SENT OTP 
+                            int activationCode = 0, ErrorCode =0;                            
+                            _loginApiCaller.GenerateOTP_V3(registerPatient.HospitaId.ToString(), registerPatient.PatientPhone,
+                                status.ToString(), registerPatient.PatientNationalId, "Mobile", ref activationCode, ref ErrorCode, ref msg , CountryID , 6);
+                            var PhoneNumber = registerPatient.PatientPhone;                            
+                            var OTP = activationCode.ToString();
+                            string MsgContent = "";                            
+                            if (OTP != "6465" && OTP != "1122")
+                            {
+                                MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
+                                MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+                                Util.SendTestSMS(PhoneNumber, MsgContent);
+                            }
+
+                            var RetunData = new RegistrationData_MW();
+
+                            RetunData.BranchID = registerPatient.HospitaId;
+                            RetunData.DataID = status;
+                            RetunData.PatientNationalID = registerPatient.PatientNationalId;
+                            RetunData.PatientPhone = registerPatient.PatientPhone;
+                            resp.msg = "OTP has been send to Register Mobile Number";
+                            resp.response = RetunData;
+                            resp.status = 1;
+                            return Ok(resp);
+
+                        }
+                        else
+						{
+                            resp.error_type = "Failed";
+                            resp.msg = "Failed to Add Record, Please Try again";
+                            resp.response = "";
+                            resp.status = 0;
+                            return Ok(resp);
+                        }                    
                 }
             }
             else

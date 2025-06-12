@@ -8,6 +8,7 @@ using System.Data;
 using System.Data.SqlClient;
 
 
+
 namespace DataLayer.Data
 {
     public class PatientDB
@@ -1082,6 +1083,93 @@ namespace DataLayer.Data
             return registerPatientFailure;
         }
 
+        public List<RegistePatientResponseFailure> RegisterNewPatient_V5(RegisterPatientUAE registerPatient, ref int status, ref string msg, ref string error_type, ref string successType, ref int RegistrationNo, ref int activationNo, string ApiSources = "MobileApp")
+        {
+            //new SqlParameter("@skip_duplicate_email", registerPatient.SkipDuplicateEmail),
+            //new SqlParameter("@skip_duplicate_phone", registerPatient.SkipDuplicatePhone),
+            //new SqlParameter("@activation_num", registerPatient.ActivationNum),
+            //new SqlParameter("@skip_send_activation_num", registerPatient.SkipSendActivationNum),
+
+            List<RegistePatientResponseFailure> registerPatientFailure = new List<RegistePatientResponseFailure>();
+            DB.param = new SqlParameter[]
+            {
+
+                new SqlParameter("@Lang", "EN"),
+                new SqlParameter("@BranchId", registerPatient.HospitaId),                
+                new SqlParameter("@TitleId", registerPatient.PatientTitleId),
+                new SqlParameter("@FirstName", registerPatient.PatientFirstName),
+                new SqlParameter("@MiddleName", registerPatient.PatientMiddleName),
+                new SqlParameter("@LastName", registerPatient.PatientLastName),
+                new SqlParameter("@FamilyName", registerPatient.PatientFamilyName),
+                new SqlParameter("@CellNo", registerPatient.PatientPhone),
+                new SqlParameter("@Email", registerPatient.PatientEmail),
+                new SqlParameter("@NationalId", registerPatient.PatientNationalId),
+                new SqlParameter("@DOB", registerPatient.PatientBirthday),
+                new SqlParameter("@GenderId", registerPatient.PatientGender),
+                new SqlParameter("@PAddress", registerPatient.PatientAddress),
+                new SqlParameter("@NationalityId", registerPatient.PatientNationalityId),
+                new SqlParameter("@MaritalStatusId", registerPatient.PatientMaritalStatusId),
+                new SqlParameter("@RegistrationNo", SqlDbType.Int, registerPatient.PatientId2),
+                new SqlParameter("@status", SqlDbType.Int),
+                new SqlParameter("@msg", SqlDbType.NVarChar, 200),
+                new SqlParameter("@ERROR_TYPE", SqlDbType.NVarChar, 200),
+                new SqlParameter("@SUCCESS_TYPE", SqlDbType.NVarChar, 200),
+                new SqlParameter("@ACtivationNo", SqlDbType.Int),
+                new SqlParameter("@skip_duplicate_check", registerPatient.skipDuplicateCheck)
+
+            };
+
+            DB.param[15].Direction = ParameterDirection.InputOutput;
+            DB.param[16].Direction = ParameterDirection.Output;
+            DB.param[17].Direction = ParameterDirection.Output;
+            DB.param[18].Direction = ParameterDirection.Output;
+            DB.param[19].Direction = ParameterDirection.Output;
+            DB.param[20].Direction = ParameterDirection.Output;
+
+
+            string DB_SP_Name = "[dbo].[Save_PatientData_V2_SP]";
+
+            if (ApiSources.ToLower() == "saleforce")
+                DB_SP_Name = "[SF].[Save_PatientData_V2_SP]";
+
+            var exisitingPatient = DB.ExecuteSPAndReturnDataTable(DB_SP_Name).ToListObject<RegistePatientResponseModel>();
+
+            if (DB.param[15].Value != DBNull.Value)
+            {
+                RegistrationNo = Convert.ToInt32(DB.param[15].Value);
+            }
+
+            if (DB.param[16].Value != DBNull.Value)
+            {
+                status = Convert.ToInt32(DB.param[16].Value);
+            }
+
+            msg = DB.param[17].Value.ToString();
+            error_type = DB.param[18].Value.ToString();
+            successType = DB.param[19].Value.ToString();
+
+            if (DB.param[20].Value != DBNull.Value)
+            {
+                activationNo = Convert.ToInt32(DB.param[20].Value);
+            }
+
+            if (status == 0 && exisitingPatient != null && exisitingPatient.Count > 0)
+            {
+                foreach (var item in exisitingPatient)
+                {
+                    RegistePatientResponseFailure i = new RegistePatientResponseFailure();
+                    i.is_you = item.DisplayMsg;
+                    i.registration_no = item.RegistrationNo;
+                    i.name = item.name;
+                    i.name_ar = item.name_ar;
+
+                    registerPatientFailure.Add(i);
+                }
+            }
+
+            return registerPatientFailure;
+        }
+
         public List<RegistePatientResponseFailure> RegisterNewPatient(RegisterPatient2 registerPatient, ref int status, ref string msg, ref string error_type, ref string successType, ref int RegistrationNo, ref int activationNo)
         {
             //new SqlParameter("@skip_duplicate_email", registerPatient.SkipDuplicateEmail),
@@ -1198,6 +1286,30 @@ namespace DataLayer.Data
                 new SqlParameter("@RegistratioNo", patientRegNo),
                 new SqlParameter("@CellNo", patientPhone),
                 new SqlParameter("@VerificationCode", VerificationCode),
+            };
+
+            DataTable dt = DB.ExecuteSPAndReturnDataTable("dbo.Get_OTPVerified_SP");
+
+            if (dt != null && dt.Rows.Count > 0)
+            {
+                return dt.Rows[0].ItemArray.GetValue(0).ToString();
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public string VerifyOTP_ForRegistation(int hospitalId, string patientRegNo, string patientPhone, string VerificationCode , int ReasonCode)
+        {
+
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@BranchId", hospitalId),
+                new SqlParameter("@RegistratioNo", patientRegNo),
+                new SqlParameter("@CellNo", patientPhone),
+                new SqlParameter("@VerificationCode", VerificationCode),
+                new SqlParameter("@ReasonCode", ReasonCode)
             };
 
             DataTable dt = DB.ExecuteSPAndReturnDataTable("dbo.Get_OTPVerified_SP");
@@ -2066,9 +2178,9 @@ namespace DataLayer.Data
                 new SqlParameter("@Msg", SqlDbType.NVarChar, 200),
                 new SqlParameter("@BookingPhone", PPhone)
             };
+
             DB.param[4].Direction = ParameterDirection.Output;
             DB.param[5].Direction = ParameterDirection.Output;
-            
 
             var dt = DB.ExecuteSPAndReturnDataTable("DBO.[Get_BookingFamilyPatients_SP]");
 
@@ -2464,6 +2576,22 @@ namespace DataLayer.Data
             return ReturnDataTable;
         }
 
+        public List<AllergyList> GET_FoodAllergyList_ByPatient_V3(string Lang, int PatientMRN, int BranchID, string Source, string EpisodeType = "OP", int EpisodeID = 0)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", Lang),
+                    new SqlParameter("@RegistrationNo", PatientMRN),
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@Source", Source),
+                    new SqlParameter("@EpisodeType", EpisodeType),
+                    new SqlParameter("@EpisodeId", EpisodeID)
+                };
+
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_AllergyList_Food_Patient_SP]").ToListObject<AllergyList>();
+            return ReturnDataTable;
+        }
+
         public void Save_FoodAllergyList_ByPatient(int PatientMRN, int BranchID,string FoodIDs, string Source, ref int errStatus, ref string errMessage)
         {
             DB.param = new SqlParameter[]
@@ -2643,6 +2771,62 @@ namespace DataLayer.Data
             return ReturnDataTable;
         }
 
+        public bool Save_Patient_RegistrationData (
+                int     BranchID,               string  PatientFirstName,       string  PatientMiddleName,
+                string  PatientLastName,        string  PatientFamilyName,      string  PatientPhone,
+                string  PatientEmail,           string  PatientNationalId,      string  PatientBirthday,
+                int     PatientGender,          string  PatientAddress,         int     PatientNationalityId,
+                int     PatientMaritalStatusId, string  IdExpiry,               int     IdType,
+                string  CurrentCity,            int     CountryId,              string  Pwd,
+                ref int errStatus,              ref string errMessage
+            )
+		{
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@PatientFirstName", PatientFirstName),
+                    new SqlParameter("@PatientMiddleName", PatientMiddleName),
+                    new SqlParameter("@PatientLastName", PatientLastName),
+                    new SqlParameter("@PatientPhone", PatientPhone),
+                    new SqlParameter("@PatientEmail",PatientEmail ),
+                    new SqlParameter("@PatientNationalId", PatientNationalId),
+                    new SqlParameter("@PatientBirthday", PatientBirthday),
+                    new SqlParameter("@PatientGender",PatientGender ),
+                    new SqlParameter("@PatientAddress", PatientAddress),
+                    new SqlParameter("@PatientNationalityId", PatientNationalityId),
+                    new SqlParameter("@PatientMaritalStatusId", PatientMaritalStatusId),
+                    new SqlParameter("@IdExpiry", IdExpiry),
+                    new SqlParameter("@IdType", IdType),
+                    new SqlParameter("@CurrentCity", CurrentCity),
+                    new SqlParameter("@CountryId", CountryId),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 1000),
+                    new SqlParameter("@PWD", Pwd)
+                };
+            DB.param[16].Direction = ParameterDirection.Output;
+            DB.param[17].Direction = ParameterDirection.Output;
+
+            var ReturnDataTable = DB.ExecuteSP("[dbo].[Save_Patient_Registraion_Data_MW_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[16].Value);
+            errMessage = DB.param[17].Value.ToString();
+
+
+            return ReturnDataTable;
+
+        }
+
+
+        public RegisterPatientUAE Add_PatientFile (string DataID)
+		{
+            DB.param = new SqlParameter[]
+                {                    
+                    new SqlParameter("@DataID", DataID)
+                };
+            
+            var _patientModel = DB.ExecuteSPAndReturnDataTable("DBO.[Get_PatientRegistraionData_MW_SP]").ToModelObject<RegisterPatientUAE>();
+            return _patientModel;
+		}
 
 
     }

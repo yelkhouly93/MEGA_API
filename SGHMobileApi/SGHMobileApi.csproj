@@ -310,6 +310,7 @@
     <Compile Include="Common\Util.cs" />
     <Compile Include="Configuration\WebApiConfig.cs" />
     <Compile Include="Controllers\AgrementController.cs" />
+    <Compile Include="Controllers\AllergyController.cs" />
     <Compile Include="Controllers\AppConfigController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
     <Compile Include="Controllers\ClientApi\ApiCallerUAE.cs" />
@@ -333,7 +334,9 @@
     <Compile Include="Controllers\HospitalController.cs" />
     <Compile Include="Controllers\InsuranceController.cs" />
     <Compile Include="Controllers\Login2Controller.cs" />
+    <Compile Include="Controllers\MedicalReport_SickleaveController.cs" />
     <Compile Include="Controllers\PrescriptionController.cs" />
+    <Compile Include="Controllers\TrackingLogsController.cs" />
     <Compile Include="Controllers\V3_Dammam\Appointment_V3Controller.cs" />
     <Compile Include="Controllers\V3_Dammam\Doctors_V3Controller.cs" />
     <Compile Include="Controllers\V3_Dammam\Login_V3Controller.cs" />
@@ -364,6 +367,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="HomeCare\HomeCareController.cs" />
     <Compile Include="Logging\CustomLogHandler.cs" />
     <Compile Include="Models\CancelledAppointmentVm.cs" />
     <Compile Include="Models\CreateAppointmentVm.cs" />
@@ -425,6 +429,7 @@
     <Folder Include="Views\Home\" />
     <Folder Include="Views\Insurance\" />
     <Folder Include="Views\Media\" />
+    <Folder Include="Views\MedicalReport_Sickleave\" />
     <Folder Include="Views\NotificationReminder\" />
     <Folder Include="Views\PatientDigitalID_EXT_\" />
     <Folder Include="Views\Payment\" />
@@ -432,6 +437,7 @@
     <Folder Include="Views\RefillMedication\" />
     <Folder Include="Views\SGHERP\" />
     <Folder Include="Views\TEST\" />
+    <Folder Include="Views\TrackingLogs\" />
     <Folder Include="Views\VideoCallConsultation\" />
     <Folder Include="Views\VideoConsultationUrl\" />
     <Folder Include="Views\Wallet\" />

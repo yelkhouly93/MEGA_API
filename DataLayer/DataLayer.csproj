@@ -101,6 +101,7 @@
     <Compile Include="Data\ClinicDB.cs" />
     <Compile Include="Data\CommonDB.cs" />
     <Compile Include="Data\DoctorAPI\DoctorAPIDB.cs" />
+    <Compile Include="Data\HomeCareDB.cs" />
     <Compile Include="Data\Insurance.cs" />
     <Compile Include="Data\LABResultDB.cs" />
     <Compile Include="Data\Login2DB.cs" />
@@ -118,6 +119,7 @@
     <Compile Include="Data\RatingDB.cs" />
     <Compile Include="Data\SGHMedicalDAL\LoginDAL.cs" />
     <Compile Include="Data\SurveyDB.cs" />
+    <Compile Include="Data\TrackingLogsDB.cs" />
     <Compile Include="Data\VitalSignDB.cs" />
     <Compile Include="Data\WalletDB.cs" />
     <Compile Include="Data\WaterReminder.cs" />

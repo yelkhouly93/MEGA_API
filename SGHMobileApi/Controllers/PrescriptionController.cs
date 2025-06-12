@@ -158,13 +158,13 @@ namespace SGHMobileApi.Controllers
                 }
                 catch (Exception e)
                 {
-                    _resp.status = 0;
+                    _resp.status = 1;
                     _resp.msg = "Parameter in Wrong Format : -- " + e.Message;
                     return Ok(_resp);
                 }
                 if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
                 {
-                    _resp.status = 0;
+                    _resp.status = 1;
 
                     _resp.msg = "Sorry this service not available";
 
@@ -172,7 +172,7 @@ namespace SGHMobileApi.Controllers
                 }
                 if (hospitaId == 9) /*for Dammam BRANCHES*/
                 {
-                    _resp.status = 0;
+                    _resp.status = 1;
 
                     _resp.msg = "Sorry this service not available";
 
@@ -181,7 +181,7 @@ namespace SGHMobileApi.Controllers
 
                 if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
                 {
-                    _resp.status = 0;
+                    _resp.status = 1;
                     _resp.msg = "WRONG Episode Type";
                     return Ok(_resp);
                 }
@@ -204,14 +204,14 @@ namespace SGHMobileApi.Controllers
                 }
                 else
                 {
-                    _resp.status = 0;
+                    _resp.status = 1;
                     _resp.msg = errMessage;
                 }
 
             }
             else
             {
-                _resp.status = 0;
+                _resp.status = 1;
                 _resp.msg = "Failed : Missing Parameters";
             }
             return Ok(_resp);

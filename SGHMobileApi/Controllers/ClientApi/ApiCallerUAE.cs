@@ -1,6 +1,6 @@
 ﻿using DataLayer.Common;
 using DataLayer.Model;
-using Newtonsoft.Json.Linq;
+//using Newtonsoft.Json.Linq;
 using RestClient;
 using SGHMobileApi.Common;
 using System;
@@ -341,7 +341,7 @@ namespace SmartBookingService.Controllers.ClientApi
             return _ListObj;
         }
 
-        public void GenerateOTP_V3(string hospitalID, string MOBILE_NO, string MRN, string NationalId, string Source, ref int activationNo, ref int Er_Status, ref string Msg)
+        public void GenerateOTP_V3(string hospitalID, string MOBILE_NO, string MRN, string NationalId, string Source, ref int activationNo, ref int Er_Status, ref string Msg , int ReasonCode = 1)
         {
             DB.param = new SqlParameter[]
                 {
@@ -352,7 +352,8 @@ namespace SmartBookingService.Controllers.ClientApi
                 new SqlParameter("@Source", Source),
                 new SqlParameter("@ACtivationNo", SqlDbType.Int),
                 new SqlParameter("@Er_Status", SqlDbType.Int),
-                new SqlParameter("@Msg", SqlDbType.NVarChar, 500)
+                new SqlParameter("@Msg", SqlDbType.NVarChar, 500),
+                new SqlParameter("@VerificationCodeReason", ReasonCode)
                 };
             DB.param[5].Direction = ParameterDirection.Output;
             DB.param[6].Direction = ParameterDirection.Output;
@@ -1254,14 +1255,8 @@ namespace SmartBookingService.Controllers.ClientApi
                 {
                     if (_InputData[i].registration_no != "" && _InputData[i].registration_no != "0")
                     {
-                        
-
                             PatientFamilyList _TempModalObj = new PatientFamilyList();
-
-                       
                             _TempModalObj.CountryId = 3;
-                       
-
                         _TempModalObj.BranchId = BookFor_BranchID.ToString(); 
                         _TempModalObj.Age = _InputData[i].age;
                         if (lang == "AR" || lang == "ar")
@@ -1291,6 +1286,8 @@ namespace SmartBookingService.Controllers.ClientApi
                         _TempModalObj.PatientId = _InputData[i].national_id;
                         _TempModalObj.PCellno = _InputData[i].phone;
                         _TempModalObj.RegistrationNo = _InputData[i].registration_no;
+
+                        _TempModalObj.Email = _InputData[i].email;
 
                         NewData.Add(_TempModalObj);
                     }
@@ -1545,12 +1542,12 @@ namespace SmartBookingService.Controllers.ClientApi
                 for (var i = 0; i < _APIModal.Count; i++)
                 {
                     PatientInsurance_UAE _TempModalObj = new PatientInsurance_UAE();
-                    _TempModalObj.category = _APIModal[0].category;
-                    _TempModalObj.company = _APIModal[0].company;
-                    _TempModalObj.grade = _APIModal[0].grade;
-                    _TempModalObj.idExpiryDate = _APIModal[0].idExpiryDate;
-                    _TempModalObj.insuranceId = _APIModal[0].insuranceId;
-                    _TempModalObj.policyNo = _APIModal[0].policyNo;
+                    _TempModalObj.category = _APIModal[i].category;
+                    _TempModalObj.company = _APIModal[i].company;
+                    _TempModalObj.grade = _APIModal[i].grade;
+                    _TempModalObj.idExpiryDate = _APIModal[i].idExpiryDate;
+                    _TempModalObj.insuranceId = _APIModal[i].insuranceId;
+                    _TempModalObj.policyNo = _APIModal[i].policyNo;
                     _TempModalObj.registrationno = MRN;
 
                     //_TempModalObj.id = Convert.ToInt32(_APIModal[i].id);
@@ -1619,7 +1616,7 @@ namespace SmartBookingService.Controllers.ClientApi
             var content = new[]{
                     new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
                     new KeyValuePair<string, string>("patient_reg_no", MRN),
-                    new KeyValuePair<string, string>("interval", "10")
+                    new KeyValuePair<string, string>("interval", "30")
                     
 
             };
@@ -2085,6 +2082,50 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
 
+        public LabRad_PDF_UAE GetPatientSickLeave_UAE_PDF(int hospitalID, string MRN, string TestID, ref int Er_Status, ref string Msg)
+        {
+            HttpStatusCode status;
+
+            var BranchName = GetBranchName(hospitalID);
+
+            string BaseAPIUrl = "";
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
+                    new KeyValuePair<string, string>("patient_reg_no", MRN),
+                    new KeyValuePair<string, string>("FILEID", TestID)
+            };
+
+            var Parameters = "?hospital_id=" + BranchName.ToString();
+            Parameters += "&patient_reg_no=" + MRN;
+            Parameters += "&FILEID=" + TestID;
+           
+
+            //AppointmentPostResponse
+            BaseAPIUrl = "https://app.saudigerman.com/Services/api/GetSys-MedReport-pdf-get" + Parameters;
+
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE_SickLeavePDF<dynamic>(BaseAPIUrl, content, true);
+
+
+            if (_NewData != null)
+            {
+                var tempObj = new LabRad_PDF_UAE();
+                tempObj.Base64 = _NewData.ToString();
+                tempObj.OrderNumber = "";
+                tempObj.PatientId = "";
+                return tempObj;
+            }
+
+            return null;
+
+
+
+
+        }
+
+
+
         public List<Invoice_Get> GetPatientInvoiceByApi_NewUAE(string lang, int hospitalID, string MRN , string BillType)
         {
             HttpStatusCode status;
@@ -2173,7 +2214,7 @@ namespace SmartBookingService.Controllers.ClientApi
             BaseAPIUrl = "https://app.saudigerman.com/Services/api/Invoice-get-pdf" + Parameters;
 
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE_LABPDF<List<INVOICE_PDF_UAE>>(BaseAPIUrl, content, true);
+            var _NewData = RestUtility.CallAPI_POST_UAE_INVOICE<List<INVOICE_PDF_UAE>>(BaseAPIUrl, content, true);
 
 
             var _LabRaDData = new List<INVOICE_PDF_UAE>();
@@ -2194,6 +2235,102 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
         }
+
+
+        public List<AllergyList> GetAllergyList_NewUAE(string lang, int hospitalID, string MRN, ref int Er_Status, ref string Msg)
+        {
+
+            HttpStatusCode status;
+
+            var BranchName = GetBranchName(hospitalID);
+
+            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/Food-AllergyList-Patient-get";
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
+                    new KeyValuePair<string, string>("patient_reg_no", MRN)
+            };
+
+            var Parameters = "?hospital_id=" + BranchName.ToString();
+            Parameters += "&patient_reg_no=" + MRN;
+            
+            BaseAPIUrl = "https://app.saudigerman.com/Services/api/Food-AllergyList-Patient-get" + Parameters;
+
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE<List<AllergyList>>(BaseAPIUrl, content, out resp, true);
+            
+            var _patientData = new List<AllergyList>();
+            _patientData = _NewData as List<AllergyList>;
+
+            return _patientData;
+        }
+
+        public bool SaveAllergyList_NewUAE(int hospitalID, string MRN,string FoodList, ref int Er_Status, ref string Msg)
+        {
+
+            HttpStatusCode status;
+
+            var BranchName = GetBranchName(hospitalID);
+
+            //string BaseAPIUrl = "";
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
+                    new KeyValuePair<string, string>("patient_reg_no", MRN),
+                    new KeyValuePair<string, string>("FoodIds", FoodList)
+            };
+
+            var Parameters = "?hospital_id=" + BranchName.ToString();
+            Parameters += "&patient_reg_no=" + MRN;
+            Parameters += "&FoodIds=" + FoodList;
+            
+
+            var BaseAPIUrl = "https://app.saudigerman.com/Services/api/PatientFood-AllergyList-Save" + Parameters;
+
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE<List<AllergyList>>(BaseAPIUrl, content, out resp, true);
+
+            
+
+            return true;
+        }
+
+        public List<MedicalReportList_UAE> Get_SysMedical_ReportList_NewUAE(string lang, int hospitalID, string RegistrationNo, ref int Er_Status, ref string Msg)
+        {
+            HttpStatusCode status;
+
+            var BranchName = GetBranchName(hospitalID);
+
+            string BaseAPIUrl = "";
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
+                    new KeyValuePair<string, string>("patient_reg_no", RegistrationNo)
+            };
+
+            var Parameters = "?hospital_id=" + BranchName.ToString();
+            Parameters += "&patient_reg_no=" + RegistrationNo;
+
+            //AppointmentPostResponse
+            BaseAPIUrl = "https://app.saudigerman.com/Services/api/GetSys-reports" + Parameters;
+
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE<List<MedicalReportList_UAE>>(BaseAPIUrl, content, out resp, true);
+
+
+            var _patientData_Dam = new List<MedicalReportList_UAE>();
+            _patientData_Dam = _NewData as List<MedicalReportList_UAE>;
+
+
+            //var _userInfo = MapTestResultModelToTestResultMain_UAE(_patientData_Dam);
+
+            return _patientData_Dam;
+
+        }
+
+
+
+
 
 
 

@@ -64,6 +64,16 @@ namespace DataLayer.Model
 
 
     }
+    public class GenericResponse_New
+    {
+        public int status { get; set; }
+        public string msg { get; set; }
+        public string additional { get; set; }
+        public object response { get; set; }
+        public string error_type { get; set; }
+
+
+    }
 
     public class GenericResponse_NEWUAE_registration
     {
@@ -93,6 +103,10 @@ namespace DataLayer.Model
 
     public class RegisterPatientResponse
     {
+        public RegisterPatientResponse ()
+		{
+            this.status = 0;
+		}
         public int activation_num { get; set; }
         public int status { get; set; }
         public string msg { get; set; }
@@ -1113,6 +1127,27 @@ namespace DataLayer.Model
 
     }
 
+    public class PreDefineMedReport2
+    {
+        public string VisitType { get; set; }
+        public string ReportType { get; set; }
+        public string RegistrationNo { get; set; }
+        public string VisitID { get; set; }
+        public DateTime VisitiDateTime { get; set; }
+        public DateTime FromDate { get; set; }
+        public DateTime ToDate { get; set; }
+        public string NoOfDays { get; set; }
+        public string Reason_AR { get; set; }
+        public string URL { get; set; }
+
+        public string DoctorName { get; set; }
+
+        public string DepartmentName { get; set; }
+
+        public string ReportID_pram { get; set; }
+
+    }
+
 
     //Ahsan testing form E-Envoiceing 
     public class SaveBillReturn
@@ -1442,7 +1477,9 @@ namespace DataLayer.Model
         public string CurrentCity { get; set; }
         public string IdType { get; set; }
         public string IdExpiry { get; set; }
-        
+
+        public string Email { get; set; }
+
 
     }
 
@@ -1599,6 +1636,61 @@ namespace DataLayer.Model
         public string Attachment_URL { get; set; }
     }
 
+    public class RegistrationData_MW
+    {
+        public int DataID { get; set; }
+        public int BranchID { get; set; }
+        public string PatientPhone{ get; set; }
+        public string PatientNationalID { get; set; }
 
+    }
+
+    public class RegistrationData_PatientAdd
+    {
+        public string RegistrationID { get; set; }
+        public int BranchID { get; set; }
+        public string PatientPhone { get; set; }
+        public string PatientNationalID { get; set; }
+
+    }
+
+
+    public class HC_PatientRequest
+    {
+        public int RequestID { get; set; }
+        public int BranchID { get; set; }
+        public string RegistrationNo { get; set; }
+        public string StatusValue { get; set; }
+        public int StatusID { get; set; }
+        public string AddDate { get; set; }
+        public bool ShowCancel { get; set; }
+        public bool ShowConfirm { get; set; }
+        public bool ShowPay { get; set; }
+        public string TotalAmount { get; set; }
+
+        public string CurrnecyFlag { get; set; }
+        public List<HC_PatientRequestService> ServicesList { get; set; }
+
+    }
+    public class HC_PatientRequestService
+    {
+        public int ServiceID { get; set; }
+        public int RequestID { get; set; }
+        public int BranchID { get; set; }
+        public string RegistrationNo { get; set; }
+        public string ServiceName { get; set; }    
+        public int MSID { get; set; }
+
+    }
+
+
+    public class AllergyList
+	{
+        public string id { get; set; }
+        public string name { get; set; }
+        public string isAllergy { get; set; }
+    }
+
+    
 
 }

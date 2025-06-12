@@ -200,7 +200,13 @@ namespace DataLayer.Model
 		public DateTime IdExpiry { get; set; }
 		public int IdType { get; set; }
 		public string CurrentCity { get; set; }
-		
+
+		public int CountryId { get; set; }
+
+		public string PWD { get; set; }
+
+		public int PatientId2 { get; set; }
+
 
 
 	}
@@ -303,6 +309,8 @@ namespace DataLayer.Model
 		public object Reports  { get; set; }		
 	}
 
+	
+
 	public class GetDoctorPostResponse
 	{
 		public string Error { get; set; }
@@ -390,5 +398,26 @@ namespace DataLayer.Model
 		public string BillType { get; set; }
 		public string Base64 { get; set; }
 	}
+
+	public class MedicalReportList_UAE
+	{
+		public string visitType { get; set; }
+		public string reportType { get; set; }
+		public string registrationNo { get; set; }
+		public string visitID { get; set; }
+		public string visitiDateTime { get; set; }
+		public string fromDate { get; set; }
+		public string toDate { get; set; }
+
+		public string noOfDays { get; set; }
+		public string reason_AR { get; set; }
+		public string url { get; set; }
+		public string doctorName { get; set; }
+		public string departmentName { get; set; }
+		public string FILEID { get; set; }
+		public string DOCNAME { get; set; }
+
+	}
+
 
 }
