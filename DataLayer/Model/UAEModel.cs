@@ -10,9 +10,7 @@ namespace DataLayer.Model
 	{
 		public string access_token { get; set; }
 		public string token_type { get; set; }
-
 		public int expires_in { get; set; }
-
 	}
 	public class UAE_SMS_TokenModal
 	{
@@ -114,6 +112,8 @@ namespace DataLayer.Model
 		public string doctorId { get; set; }
 
 		public string clinicId { get; set; }
+
+		public string Testing { get; set; }
 
 	}
 

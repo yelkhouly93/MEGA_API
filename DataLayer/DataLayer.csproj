@@ -101,6 +101,7 @@
     <Compile Include="Data\ClinicDB.cs" />
     <Compile Include="Data\CommonDB.cs" />
     <Compile Include="Data\DoctorAPI\DoctorAPIDB.cs" />
+    <Compile Include="Data\FCM\fcmDB.cs" />
     <Compile Include="Data\HomeCareDB.cs" />
     <Compile Include="Data\Insurance.cs" />
     <Compile Include="Data\LABResultDB.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Data\WalletDB.cs" />
     <Compile Include="Data\WaterReminder.cs" />
     <Compile Include="Model\AppConfigModal.cs" />
+    <Compile Include="Model\EygptModel.cs" />
     <Compile Include="Model\ModelApi.cs" />
     <Compile Include="Model\Models.cs" />
     <Compile Include="Model\CancelledAppointment.cs" />

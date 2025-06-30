@@ -43,7 +43,7 @@ namespace DataLayer.Data
             };
 
             if (isUpdate)
-                DB.ExecuteNonQuerySP("SmartFeature.Update_AppJourneyIdentifiers_SP ");
+                DB.ExecuteNonQuerySP("SmartFeature.Update_AppJourneyIdentifiers_SP");
             else
                 DB.ExecuteNonQuerySP("SmartFeature.Add_AppJourneyIdentifiers_SP");
         }

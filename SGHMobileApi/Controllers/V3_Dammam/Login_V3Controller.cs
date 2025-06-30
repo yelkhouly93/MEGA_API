@@ -865,6 +865,522 @@ namespace SGHMobileApi.Controllers
         }
 
 
+
+        [HttpPost]
+        [Route("v6/login-check")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientList_Request_V6(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+
+            var lang = "EN";
+            var hospitalId = 0;
+            var patientMrn = "";
+
+            var IsEncrypt = true;
+            if (string.IsNullOrEmpty(col["country_ID"]))
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter! Country Required";
+                return Ok(resp);
+            }
+
+            if (!string.IsNullOrEmpty(col["patient_reg_no"]) || !string.IsNullOrEmpty(col["patient_national_id"]) || !string.IsNullOrEmpty(col["patient_phone"]))
+            {
+                var Source = "";
+                var CountryId = 0;
+                try
+                {
+                    CountryId = Convert.ToInt32(col["country_ID"]);
+                }
+                catch (Exception ex)
+                {
+                    resp.status = 0;
+                    resp.msg = "Wrong Prameter. Please Enter the Valid Input.";
+                    return Ok(resp);
+                }
+
+
+
+                if (!string.IsNullOrEmpty(col["Source"]))
+                    Source = col["Source"];
+
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                if (!string.IsNullOrEmpty(col["IsEncrypt"]))
+                {
+                    if (col["IsEncrypt"] == "0")
+                        IsEncrypt = false;
+                }
+
+                try
+                {
+                    if (string.IsNullOrEmpty(col["hospital_id"]))
+                        hospitalId = 0;
+                    else
+                        hospitalId = Convert.ToInt32(col["hospital_id"]);
+
+                    if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+                        patientMrn = col["patient_reg_no"].ToString();
+                    else
+                        patientMrn = "";
+                }
+                catch (Exception ex)
+                {
+                    resp.status = 0;
+                    resp.msg = "Wrong Prameter. Please Enter the Valid Input.";
+                    return Ok(resp);
+                }
+
+
+                var PatientNationId = col["patient_national_id"];
+                var PCell = col["patient_phone"];
+
+                var loginDb = new Login2DB();
+                var errStatus = 0;
+                var errMessage = "";
+                var OTP = "";
+
+                if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+                {
+                    if (string.IsNullOrEmpty(col["hospital_id"]))
+                    {
+
+                        resp.status = 0;
+                        resp.msg = "Missing Prameter. With MRN Please Provide Hospital ID";
+                        resp.error_type = errStatus.ToString();
+                        return Ok(resp);
+
+                    }
+                }
+
+                if (!string.IsNullOrEmpty(col["patient_national_id"]) && CountryId == 2)
+                {
+                    if (PatientNationId.Length != 10)
+                    {
+                        resp.status = 0;
+                        resp.msg = "Wrong input! Invalid National ID";
+                        resp.error_type = errStatus.ToString();
+                        return Ok(resp);
+                    }
+                }
+
+
+
+                if (CountryId == 2) /*for KSA*/
+                {
+                    // For Damamam Intregaration 
+                    bool CheckInDammam = true;
+                    bool OnlyDammam = false;
+                    var intpatientMrn = 0;
+
+
+                    if (!string.IsNullOrEmpty(col["patient_reg_no"]))
+                    {
+                        try
+                        {
+                            intpatientMrn = Convert.ToInt32(patientMrn);
+                        }
+                        catch (Exception ex)
+                        {
+                            resp.status = 0;
+                            resp.msg = "Wrong Prameter. Please Enter the Valid Input.";
+                            return Ok(resp);
+                        }
+                    }
+
+
+
+
+                    //checked IF PATIENT SELECT ANY OTHER BRANCH
+                    if (hospitalId > 0 && hospitalId != 9)
+                        CheckInDammam = false;
+
+                    // Check Damam MRN Provided
+                    if (intpatientMrn > 0 && hospitalId == 9)
+                        OnlyDammam = true;
+
+                    // For Damamam Intregaration 
+                    // Ahsan New Chjange for Dammam
+                    var userInfo = new List<login_check_modal>();
+
+                    //First Check in Other Branches - Old Logic
+                    if (!OnlyDammam)
+                    {
+
+                        userInfo = loginDb.login_check(lang, hospitalId, PCell, PatientNationId, intpatientMrn, Source, ref errStatus, ref errMessage, IsEncrypt);
+                        if (errStatus == 100)
+                        {
+                            resp.status = 0;
+                            resp.msg = errMessage;
+                            resp.error_type = errStatus.ToString();
+                            return Ok(resp);
+                        }
+                    }
+
+                    // Call dammam API Function fill list
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    List<login_check_modal> _damuserInfo = new List<login_check_modal>();
+
+                    if (CheckInDammam)
+                    {
+                        var IdType = "";
+                        var IdValue = "";
+                        if (OnlyDammam)
+                        {
+                            IdType = "MRN";
+                            IdValue = patientMrn.ToString();
+                        }
+                        else
+                        {
+                            if (!string.IsNullOrEmpty(PatientNationId))
+                            {
+                                IdType = "NID";
+                                IdValue = PatientNationId.ToString();
+                                //IdValue = "1174129823";
+                            }
+                            else if (!string.IsNullOrEmpty(PCell))
+                            {
+                                IdType = "MOB";
+
+                                var TempPcell = PCell.ToString();
+
+                                // change the the Format to
+                                TempPcell = TempPcell.Replace("%2B966", "");
+                                TempPcell = TempPcell.Replace("+", "");
+
+                                //TempPcell = TempPcell.Substring(0,3).Replace("966", "");                            
+                                if (TempPcell.Substring(0, 5) == "00966")
+                                {
+                                    TempPcell = TempPcell.Substring(5, TempPcell.Length - 5);
+                                }
+                                if (TempPcell.Substring(0, 3) == "966")
+                                {
+                                    TempPcell = TempPcell.Substring(3, TempPcell.Length - 3);
+                                }
+                                var FirstChar = TempPcell.Substring(0, 1);
+                                if (FirstChar != "0")
+                                {
+                                    TempPcell = "0" + TempPcell;
+                                }
+
+
+                                IdValue = TempPcell.ToString();
+                            }
+
+                        }
+
+
+                        // Call dammam API Function fill list
+                        //LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                        //List<login_check_modal> _damuserInfo;
+                        _damuserInfo = _loginApiCaller.ValidateLoginUserByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                    }
+
+                    int Tempcount1 = userInfo.Count;
+                    userInfo.AddRange(_damuserInfo);
+                    int Tempcount2 = userInfo.Count;
+                    errStatus = 1; // SET initial Error No record Found
+                                   // Now check Count 
+                    if (userInfo.Count > 0)
+                    {
+                        if (userInfo.Count == 1)
+                            errStatus = 0; // SET to zero only one record to send SMS Directly one that Number
+                        else
+                            errStatus = 2; // Multiple Record Found
+                    }
+
+                    if (errStatus != 1)
+                    {
+                        resp.status = errStatus;
+                        if (errStatus == 0)
+                        {
+                            resp.status = 1;
+                            //string smsRes = "";
+                            //DataRow dr = userInfo.Rows[0];
+                            //var PhoneNumber = dr["PatientCellNo2"].ToString();
+                            //userInfo.Rows[0]["PatientCellNo2"] = "";
+
+
+                            // SENT OTP 
+                            int activationCode = 0, ErrorCode;
+
+                            //_loginApiCaller.GenerateOTP_V3(util.Decrypt (userInfo[0].BranchId , true) , userInfo[0].PatientCellNo2, util.Decrypt( userInfo[0].Registrationno , true) , userInfo[0].PatientId , Source ,ref activationCode ,ref errStatus , ref errMessage);
+                            _loginApiCaller.GenerateOTP_V3(userInfo[0].BranchId, userInfo[0].PatientCellNo2, userInfo[0].Registrationno, userInfo[0].PatientId, Source, ref activationCode, ref errStatus, ref errMessage);
+
+
+                            // Encrpt the Data here For condition if 1 record Found
+
+
+                            var PhoneNumber = userInfo[0].PatientCellNo2;
+                            userInfo[0].PatientCellNo2 = "";
+
+                            //PhoneNumber = "0592285955";
+                            OTP = activationCode.ToString();
+                            string MsgContent = "";
+                            //OTP = "1111";
+                            if (OTP != "6465" && OTP != "1122")
+                            {
+                                //PhoneNumber = "0581178188";
+                                MsgContent = ConfigurationManager.AppSettings["SMS_InitalText"].ToString() + OTP + " ";
+                                MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+                                Util.SendTestSMS(PhoneNumber, MsgContent);
+                            }
+                        }
+                        else
+                        {
+                            // Loop to Empty Mobile Number 
+                        }
+
+                        // Encrpt the Data here For condition before sending to API
+
+                        var Final_userInfo = new List<login_check_modal>();
+                        //Final_userInfo = userInfo;
+                        if (IsEncrypt)
+                            Final_userInfo = loginDb.Encrpt_UserList_Obj(userInfo);
+                        else
+                            Final_userInfo = userInfo;
+
+                        resp.msg = errMessage;
+                        resp.response = Final_userInfo;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        resp.error_type = errStatus.ToString();
+                    }
+
+                }
+                else if (CountryId == 3) /*for UAE*/
+                {
+                    var IdType = "";
+                    var IdValue = "";
+                    var BranchName = "";
+
+                    if (!string.IsNullOrEmpty(patientMrn.ToString()))
+                    {
+                        IdType = "MRN";
+                        IdValue = patientMrn.ToString();
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(PatientNationId))
+                        {
+                            IdType = "IdCard";
+                            IdValue = PatientNationId.ToString();
+                        }
+                        else if (!string.IsNullOrEmpty(PCell))
+                        {
+                            IdType = "Mobile";
+
+                            var TempPcell = PCell.ToString();
+
+                            // change the the Format to
+                            TempPcell = TempPcell.Replace("%2B971", "");
+                            TempPcell = TempPcell.Replace("%2B", "");
+                            TempPcell = TempPcell.Replace("+", "");
+
+                            if (TempPcell.Substring(0, 5) == "00971")
+                            {
+                                TempPcell = TempPcell.Substring(5, TempPcell.Length - 5);
+                            }
+                            if (TempPcell.Substring(0, 3) == "971")
+                            {
+                                TempPcell = TempPcell.Substring(3, TempPcell.Length - 3);
+                            }
+                            var FirstChar = TempPcell.Substring(0, 1);
+
+                            IdValue = TempPcell.ToString();
+                        }
+                    }
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var _UAEserInfo = _UAEApiCaller.ValidateLoginUserByApi_NewUAE(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage);
+
+
+                    if (_UAEserInfo == null)
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        return Ok(resp);
+                    }
+
+                    if (_UAEserInfo.Count == 0)
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        return Ok(resp);
+
+                    }
+                    else if (_UAEserInfo.Count == 1)
+                    {
+                        resp.status = 1;
+                        // SENT OTP 
+                        int activationCode = 0;
+                        int ErrorCode = 0;
+                        LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                        _loginApiCaller.GenerateOTP_V3(_UAEserInfo[0].BranchId, _UAEserInfo[0].PatientCellNo2, _UAEserInfo[0].Registrationno, _UAEserInfo[0].PatientId, Source, ref activationCode, ref errStatus, ref errMessage);
+
+
+                        // Encrpt the Data here For condition if 1 record Found
+                        var PhoneNumber = _UAEserInfo[0].PatientCellNo2;
+                        _UAEserInfo[0].PatientCellNo2 = "";
+                        OTP = activationCode.ToString();
+                        string MsgContent = "";
+                        //OTP = "1111";
+
+
+                        //var CBC = new CommonDB();
+                        //CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+
+
+
+
+
+
+                        //if (OTP != "6465" && OTP != "1122")
+
+                        // UAE SMS API CAll 
+                        //PhoneNumber = "0581178188";
+                        MsgContent = ConfigurationManager.AppSettings["SMS_InitalText_UAE"].ToString() + OTP + " ";
+                        MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+                        //Util.SendTestSMS(PhoneNumber, MsgContent);
+                        var CBC = new CommonDB();
+                        CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+
+                        errStatus = 1; // Multiple Record Found
+                    }
+                    else
+                    {
+                        // Multiple Record Found 
+                        resp.status = 2;
+                        errStatus = 2; // Multiple Record Found
+
+                    }
+                    // Encrpt the Data here For condition before sending to API
+                    var Final_userInfo = new List<login_check_modal>();
+                    //Final_userInfo = userInfo;
+                    if (IsEncrypt)
+                        Final_userInfo = loginDb.Encrpt_UserList_Obj(_UAEserInfo);
+                    else
+                        Final_userInfo = _UAEserInfo;
+
+                    resp.msg = errMessage;
+                    resp.response = Final_userInfo;
+                }
+                else if (CountryId == 4)
+				{
+
+                    var IdType = "";
+                    var IdValue = "";
+
+                    if (!string.IsNullOrEmpty(patientMrn.ToString()))
+                    {
+                        IdType = "patient_reg_no";
+                        IdValue = patientMrn.ToString();
+                    }
+                    else
+                    {
+                        if (!string.IsNullOrEmpty(PatientNationId))
+                        {
+                            IdType = "patient_national_id";
+                            IdValue = PatientNationId.ToString();
+                        }
+                        else if (!string.IsNullOrEmpty(PCell))
+                        {
+                            IdType = "patient_phone";
+
+                            var TempPcell = PCell.ToString();
+                            IdValue = TempPcell.ToString();
+                        }
+                    }
+
+                    ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+                    var _EYGuserInfo = _EYGApiCaller.ValidateLoginUserByApi_EYGPT(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage);
+
+
+                    if (_EYGuserInfo == null)
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        return Ok(resp);
+                    }
+
+
+                    if (_EYGuserInfo.Count == 0)
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        return Ok(resp);
+
+                    }
+                    else if (_EYGuserInfo.Count == 1)
+                    {
+                        resp.status = 1;
+                        // SENT OTP 
+                        int activationCode = 0;
+                        int ErrorCode = 0;
+                        LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                        _loginApiCaller.GenerateOTP_V3(_EYGuserInfo[0].BranchId, _EYGuserInfo[0].PatientCellNo2, _EYGuserInfo[0].Registrationno, _EYGuserInfo[0].PatientId, Source, ref activationCode, ref errStatus, ref errMessage);
+
+
+                        // Encrpt the Data here For condition if 1 record Found
+                        var PhoneNumber = _EYGuserInfo[0].PatientCellNo2;
+                        _EYGuserInfo[0].PatientCellNo2 = "";
+                        OTP = activationCode.ToString();
+                        string MsgContent = "";
+
+                        
+
+                        // UAE SMS API CAll 
+                        //PhoneNumber = "0581178188";
+                        MsgContent = ConfigurationManager.AppSettings["SMS_InitalText_UAE"].ToString() + OTP + " ";
+                        MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+                        //Util.SendTestSMS(PhoneNumber, MsgContent);
+                        var CBC = new CommonDB();
+                        CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+
+                        errStatus = 1; // Multiple Record Found
+                    }
+                    else
+                    {
+                        // Multiple Record Found 
+                        resp.status = 2;
+                        errStatus = 2; // Multiple Record Found
+
+                    }
+                    // Encrpt the Data here For condition before sending to API
+                    var Final_userInfo = new List<login_check_modal>();
+                    //Final_userInfo = userInfo;
+                    if (IsEncrypt)
+                        Final_userInfo = loginDb.Encrpt_UserList_Obj(_UAEserInfo);
+                    else
+                        Final_userInfo = _UAEserInfo;
+
+                    resp.msg = errMessage;
+                    resp.response = Final_userInfo;
+
+
+
+
+                }
+
+
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter!";
+            }
+
+
+            return Ok(resp);
+        }
+
+        
+
         [HttpPost]
         [Route("v4/login-pwd")]
         [ResponseType(typeof(List<GenericResponse>))]

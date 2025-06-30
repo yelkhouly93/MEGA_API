@@ -1,4 +1,5 @@
 ﻿using DataLayer.Data;
+using DataLayer.Data.FCM;
 using DataLayer.Model;
 using System;
 using System.Collections.Generic;
@@ -75,6 +76,61 @@ namespace SGHMobileApi.Controllers
 
             return Ok(_resp);
         }
+
+
+        // GET: SGHERP
+        [HttpPost]
+        [Route("FCM/Get-Incomplete-Reminder")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetIncompleteAppoitmentReminders_ForFCM(FormDataCollection col)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(col["clientid"]) && !string.IsNullOrEmpty(col["username"]) && !string.IsNullOrEmpty(col["password"]))
+                {
+                    if (col["clientid"] == "301C25F7-602E-4348-A032-E8CBC7794BB6" && col["username"] == "FCMData" && col["password"] == "YXf5LXkXh4B15KlDBqqyhA==")
+                    {   
+                        fcmDB CDB = new fcmDB();
+                        var DataResponse = CDB.Get_IncompleteReminder_DT();
+
+                        if (DataResponse != null && DataResponse.Rows.Count > 0)
+                        {
+                            _resp.status = 1;
+                            _resp.msg = "Success";
+                            _resp.response = DataResponse;
+                        }
+                        else
+                        {
+                            _resp.status = 0;
+                            _resp.msg = "Fail";
+                        }
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Authentication Failed";
+                    }
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Missing Parameters";
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                _resp.msg = ex.ToString();
+                Log.Error(ex);
+            }
+
+
+            return Ok(_resp);
+        }
+
+
 
     }
 }

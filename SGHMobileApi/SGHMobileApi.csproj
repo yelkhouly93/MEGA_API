@@ -313,6 +313,7 @@
     <Compile Include="Controllers\AllergyController.cs" />
     <Compile Include="Controllers\AppConfigController.cs" />
     <Compile Include="Controllers\ApplicationController.cs" />
+    <Compile Include="Controllers\ClientApi\ApiCallerEygpt.cs" />
     <Compile Include="Controllers\ClientApi\ApiCallerUAE.cs" />
     <Compile Include="Controllers\ClientApi\AvailableSlotsApiCaller.cs" />
     <Compile Include="Controllers\ClientApi\ClinicApiCaller.cs" />

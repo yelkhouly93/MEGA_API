@@ -612,10 +612,19 @@ namespace SmartBookingService.Controllers
                         _resp.status = 1;
                         _resp.msg = "Record(s) Found";
                         _resp.response = allAppointmnetList;
-
                     }
-
-
+                }
+                else if (hospitalId >= 201 && hospitalId < 300)
+				{
+                    var UAEMRN = col["patient_reg_no"].ToString();
+                    ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+                    var allAppointmnetList = _EYGApiCaller.GetPatientAppointmentsByApi_EYGPT(lang, UAEMRN.ToString(), hospitalId);
+                    if (allAppointmnetList != null && allAppointmnetList.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = allAppointmnetList;
+                    }
 
                 }
                 else if (hospitalId == 9)
@@ -636,6 +645,100 @@ namespace SmartBookingService.Controllers
 
                     }
                 
+                }
+                else
+                {
+                    var allAppointmnetList = patientDb.GetPatientAppointmentList(lang, hospitalId, registrationNo, ApiSource);
+                    if (allAppointmnetList != null && allAppointmnetList.Rows.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = allAppointmnetList;
+
+                    }
+                }
+
+
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
+        [HttpPost]
+        [Route("v6/patient-appointments-list")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientAppointList_V6(FormDataCollection col)
+        {
+            var _resp = new GenericResponse();
+            var patientDb = new PatientDB();
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]) && col["patient_reg_no"] != "0")
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                var hospitalId = Convert.ToInt32(col["hospital_id"]);
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+
+
+
+                var ApiSource = "MobileApp";
+                if (!string.IsNullOrEmpty(col["Sources"]))
+                    ApiSource = col["Sources"].ToString();
+
+                _resp.status = 0;
+                _resp.msg = "No Record Found";
+
+                if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    var UAEMRN = col["patient_reg_no"].ToString();
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var allAppointmnetList = _UAEApiCaller.GetPatientAppointmentsByApi_NewUAE(lang, UAEMRN.ToString(), hospitalId);
+                    if (allAppointmnetList != null && allAppointmnetList.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = allAppointmnetList;
+                    }
+                }
+                else if (hospitalId >= 201 && hospitalId < 300)
+                {
+                    var UAEMRN = col["patient_reg_no"].ToString();
+                    ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+                    var allAppointmnetList = _EYGApiCaller.GetPatientAppointmentsByApi_EYGPT(lang, UAEMRN.ToString(), hospitalId);
+                    if (allAppointmnetList != null && allAppointmnetList.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = allAppointmnetList;
+                    }
+
+                }
+                else if (hospitalId == 9)
+                {
+                    var apiCaller = new PatientApiCaller();
+                    var IdType = "";
+                    var IdValue = "";
+                    IdType = "MRN";
+                    IdValue = registrationNo.ToString();
+
+                    LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                    var allAppointmnetList = _loginApiCaller.GetPatientAppointmentsByApi_NewDam(lang, IdValue);
+                    if (allAppointmnetList != null && allAppointmnetList.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = allAppointmnetList;
+
+                    }
+
                 }
                 else
                 {

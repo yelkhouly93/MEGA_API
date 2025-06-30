@@ -15,6 +15,7 @@ using System.IO;
 using System.Net.Http.Formatting;
 using System.Web;
 using System.Web.Http.Description;
+using System.Web.Routing;
 
 namespace SGHMobileApi.Controllers
 {
@@ -34,6 +35,14 @@ namespace SGHMobileApi.Controllers
             resp.status = 0;
             resp.msg = "Missing Parameter!";
 
+
+            // Get the route data
+            var routeData = Request.GetRouteData();
+
+            // Get the route template string
+            var routeTemplate = routeData.Route.RouteTemplate;
+
+
             try
             {
                 if (col != null)
@@ -51,6 +60,7 @@ namespace SGHMobileApi.Controllers
                         )
                     {
                         var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                        
                         var patient_reg_no = col["patient_reg_no"];
                         var APP_JOURNEY_FLAG = col["APP_JOURNEY_FLAG"];
                         var APP_JOURNEY_DEPTID = col["APP_JOURNEY_DEPTID"];
@@ -58,15 +68,20 @@ namespace SGHMobileApi.Controllers
                         var Entry_Purpose = col["Entry_Purpose"];
                         var App_ID = col["App_ID"];
                         var Lang = col["Lang"];
-                        
+
+
+                        var patient_Name = "";
+                        if (!string.IsNullOrEmpty(col["patient_name"]))
+                            patient_Name = col["patient_name"];
 
 
                         var Sources = col["Sources"].ToString();
 
-                        var IdentiferName = "APP_JOURNEY_FLAG~APP_JOURNEY_BRANCH~APP_JOURNEY_MRN~APP_JOURNEY_DEPTID~APP_JOURNEY_DOCID";
-                        var IdentiferValues = APP_JOURNEY_FLAG.ToString()+'~'+ hospitaId + '~' + patient_reg_no + '~' + APP_JOURNEY_DEPTID + '~' + APP_JOURNEY_DOCID;
+                        var IdentiferName = "APP_JOURNEY_FLAG~APP_JOURNEY_BRANCH~APP_JOURNEY_MRN~APP_JOURNEY_DEPTID~APP_JOURNEY_DOCID~APP_JOURNEY_PATIENT_NAME";
+                        var IdentiferValues = APP_JOURNEY_FLAG.ToString()+'~'+ hospitaId + '~' + patient_reg_no + '~' + APP_JOURNEY_DEPTID + '~' + APP_JOURNEY_DOCID + '~' + patient_Name ;
                         var isUpdate = true;
-                        if (APP_JOURNEY_FLAG == "0" && hospitaId.ToString() == "0" && patient_reg_no == "0" && APP_JOURNEY_DEPTID == "0" && APP_JOURNEY_DOCID == "0")
+                        
+                        if (APP_JOURNEY_DEPTID == "0" && APP_JOURNEY_DOCID == "0")
                             isUpdate = false;
 
                         _TrackLogDB.SaveTrackingLogs(Entry_Purpose,hospitaId.ToString(), patient_reg_no, IdentiferName, IdentiferValues, App_ID, Lang, isUpdate);

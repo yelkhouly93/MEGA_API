@@ -1067,6 +1067,125 @@ namespace SmartBookingService.Controllers
         }
 
 
+        [HttpPost]
+        [Route("v6/patient-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PatientGET_v6(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+            try
+            {
+                var lang = "EN";
+                if (!string.IsNullOrEmpty(col["patient_reg_no"]) && !string.IsNullOrEmpty(col["hospital_id"]))
+                {
+
+                    if (!string.IsNullOrEmpty(col["lang"]))
+                        lang = col["lang"];
+
+                    var hospitalId = Convert.ToInt32(col["hospital_id"]);
+
+                    var patientMrn = Convert.ToInt32(col["patient_reg_no"]);
+                    var patientMrnStr = col["patient_reg_no"].ToString();
+
+                    var errStatus = 1;
+                    var errMessage = "";
+
+                    PatientDB patientDb = new PatientDB();
+                    // Change as per Mehmode Request
+                    //var dt = patientDb.GetPatientDataDT_V2(lang, hospitalId, patientMrn, ref errStatus, ref errMessage);
+
+                    var loginDb = new Login2DB();
+
+
+                    var ApiSource = "MobileApp";
+                    if (!string.IsNullOrEmpty(col["Sources"]))
+                        ApiSource = col["Sources"].ToString();
+
+
+                    UserInfo_New userInfo = new UserInfo_New();
+                    if (hospitalId >= 301 && hospitalId < 400) /*for UAE BRANCHES*/
+                    {
+                        try
+                        {
+                            ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                            var IdType = "";
+                            var IdValue = "";
+                            IdType = "MRN";
+                            IdValue = col["patient_reg_no"].ToString();
+                            userInfo = _UAEApiCaller.GetPatientDataByApi_NewUAE(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage);
+                            errStatus = 0;
+                        }
+                        catch
+                        {
+                            errStatus = 1;
+                            errMessage = "No Record Found. Please Try Again Later.";
+                            return Ok(resp);
+                        }
+
+                    }
+                    else if (hospitalId >= 200 && hospitalId < 300) /*for EYGPT BRANCHES*/
+					{
+                        ApiCallerEygpt _EYGPTApiCaller = new ApiCallerEygpt();
+                        userInfo = _EYGPTApiCaller.GetPatientDataByApi_Eygpt(lang , patientMrnStr , hospitalId , ref errStatus, ref errMessage);
+
+                        errStatus = 0;
+
+
+                    }
+                    else if (hospitalId == 9)
+                    {
+                        var apiCaller = new PatientApiCaller();
+                        var IdType = "";
+                        var IdValue = "";
+                        IdType = "MRN";
+                        IdValue = patientMrn.ToString();
+
+                        LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                        userInfo = _loginApiCaller.GetPatientDataByApi_NewDam(lang, IdValue, IdType, ref errStatus, ref errMessage);
+                        if (userInfo != null)
+                            errStatus = 0;
+                    }
+                    else
+                    {
+                        userInfo = loginDb.ValidateLoginUser_New(lang, hospitalId, null, col["patient_reg_no"].ToString(), null, ref errStatus, ref errMessage, ApiSource);
+                    }
+
+
+
+
+                    if (errStatus == 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        //resp.response = dt;
+                        resp.response = userInfo;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                        resp.error_type = errStatus.ToString();
+                    }
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Missing Parameter!";
+                }
+
+
+                return Ok(resp);
+            }
+            catch (Exception ex)
+            {
+
+                //Log.Error(ex);
+            }
+
+            return Ok();
+        }
+
+
 
         [HttpPost]
         [Route("v4/BookingPatientFamily-list-get")]

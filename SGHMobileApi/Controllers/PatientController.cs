@@ -2163,5 +2163,118 @@ namespace SmartBookingService.Controllers
 
 
 
+        [HttpPost]
+        [Route("v6/Patient-VitalSign-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetPatientVitalSign_V6(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+
+            if (!string.IsNullOrEmpty(col["patient_reg_no"])
+                && !string.IsNullOrEmpty(col["Sources"])
+                && !string.IsNullOrEmpty(col["hospital_id"])
+                )
+            {
+                var Lang = "EN";
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    Lang = col["lang"];
+
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    if (Lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+                else if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    _resp.status = 0;
+                    if (Lang == "EN")
+                        _resp.msg = "Sorry this service not available";
+                    else
+                        _resp.msg = "عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+                
+
+                var registrationNo = Convert.ToInt32(col["patient_reg_no"]);
+                var registrationNoStr = col["patient_reg_no"].ToString();
+                var Source = col["Sources"].ToString();
+
+
+
+                int errStatus = 0;
+                string errMessage = "No record Found";
+
+                var EpisodeType = "OP";
+                var EpisodeID = 0;
+
+                if (!string.IsNullOrEmpty(col["Episode_Type"]))
+                    EpisodeType = col["Episode_Type"];
+                if (!string.IsNullOrEmpty(col["Episode_Id"]))
+                    EpisodeID = Convert.ToInt32(col["Episode_Id"]);
+
+
+                if (EpisodeType.ToUpper() != "OP" && EpisodeType.ToUpper() != "IP")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "WRONG Episode Type";
+                    return Ok(_resp);
+                }
+
+                if (hospitaId >= 200 && hospitaId < 300)
+				{
+                    
+                    ApiCallerEygpt _EYGPTApiCaller = new ApiCallerEygpt();
+                    var userInfo = _EYGPTApiCaller.GetPatientVitalSignByApi_Eygpt(Lang, registrationNoStr, hospitaId, ref errStatus, ref errMessage);
+                    if (userInfo != null && userInfo.Count > 0)
+					{
+                        resp.status = 1;
+                        resp.msg = "Record Found";
+                        resp.response = userInfo;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No Record Found";
+                        resp.response = null;
+                    }
+                }
+                else
+				{
+                    var _DataList = _patientDb.GET_Patient_VitalSign(Lang, registrationNo, hospitaId, Source, EpisodeType, EpisodeID);
+
+                    if (_DataList != null && _DataList.Rows.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Record Found";
+                        resp.response = _DataList;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No Record Found";
+                        resp.response = null;
+                    }
+                }
+
+                
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter!";
+            }
+            return Ok(resp);
+
+            return Ok();
+        }
+
+
+
     }
 }
