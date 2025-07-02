@@ -1355,9 +1355,9 @@ namespace SGHMobileApi.Controllers
                     var Final_userInfo = new List<login_check_modal>();
                     //Final_userInfo = userInfo;
                     if (IsEncrypt)
-                        Final_userInfo = loginDb.Encrpt_UserList_Obj(_UAEserInfo);
+                        Final_userInfo = loginDb.Encrpt_UserList_Obj(_EYGuserInfo);
                     else
-                        Final_userInfo = _UAEserInfo;
+                        Final_userInfo = _EYGuserInfo;
 
                     resp.msg = errMessage;
                     resp.response = Final_userInfo;
