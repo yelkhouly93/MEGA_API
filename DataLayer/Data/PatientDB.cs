@@ -2548,6 +2548,30 @@ namespace DataLayer.Data
 
         }
 
+        public DataTable GET_VideoCallDetails_V3(string Lang, string AppointmentID, int BranchID, string PatientMRN, ref int errStatus, ref string errMessage)
+        {
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@Lang", Lang),
+                    new SqlParameter("@AppointmentID", AppointmentID),
+                    new SqlParameter("@BranchID", BranchID),
+                    new SqlParameter("@PatientMRN", PatientMRN),
+                    new SqlParameter("@status", SqlDbType.Int),
+                    new SqlParameter("@msg", SqlDbType.NVarChar, 1000)
+                };
+
+            DB.param[4].Direction = ParameterDirection.Output;
+            DB.param[5].Direction = ParameterDirection.Output;
+
+            var ReturnDataTable = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_VideoCallDetails_UAE_Zoom_SP]");
+
+            errStatus = Convert.ToInt32(DB.param[4].Value);
+            errMessage = DB.param[5].Value.ToString();
+
+            return ReturnDataTable;
+
+        }
+
         public void UPDATE_VideoCallPatientJoin(string AppointmentID, int BranchID, string JoinBy)
         {
             DB.param = new SqlParameter[]
@@ -2735,7 +2759,8 @@ namespace DataLayer.Data
 
 
         
-        public void  Save_AppoitmentLogs (int BranchID , string AppointmentID , string MRN,int OperatorId ,string AppoitmentStatus,string Sources , int Doctor_Id)
+        public void  Save_AppoitmentLogs (int BranchID , string AppointmentID , string MRN,int OperatorId ,string AppoitmentStatus,
+                                            string Sources , int Doctor_Id , int IsVideo = 0 , int BookingType = 0)
 		{
             DB.param = new SqlParameter[]
                 {                    
@@ -2746,7 +2771,9 @@ namespace DataLayer.Data
                     new SqlParameter("@AppoitmentStatus", AppoitmentStatus),
                     new SqlParameter("@Sources", Sources),
                     new SqlParameter("@Doctor_Id", Doctor_Id),
-                    
+                    new SqlParameter("@IsVideo", IsVideo),
+                    new SqlParameter("@BookingType", BookingType)
+
                 };
 
             var allDataDt

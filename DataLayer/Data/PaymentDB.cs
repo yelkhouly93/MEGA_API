@@ -61,6 +61,8 @@ namespace DataLayer.Data
         //    return dataTable;
         //}
 
+       
+
         public SaveBillReturn PaymentConfirmation_GenerateBill(int BranchId, int AppointmentID, string BillType, int OperatorID, string OnlineTrasactionID, string PaidAmount, string PaymentMethod,int TrackID, ref int errStatus, ref string errMessage)
         {
             DB.param = new SqlParameter[]

@@ -206,6 +206,48 @@ namespace SmartBookingService.Controllers.ClientApi
 
         }
 
+
+        public List<Consultation_Amount_UAE> GetConsultationAmount_UAE(string AppointmentId, int BranchID, ref int Er_Status, ref string Msg)
+        {
+            HttpStatusCode status;
+            accountData_dam _accData = new accountData_dam();
+            string RegistrationUrl = "https://app.saudigerman.com/Services/api/Consultation-amount-Get";
+
+            var BranchName = "";
+            BranchName = GetBranchName(BranchID);
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("appointment_id", AppointmentId.ToString()),                    
+                    new KeyValuePair<string, string>("hospital_id", BranchName)
+            };
+
+            var Parameters = "?appointment_id=" + AppointmentId.ToString();            
+            Parameters += "&hospital_id=" + BranchName;
+
+            RegistrationUrl = "https://app.saudigerman.com/Services/api/Consultation-amount-Get" + Parameters;
+
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE<List<Consultation_Amount_UAE>>(RegistrationUrl, content, out resp, true);
+
+            var _patientData_UAE = new List<Consultation_Amount_UAE>();
+            _patientData_UAE = _NewData as List<Consultation_Amount_UAE>;
+
+            Er_Status = resp.status;
+            Msg = resp.msg;
+
+            Consultation_Amount_UAE firstRecord = null;
+
+            if (_patientData_UAE != null && _patientData_UAE.Count > 0)
+            {
+                firstRecord = _patientData_UAE[0];
+            }
+
+
+
+            return _patientData_UAE;
+
+        }
+
         private UserInfo_New MapUserInfoModelToUserInf_NewUAE2(List<UAE_Patient_Info> userInfoModel , int BranchID)
         {
             var BranchFullName = GetBranchFullName(BranchID);
@@ -495,7 +537,14 @@ namespace SmartBookingService.Controllers.ClientApi
                             _TempModalObj.DurationLeft = dateDifference;
                         }
                         _TempModalObj.Id = Convert.ToInt32(_APIModal[i].appointmentNo);
-                        _TempModalObj.isPaid = false;
+                        
+                        // New CHnages Video Call
+                        _TempModalObj.isPaid = _APIModal[i].isPaid;
+                        // For TESTING AHSAN
+                        //_TempModalObj.IsVideoCall = _APIModal[i].IsVideoCall;
+                        _TempModalObj.IsVideoCall = 1;
+
+
                         _TempModalObj.IsUpComming = Convert.ToInt32(_APIModal[i].isUpComming);
                         _TempModalObj.PatientName = _APIModal[i].patientName;
                         _TempModalObj.PatientVisited = Convert.ToInt32(_APIModal[i].patientVisited);
@@ -543,6 +592,65 @@ namespace SmartBookingService.Controllers.ClientApi
         //    return false;
 
         //}
+
+
+
+        public bool SavePaymentConfirmation_NewUAE(string appointmentID,int HospitalID , string OnlineTransaction_id
+            ,string Paid_Amount , string Payment_Method , string TracK_ID,string VideoURL, string MRN,
+            out GenericResponse responseOut)
+        {
+            HttpStatusCode status;
+            string BaseAPIUrl = "";
+            var BranchName = GetBranchName(HospitalID);
+
+            VideoURL = GETVideoURL(appointmentID, HospitalID.ToString(), MRN);
+
+            logs_Payment_Call(TracK_ID , OnlineTransaction_id);
+
+            var errStatus = 0;
+            var errMessage = "";            
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("appointment_id", appointmentID),
+                    new KeyValuePair<string, string>("hospital_id", BranchName),
+                    new KeyValuePair<string, string>("OnlineTransaction_id", OnlineTransaction_id),
+                    new KeyValuePair<string, string>("Paid_Amount", Paid_Amount),
+                    new KeyValuePair<string, string>("Payment_Method", Payment_Method),
+                    new KeyValuePair<string, string>("TracK_ID", TracK_ID),
+                    new KeyValuePair<string, string>("VideoURL", VideoURL),
+
+            };
+            var Parameters = "?appointment_id=" + appointmentID.ToString();
+            Parameters += "&hospital_id=" + BranchName.ToString();
+            Parameters += "&OnlineTransaction_id=" + OnlineTransaction_id.ToString();
+            Parameters += "&Paid_Amount=" + Paid_Amount.ToString();
+            Parameters += "&Payment_Method=" + Payment_Method.ToString();
+            Parameters += "&TracK_ID=" + TracK_ID.ToString();
+            Parameters += "&VideoURL=" + VideoURL.ToString();
+
+
+            //AppointmentPostResponse
+            BaseAPIUrl = "https://app.saudigerman.com/Services/api/payment-confirmation" + Parameters;
+            var resp = new GenericResponse();
+            var _NewData = RestUtility.CallAPI_POST_UAE<PaymentConfirmPostResponse>(BaseAPIUrl, content, out resp, true);
+
+            responseOut = resp;
+
+            if (resp.status == 1)
+			{
+                logs_Payment_Invoice_Generated(TracK_ID );
+                return true;
+			}
+                
+
+            return false;
+
+            //if (status == HttpStatusCode.OK)
+            //    return true;
+
+            //return false;
+
+        }
 
         public bool SaveAppointmentApi_NewUAE(UAE_BookAppointment bookModel, out AppointmentPostResponse responseOut)
         {
@@ -959,7 +1067,7 @@ namespace SmartBookingService.Controllers.ClientApi
             var _Data_UAE = new List<UAE_Doctor_Days>();
             _Data_UAE = _NewData as List<UAE_Doctor_Days>;
 
-            var _NewDataForMobile = MapDoctorSchduleDays_NewUAE(_Data_UAE, BranchID, DoctorID);
+            var _NewDataForMobile = MapDoctorSchduleDays_NewUAE(_Data_UAE, BranchID, DoctorID , IsVideo);
             return _NewDataForMobile;
         }
 
@@ -2423,6 +2531,45 @@ namespace SmartBookingService.Controllers.ClientApi
 
         }
 
+        private void logs_Payment_Call(string TrackID , string OnlineTransactionId)
+        {
+            CustomDBHelper DB = new CustomDBHelper("RECEPTION");
+
+            var SQL_Qry = "Update EServiceLog.dbo.API_Save_CashBill_Log SET OnlineTransactionId = '" + OnlineTransactionId + "' , InvoiceCall = 1 WHERE ID = " + TrackID.ToString();
+            DB.ExecuteNonQuery(SQL_Qry);
+            
+        }
+
+
+        private void logs_Payment_Invoice_Generated(string TrackID )
+        {
+            CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
+
+            var SQL_Qry = "UPDATE [EServiceLog].dbo.API_Save_CashBill_Log SET HISStatus = 1 , IsCompeleted = 1  WHERE ID = " + TrackID.ToString();
+            _DB.ExecuteNonQuery(SQL_Qry);
+
+        }
+
+        public string GETVideoURL (string AppointmentID , string HospitalID , string MRN)
+		{
+            CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
+
+            string strQry = "SELECT id FROM [dbo].[VideoCallDetails] with (nolock) WHERE AppointmentID = '" + AppointmentID + "' AND BranchID = '" + HospitalID + "'";
+
+            //tempDR.Branch_AR = util.Encrypt(dtobj[i].Branch_AR.ToString(), true);
+            
+            var str_ID = _DB.ExecuteSQLScalar(strQry);
+            if (!String.IsNullOrEmpty(str_ID))
+			{
+                var VideoURL = ConfigurationManager.AppSettings["UAE_VIDEO_URL"].ToString() + "?id=" + util.Encrypt(str_ID, true);
+                return VideoURL;
+            }
+            
+
+
+
+            return "";
+		}
 
 
 

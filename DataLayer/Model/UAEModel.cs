@@ -113,7 +113,12 @@ namespace DataLayer.Model
 
 		public string clinicId { get; set; }
 
-		public string Testing { get; set; }
+		public bool isPaid { get; set; }
+
+		public int IsVideoCall { get; set; }
+		
+
+
 
 	}
 
@@ -175,6 +180,16 @@ namespace DataLayer.Model
 		public string Message { get; set; }
 		public string AppId { get; set; }
 		public string AppStatus { get; set; }
+	}
+
+	public class PaymentConfirmPostResponse
+	{
+		public string appointment_id { get; set; }
+		public string hospital_id { get; set; }
+		public string OnlineTransaction_id { get; set; }
+		public string Paid_Amount { get; set; }
+		public string Payment_Method { get; set; }
+		public string TracK_ID { get; set; }
 	}
 
 
@@ -416,6 +431,14 @@ namespace DataLayer.Model
 		public string departmentName { get; set; }
 		public string FILEID { get; set; }
 		public string DOCNAME { get; set; }
+
+	}
+	public class ZoomInfo_UAE
+	{
+		public string sessionName { get; set; }
+		public string userName { get; set; }
+		public string sessionPasscode { get; set; }
+		
 
 	}
 

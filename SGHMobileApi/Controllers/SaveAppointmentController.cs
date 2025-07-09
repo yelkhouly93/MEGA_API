@@ -1013,6 +1013,78 @@ namespace SGHMobileApi.Controllers
 
 
         [HttpPost]
+        [Route("v3/VideoCallDetails-Get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GETVedioCallDetails_V3(FormDataCollection col)
+        {
+            GenericResponse resp = new GenericResponse();
+            var lang = "EN";
+
+            if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Appointment_id"]) && !string.IsNullOrEmpty(col["patient_reg_no"]))
+            {
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                var Appointmentid = col["Appointment_id"].ToString();
+                var patient_reg_no = col["patient_reg_no"].ToString();
+                var errStatus = 0;
+                var errMessage = "";
+                var patientDb = new PatientDB();
+                if (!string.IsNullOrEmpty(col["lang"]))
+                    lang = col["lang"];
+
+                if (hospitaId == 9)
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Sorry this service not available - عذرا هذه الخدمة غير متوفرة";
+                    return Ok(_resp);
+                }
+                if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                {
+                    //_resp.status = 0;
+                    //_resp.msg = "Sorry this service not available";
+                    var ReturnResponseUAE = patientDb.GET_VideoCallDetails_V3(lang, Appointmentid, hospitaId, patient_reg_no, ref errStatus, ref errMessage);
+
+                    if (errStatus != 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = ReturnResponseUAE;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                    }
+                    return Ok(_resp);
+                }
+
+                
+
+                
+                var ReturnResponse = patientDb.GET_VideoCallDetails(lang, Appointmentid, hospitaId, patient_reg_no, ref errStatus, ref errMessage);
+
+                if (errStatus != 0)
+                {
+                    resp.status = 1;
+                    resp.msg = errMessage;
+                    resp.response = ReturnResponse;
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = errMessage;
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(resp);
+        }
+
+
+        [HttpPost]
         [Route("v2/VideoCallPatientJoin-Update")]
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult UpdateVideoCallDetails_PatientJoin(FormDataCollection col)

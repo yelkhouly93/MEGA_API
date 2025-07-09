@@ -1,4 +1,5 @@
-﻿using DataLayer.Data;
+﻿using DataLayer.Common;
+using DataLayer.Data;
 using DataLayer.Data.FCM;
 using DataLayer.Model;
 using System;
@@ -14,6 +15,7 @@ namespace SGHMobileApi.Controllers
 {
     public class SGHERPController : ApiController
     {
+        private readonly EncryptDecrypt_New util = new EncryptDecrypt_New();
         private GenericResponse _resp = new GenericResponse()
         {
             status = 0
@@ -111,6 +113,52 @@ namespace SGHMobileApi.Controllers
                         _resp.msg = "Authentication Failed";
                     }
 
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Missing Parameters";
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                _resp.msg = ex.ToString();
+                Log.Error(ex);
+            }
+
+
+            return Ok(_resp);
+        }
+
+
+        // GET: SGHERP
+        [HttpPost]
+        [Route("vid/Get-ZoomCall-Details")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetZoomCallInfo_ForVC(FormDataCollection col)
+        {
+            _resp.status = 0;
+
+            try
+            {
+                if (!string.IsNullOrEmpty(col["id"]))
+                {
+                    var EncId = col["id"].ToString();
+                    var dycID = util.Encrypt(EncId, true);
+
+                    fcmDB CDB = new fcmDB();
+                    if (!String.IsNullOrEmpty(dycID))
+					{
+                        var DataResponse = CDB.VC_GetZoomCallInfo(dycID);
+                        if (DataResponse != null )
+						{
+                            _resp.status = 1;
+                            _resp.response = DataResponse;
+                            return Ok(_resp);
+                        }
+                    }
                 }
                 else
                 {

@@ -432,6 +432,101 @@ namespace SGHMobileApi.Controllers
 
         }
 
+        // GET: Payment
+        [HttpPost]
+        [Route("v5/consultaion-amount-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetConsultationAmount_V5(FormDataCollection col)
+        {
+            //AHSAN TESTING need to Comment now
+            //TESTENVOICES();
+
+            _resp = new GenericResponse();
+
+            //Ahsan Closing Date 12-02-2023 as per Payment Issues
+
+            //_resp.status = 0;
+            //_resp.msg = "Service Not Avaible.";
+            //return Ok(_resp);
+
+            //Ahsan Closing Date 12-02-2023 as per Payment Issues
+
+
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["appointment_id"]) && !string.IsNullOrEmpty(col["bill_type"]) && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Mobile_Payment_Test"]))
+            {
+                if (col["Mobile_Payment_Test"].ToString() != "1")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Service Not Avaible.";
+                    return Ok(_resp);
+                }
+                var HospitalId = Convert.ToInt32(col["hospital_id"]);
+                var appointment_id = Convert.ToInt32(col["appointment_id"]);
+                var BillType = col["bill_type"];
+                var Status = 0;
+                var Msg = "";
+
+                if (HospitalId >= 301 && HospitalId < 400) /*for UAE BRANCHES*/
+                {
+                    // NEw Development For Video Call
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    AppointmentPostResponse responseOut = new AppointmentPostResponse();
+                    //Consultation_Amount_UAE
+                    var userDataInfo = _UAEApiCaller.GetConsultationAmount_UAE(appointment_id.ToString(), HospitalId,ref Status, ref Msg);
+                    
+                    _resp.status = Status;
+                    _resp.msg = Msg;
+                    _resp.response = userDataInfo;
+
+                    return Ok(_resp);
+                }
+
+
+                if (BillType != "I" && BillType != "C")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Wrong BillType Format- It should be 'C' For Cash and 'I' for insurance";
+                    return Ok(_resp);
+                }
+
+                var datatableAmount = _paymentDb.GetConsultationAmount(HospitalId, appointment_id, BillType, 1, ref Status, ref Msg);
+
+                if (Status == 1 && datatableAmount.Rows.Count > 0)
+                {
+                    _resp.status = 1;
+                    _resp.msg = Msg;
+                    _resp.response = datatableAmount;
+
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = Msg;
+                }
+
+
+
+
+                //if (Error_Code == 0)
+                //    _resp.status = 1;
+                //else
+                //    _resp.status = 0;
+
+                //_resp.msg = MSG;
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters";
+            }
+
+            return Ok(_resp);
+
+        }
+
 
         // GET: Payment confirmation
         [HttpPost]
@@ -622,6 +717,135 @@ namespace SGHMobileApi.Controllers
                 
 
                
+            }
+            else
+            {
+                _resp.status = 0;
+                _resp.msg = "Failed : Missing Parameters_Test";
+            }
+
+            return Ok(_resp);
+
+        }
+
+
+        // GET: Payment confirmation With Status 
+        [HttpPost]
+        [Route("v5/payment-confirmation")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult PaymentConfirmation_V5(FormDataCollection col)
+        {
+            _resp = new GenericResponse();
+            CommonDB CDB = new CommonDB();
+
+            if (!string.IsNullOrEmpty(col["appointment_id"])
+                && !string.IsNullOrEmpty(col["bill_type"])
+                && !string.IsNullOrEmpty(col["hospital_id"])
+                && !string.IsNullOrEmpty(col["OnlineTransaction_id"])
+                && !string.IsNullOrEmpty(col["Payment_Method"])
+                && !string.IsNullOrEmpty(col["Payment_Status"])
+                )
+            {
+
+                var appointment_id = Convert.ToInt32(col["appointment_id"]);
+                var hospitalID = Convert.ToInt32(col["hospital_id"]);
+                var BillType = col["bill_type"];
+
+
+                var PaymentStatus = col["Payment_Status"];
+
+                var OnlineTrasactionID = "";
+                var PaidAmount = "0";
+                // New Logic tracking ID on 08-05-2023 TRACKING ID
+                var TrackID = 0;
+
+                var PaymentMethod = "V2/API";
+                if (!string.IsNullOrEmpty(col["OnlineTransaction_id"]))
+                    OnlineTrasactionID = col["OnlineTransaction_id"];
+
+                if (!string.IsNullOrEmpty(col["Paid_Amount"]))
+                    PaidAmount = col["Paid_Amount"];
+
+                if (!string.IsNullOrEmpty(col["Payment_Method"]))
+                    PaymentMethod = col["Payment_Method"];
+
+                if (!string.IsNullOrEmpty(col["TracK_ID"]))
+                    TrackID = Convert.ToInt32(col["TracK_ID"].ToString());
+
+
+
+                if (hospitalID >= 301 && hospitalID < 400) /*for UAE BRANCHES*/
+                {
+                    // NEw Development For Video Call
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    GenericResponse responseOut = new GenericResponse();
+
+                    var VideoURLUAE = "";
+                    
+                    var userDataInfo = _UAEApiCaller.SavePaymentConfirmation_NewUAE(appointment_id.ToString(), hospitalID
+                        ,OnlineTrasactionID, PaidAmount,PaymentMethod, TrackID.ToString(), VideoURLUAE , "",
+                        out responseOut);
+
+                    _resp.status = responseOut.status;
+                    if (_resp.status ==1 )
+                        _resp.msg = "Payment Save Successfully";
+                    else
+                        _resp.msg = responseOut.msg;
+
+                    _resp.response = userDataInfo;
+
+
+
+                    //_resp.status = 0;
+                    //_resp.msg = "Sorry this service not available";
+                    return Ok(_resp);
+                }
+
+
+
+                var Status = 0;
+                var Msg = "";
+
+                if (BillType != "I" && BillType != "C")
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed : Wrong BillType Format- It should be 'C' For Cash and 'I' for insurance";
+                    return Ok(_resp);
+                }
+
+                SaveBillReturn ReturnObj = new SaveBillReturn();
+
+                if (PaymentStatus == "Success")
+                {
+                    ReturnObj = _paymentDb.PaymentConfirmation_GenerateBill(hospitalID, appointment_id, BillType, 1, OnlineTrasactionID, PaidAmount, PaymentMethod, TrackID, ref Status, ref Msg);
+                    //if (Status == 1 && datatableAmount.Rows.Count > 0)
+                    if (Status == 1 && ReturnObj != null)
+                    {
+                        if (ReturnObj.GenerateEInvoice == "1")
+                        {
+                            var tempReturnHIS = GenerateInovice_HIS(hospitalID, ReturnObj.BillNo, false);
+                        }
+                        _resp.status = 1;
+                        _resp.msg = Msg;
+                        _resp.response = ReturnObj;
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = Msg;
+                    }
+                }
+                else
+                {
+                    // Payment Failed
+                    _paymentDb.PaymentConfirmation_FailedTransaction(OnlineTrasactionID, PaidAmount, TrackID, hospitalID);
+                    _resp.status = 0;
+                    _resp.msg = "Payment Failed , and Record Saved";
+                }
+
+
+
+
             }
             else
             {

@@ -565,6 +565,34 @@ namespace DataLayer.Model
     }
 
 
+    public class Consultation_Amount_UAE
+    {
+        
+        public string totalPayment { get; set; }
+        public string grossAmount { get; set; }
+        public string totalCompanyVATAmount { get; set; }
+        public string totalPatientVATAmount { get; set; }
+        public string totalDiscountAmount { get; set; }
+        public string totalDeductibleAmount { get; set; }
+        public string totalNetAmount { get; set; }
+        public string authorityId { get; set; }
+        public string doctorName { get; set; }
+        public string consultationType { get; set; }
+        public string consultationTypeId { get; set; }
+        public string departmentId { get; set; }
+        public string companyDiscountLevel { get; set; }
+        public string companyDeductibleLevel { get; set; }
+        public string totalComputedVAT { get; set; }
+        public string discountApprovalId { get; set; }
+        public string discountId { get; set; }
+        public string discountName { get; set; }
+
+        public string discountApprovedBy { get; set; }
+        public string tariffId { get; set; }
+        public string tariffName { get; set; }
+    }
+
+
     public class UserPwdDetails
 	{
         public string RegId { get; set; }
