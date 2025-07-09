@@ -116,7 +116,11 @@ namespace DataLayer.Model
 		public bool isPaid { get; set; }
 
 		public int IsVideoCall { get; set; }
-		
+
+		public string slotTypeId { get; set; }
+		public string slotTypeName { get; set; }
+
+
 
 
 
@@ -172,6 +176,7 @@ namespace DataLayer.Model
 
 		public string MobileNumber { set; get; }
 		public string Remarks { set; get; }
+		public int isVideo { set; get; }
 	}
 
 	public class AppointmentPostResponse

@@ -1054,7 +1054,7 @@ namespace SGHMobileApi.Controllers
                         resp.status = 0;
                         resp.msg = errMessage;
                     }
-                    return Ok(_resp);
+                    return Ok(resp);
                 }
 
                 
@@ -1073,6 +1073,7 @@ namespace SGHMobileApi.Controllers
                     resp.status = 0;
                     resp.msg = errMessage;
                 }
+                return Ok(resp);
             }
             else
             {

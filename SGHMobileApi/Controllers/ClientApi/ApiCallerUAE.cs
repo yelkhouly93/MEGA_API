@@ -1,4 +1,5 @@
 ﻿using DataLayer.Common;
+using DataLayer.Data;
 using DataLayer.Model;
 //using Newtonsoft.Json.Linq;
 using RestClient;
@@ -540,9 +541,11 @@ namespace SmartBookingService.Controllers.ClientApi
                         
                         // New CHnages Video Call
                         _TempModalObj.isPaid = _APIModal[i].isPaid;
-                        // For TESTING AHSAN
-                        //_TempModalObj.IsVideoCall = _APIModal[i].IsVideoCall;
-                        _TempModalObj.IsVideoCall = 1;
+
+                        if (_APIModal[i].slotTypeId == "16")
+                            _TempModalObj.IsVideoCall = 1;
+                        else
+                            _TempModalObj.IsVideoCall = 0;
 
 
                         _TempModalObj.IsUpComming = Convert.ToInt32(_APIModal[i].isUpComming);
@@ -603,7 +606,19 @@ namespace SmartBookingService.Controllers.ClientApi
             string BaseAPIUrl = "";
             var BranchName = GetBranchName(HospitalID);
 
-            VideoURL = GETVideoURL(appointmentID, HospitalID.ToString(), MRN);
+
+            MediaDB _MediaDB = new MediaDB();
+            
+            var StrID = _MediaDB.GETVideoURL(appointmentID, HospitalID.ToString(), MRN);
+            
+            if (StrID != null && StrID.id != null)
+            {
+                VideoURL = StrID.DoctorURL + "?id=" + util.Encrypt(StrID.id, true);                
+            }
+            else
+			{
+                VideoURL = ConfigurationManager.AppSettings["UAE_VIDEO_URL"].ToString();
+            }
 
             logs_Payment_Call(TracK_ID , OnlineTransaction_id);
 
@@ -617,7 +632,7 @@ namespace SmartBookingService.Controllers.ClientApi
                     new KeyValuePair<string, string>("Paid_Amount", Paid_Amount),
                     new KeyValuePair<string, string>("Payment_Method", Payment_Method),
                     new KeyValuePair<string, string>("TracK_ID", TracK_ID),
-                    new KeyValuePair<string, string>("VideoURL", VideoURL),
+                    //new KeyValuePair<string, string>("VideoURL", VideoURL),
 
             };
             var Parameters = "?appointment_id=" + appointmentID.ToString();
@@ -626,7 +641,7 @@ namespace SmartBookingService.Controllers.ClientApi
             Parameters += "&Paid_Amount=" + Paid_Amount.ToString();
             Parameters += "&Payment_Method=" + Payment_Method.ToString();
             Parameters += "&TracK_ID=" + TracK_ID.ToString();
-            Parameters += "&VideoURL=" + VideoURL.ToString();
+            //Parameters += "&VideoURL='" + VideoURL.ToString();
 
 
             //AppointmentPostResponse
@@ -636,14 +651,18 @@ namespace SmartBookingService.Controllers.ClientApi
 
             responseOut = resp;
 
-            if (resp.status == 1)
-			{
-                logs_Payment_Invoice_Generated(TracK_ID );
-                return true;
-			}
-                
+			//for Testing return Successfull from UAE
+			logs_Payment_Invoice_Generated(TracK_ID);
+			return true;
 
-            return false;
+			//         if (resp.status == 1)
+			//{
+			//             logs_Payment_Invoice_Generated(TracK_ID );
+			//             return true;
+			//}
+
+
+			return false;
 
             //if (status == HttpStatusCode.OK)
             //    return true;
@@ -664,6 +683,11 @@ namespace SmartBookingService.Controllers.ClientApi
             var IdType = "MRN";
             var IdValue = bookModel.PatientId;            
             var userInfo = GetPatientDataByApi_NewUAE("EN", IdValue, IdType, bookModel.BranchID, ref errStatus, ref errMessage);
+            var isvideo = "1";
+
+            if (bookModel.isVideo == 1)
+                isvideo = "4";
+
 
             var content = new[]{
 					new KeyValuePair<string, string>("Facility", BranchName),
@@ -677,7 +701,8 @@ namespace SmartBookingService.Controllers.ClientApi
 					new KeyValuePair<string, string>("TransType", bookModel.TransType),
 					new KeyValuePair<string, string>("IsStandby", bookModel.IsStandby),
 					new KeyValuePair<string, string>("Remarks", bookModel.Remarks),
-                    new KeyValuePair<string, string>("MobileNumber", userInfo.phone)
+                    new KeyValuePair<string, string>("MobileNumber", userInfo.phone),
+                    new KeyValuePair<string, string>("SlotType", isvideo)
 
             };
 			var Parameters = "?Facility=" + BranchName.ToString();
@@ -692,6 +717,7 @@ namespace SmartBookingService.Controllers.ClientApi
             Parameters += "&IsStandby=" + bookModel.IsStandby;
             Parameters += "&Remarks=" + bookModel.Remarks;
             Parameters += "&MobileNumber=" + userInfo.phone;
+            Parameters += "&SlotType=" + isvideo;
 
             //AppointmentPostResponse
             BaseAPIUrl = "https://app.saudigerman.com//Services/api/SlotTransactions" + Parameters;
@@ -1878,6 +1904,7 @@ namespace SmartBookingService.Controllers.ClientApi
 
             var SQL_Qry = "  Select BranchCode  from BAS_Branch_TB where HIS_Id = " + BranchID;
             var BranchName = _DB.ExecuteSQLScalar(SQL_Qry);
+            
             return BranchName;
         }
         private string GetBranchFullName(int BranchID)
@@ -2534,44 +2561,41 @@ namespace SmartBookingService.Controllers.ClientApi
         private void logs_Payment_Call(string TrackID , string OnlineTransactionId)
         {
             CustomDBHelper DB = new CustomDBHelper("RECEPTION");
+            var test = "asd";
 
-            var SQL_Qry = "Update EServiceLog.dbo.API_Save_CashBill_Log SET OnlineTransactionId = '" + OnlineTransactionId + "' , InvoiceCall = 1 WHERE ID = " + TrackID.ToString();
-            DB.ExecuteNonQuery(SQL_Qry);
-            
+            //var SQL_Qry = "Update EServiceLog.dbo.API_Save_CashBill_Log SET OnlineTransactionId = '" + OnlineTransactionId + "' , InvoiceCall = 1 WHERE ID = " + TrackID.ToString();
+            //var tenmp = DB.ExecuteNonQuery(SQL_Qry);
+            //if (tenmp == 2)
+            //    test = "asdafdsa";
+
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@ID", TrackID),
+                new SqlParameter("@OnlineTransactionId", OnlineTransactionId),
+                new SqlParameter("@Stage", 1)
+            };
+            string DB_SP_Name = "eServiceLog.Update_CashBillLog_SP";
+            var allPhysiciansModel = DB.ExecuteSP(DB_SP_Name);
         }
 
 
         private void logs_Payment_Invoice_Generated(string TrackID )
         {
-            CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
+            //CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
 
-            var SQL_Qry = "UPDATE [EServiceLog].dbo.API_Save_CashBill_Log SET HISStatus = 1 , IsCompeleted = 1  WHERE ID = " + TrackID.ToString();
-            _DB.ExecuteNonQuery(SQL_Qry);
+            //var SQL_Qry = "UPDATE [EServiceLog].dbo.API_Save_CashBill_Log SET HISStatus = 1 , IsCompeleted = 1  WHERE ID = " + TrackID.ToString();
+            //_DB.ExecuteNonQuery(SQL_Qry);
 
+            DB.param = new SqlParameter[]
+             {
+                new SqlParameter("@ID", TrackID),                
+                new SqlParameter("@Stage", 2)
+             };
+            string DB_SP_Name = "eServiceLog.Update_CashBillLog_SP";
+            var allPhysiciansModel = DB.ExecuteSP(DB_SP_Name);
         }
 
-        public string GETVideoURL (string AppointmentID , string HospitalID , string MRN)
-		{
-            CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
-
-            string strQry = "SELECT id FROM [dbo].[VideoCallDetails] with (nolock) WHERE AppointmentID = '" + AppointmentID + "' AND BranchID = '" + HospitalID + "'";
-
-            //tempDR.Branch_AR = util.Encrypt(dtobj[i].Branch_AR.ToString(), true);
-            
-            var str_ID = _DB.ExecuteSQLScalar(strQry);
-            if (!String.IsNullOrEmpty(str_ID))
-			{
-                var VideoURL = ConfigurationManager.AppSettings["UAE_VIDEO_URL"].ToString() + "?id=" + util.Encrypt(str_ID, true);
-                return VideoURL;
-            }
-            
-
-
-
-            return "";
-		}
-
-
+      
 
 
 

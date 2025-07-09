@@ -1,4 +1,5 @@
 ﻿using DataLayer.Common;
+using DataLayer.Model;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -57,5 +58,35 @@ namespace DataLayer.Data
             return DtResults;
 
         }
+
+
+        //for Video Call UAE testing
+
+          public VideoCallURL GETVideoURL (string AppointmentID , string HospitalID , string MRN)
+		{
+            CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
+
+            //var strQry2 = "Select BranchCode  from BAS_Branch_TB where HIS_Id = " + HospitalID; 
+            //var str_ID = _DB.ExecuteSQLScalar(strQry2);
+
+
+            //string strQry = "Select id from VideoCallDetails where AppointmentID = " + AppointmentID + " and BranchID = " + HospitalID;
+            //str_ID = _DB.ExecuteSQLScalar(strQry);
+
+            DB.param = new SqlParameter[]
+                {
+                    new SqlParameter("@BranchID", HospitalID),                    
+                    new SqlParameter("@AppointmentID", AppointmentID)
+                };
+            var DtResults
+                = DB.ExecuteSPAndReturnDataTable("[dbo].[Get_VideoCall_INFO_Zoom_SP]").ToModelObject<VideoCallURL>();
+
+
+
+            return DtResults;
+            
+		}
+
+
     }
 }

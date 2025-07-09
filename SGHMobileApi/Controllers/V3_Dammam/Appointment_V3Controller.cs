@@ -1087,6 +1087,8 @@ namespace SmartBookingService.Controllers
                         bookModel.StartTime = col["time_from"].ToString();
                         bookModel.PatientId = col["patient_reg_no"].ToString();
                         bookModel.PhysicanId = physicianId;
+                        bookModel.isVideo = isVideoAppointment;
+
 
                         AppointmentPostResponse responseOut = new AppointmentPostResponse();
 
@@ -1145,7 +1147,7 @@ namespace SmartBookingService.Controllers
                             var APPID = ConfigurationManager.AppSettings["Agora_APPID"].ToString();
                             var errStatus2 = 0;
                             var errMessage2 = "";
-                            patientDb.Save_VideoCallDetails(AppoitmentID.ToString(), hospitaId, Channel, URLToken, StartDateTime, EndDateTime, patientId.ToString(), physicianId, clinicId, WebURL, sources, APPID, AppointmentTimeFrom, AppointmentTimeTo, ref errStatus2, ref errMessage2);
+                            patientDb.Save_VideoCallDetails(AppoitmentID.ToString(), hospitaId, Channel, URLToken, StartDateTime, EndDateTime, col["patient_reg_no"].ToString(), physicianId, clinicId, WebURL, sources, APPID, AppointmentTimeFrom, AppointmentTimeTo, ref errStatus2, ref errMessage2);
                         }
 
 

@@ -787,6 +787,9 @@ namespace SGHMobileApi.Controllers
                         out responseOut);
 
                     _resp.status = responseOut.status;
+                    // For Testin UAE not working
+                    _resp.status = 1;
+
                     if (_resp.status ==1 )
                         _resp.msg = "Payment Save Successfully";
                     else

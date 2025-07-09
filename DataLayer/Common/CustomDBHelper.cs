@@ -27,8 +27,8 @@ namespace DataLayer.Common
         {
             using (SqlConnection CN = new SqlConnection(base.SqlConnectionString))
             {
-                try
-                {
+                //try
+                //{
                     CN.Open();
 
                     DataTable dt = new DataTable();
@@ -38,26 +38,28 @@ namespace DataLayer.Common
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandTimeout = 300;
                         var tempstr = cmd.ExecuteScalar();
-                        
+
+                        CN.Close();
+
                         if (tempstr == null)
                             return "";
-
+                    
                         return tempstr.ToString();
 
                         //return cmd.ExecuteScalar().ToString();
 
 
                     }
-                }
-                catch (Exception ex)
-                {
-                    this.Successful = false;
-                    this.ErrorMessage = ex.Message;
-                    this.ErrorStackTrace = ex.StackTrace;
-                    Log_SP_ERROR(sql, ex.Message, ex.StackTrace);
-                    throw new ApplicationException("Error Message:</b> <br /> " + ex.Message + "<br /><br /><b>Stack Trace:</b><br /> " + ex.StackTrace);
-                    //return false;
-                }
+                //}
+                //catch (Exception ex)
+                //{
+                //    this.Successful = false;
+                //    this.ErrorMessage = ex.Message;
+                //    this.ErrorStackTrace = ex.StackTrace;
+                //    Log_SP_ERROR(sql, ex.Message, ex.StackTrace);
+                //    throw new ApplicationException("Error Message:</b> <br /> " + ex.Message + "<br /><br /><b>Stack Trace:</b><br /> " + ex.StackTrace);
+                //    //return false;
+                //}
             }
         }
 

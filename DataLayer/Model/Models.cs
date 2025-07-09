@@ -1719,6 +1719,12 @@ namespace DataLayer.Model
         public string isAllergy { get; set; }
     }
 
-    
+    public class VideoCallURL
+    {
+        public string id { get; set; }
+        public string DoctorURL { get; set; }        
+    }
+
+
 
 }

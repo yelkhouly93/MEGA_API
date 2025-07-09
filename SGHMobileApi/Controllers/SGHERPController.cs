@@ -143,10 +143,11 @@ namespace SGHMobileApi.Controllers
 
             try
             {
-                if (!string.IsNullOrEmpty(col["id"]))
+                if (!string.IsNullOrEmpty(col["username"]))
                 {
-                    var EncId = col["id"].ToString();
-                    var dycID = util.Encrypt(EncId, true);
+                    var EncId = col["username"].ToString();
+                    //var dycID = util.Encrypt(EncId, true);
+                    var dycID = EncId;
 
                     fcmDB CDB = new fcmDB();
                     if (!String.IsNullOrEmpty(dycID))
