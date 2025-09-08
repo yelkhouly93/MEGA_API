@@ -514,6 +514,28 @@ namespace SmartBookingService.Controllers
 
 
                     }
+                    else if (hospitalId >= 201 && hospitalId < 300) /*for UAE BRANCHES*/
+                    {
+                        ApiCallerEygpt _EygptApiCaller = new ApiCallerEygpt();
+                        var _DataInfo = _EygptApiCaller.GetDoctorSchduleDaysByApi_NewEYGPT_V5(lang, physicianId.ToString(), hospitalId, selectedDate, clinicId.ToString(), bIsVideo);
+
+                        if (_DataInfo != null && _DataInfo.Count == 0)
+                        {
+                            _resp.status = 0;
+                            _resp.msg = "No record Found";
+                            _resp.error_type = "0";
+
+                        }
+                        else
+                        {
+
+                            _resp.status = 1;
+                            _resp.msg = "Record Found";
+                            _resp.response = _DataInfo;
+                        }
+
+
+                    }
                     else if (hospitalId == 9)
                     {
                         // Call dammam API Function fill list
@@ -731,6 +753,28 @@ namespace SmartBookingService.Controllers
                         ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
                         allAvailableSlots = _UAEApiCaller.GetDoctorSlotsOfDaysByApi_NewUAE_V5(lang, physicianId.ToString(), hospitaId, selectedDate , bIsvideo);
                     }
+                    else if (hospitaId >= 201 && hospitaId < 300) /*for Eygpt BRANCHES*/
+					{
+                        //ApiCallerEygpt _EygptApiCaller = new ApiCallerEygpt();
+                        //var allAvailableSlots_2 = _EygptApiCaller.GetDoctorSlotsOfDaysByApi_NewEygpt_V5(lang, physicianId.ToString(), hospitaId, selectedDate, clinicId.ToString(), bIsvideo);
+
+                        //if (allAvailableSlots_2 != null && allAvailableSlots_2.Count > 0)
+                        //{
+                        //    _resp.status = 1;
+                        //    _resp.msg = "Doctor Schedules are available for selected Date";
+                        //    _resp.response = allAvailableSlots_2;
+                        //}
+                        //else
+                        //{
+                        //    _resp.status = 0;
+                        //    _resp.msg = "Doctor Schedules are Not available for selected Date";
+                        //}
+
+                        _resp.status = 0;
+                        _resp.msg = "Service Not Available";
+                        return Ok(_resp);
+
+                    }
                     else if (hospitaId == 9)
                     {
                         //var ClinicCode = "1390";
@@ -755,21 +799,118 @@ namespace SmartBookingService.Controllers
                         allAvailableSlots = physicianDb.GetAvailableSlotsByPhysician(lang, hospitaId, clinicId, physicianId, selectedDate, ApiSource, IsVideo);
                     }
 
+                    if (allAvailableSlots != null && allAvailableSlots.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Doctor Schedules are available for selected Date";
+                        _resp.response = allAvailableSlots;
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "Doctor Schedules are Not available for selected Date";
+                    }
+                }
+                else
+                {
+                    _resp.status = 0;
+                    _resp.msg = "Failed! Missing Parameters";
+                }
+            }
+            catch (Exception e)
+            {
+                _resp.status = 0;
+                _resp.msg = e.ToString();
+            }
+
+            return Ok(_resp);
+        }
+
+        [HttpPost]
+        [Route("v6/doctor-slots-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetDoctorsSlots_v6(FormDataCollection col)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["physician_id"]) &&
+                    col["physician_id"] != "0" && !string.IsNullOrEmpty(col["date"]))
+                {
+
+                    var lang = col["lang"];
+                    var hospitaId = Convert.ToInt32(col["hospital_id"]);
+                    var clinicId = Convert.ToInt32(col["clinic_id"]);
+                    var physicianId = Convert.ToInt32(col["physician_id"]);
+                    var selectedDate = Convert.ToDateTime(col["date"]);
+                    //var pageno = Convert.ToInt32(col["page_no"]);
+                    //var pagesize = Convert.ToInt32(col["page_size"]);
+                    var physicianDb = new PhysicianDB();
+                    var availableSlotsApiCaller = new AvailableSlotsApiCaller();
+                    List<AvailableSlots> allAvailableSlots;
+
+                    var ApiSource = "MobileApp";
+                    if (!string.IsNullOrEmpty(col["Sources"]))
+                        ApiSource = col["Sources"].ToString();
 
 
+                    //for Video Call Selection 
+                    var IsVideo = 0;
+                    var bIsvideo = false;
+                    if (!string.IsNullOrEmpty(col["IsVideo"]))
+                    {
+                        IsVideo = Convert.ToInt32(col["IsVideo"]);
+                        if (IsVideo == 1)
+                            bIsvideo = true;
+                    }
 
-                    //if (!Util.OasisBranches.Contains(hospitaId))
-                    //{
-                    //    allAvailableSlots = physicianDb.GetAvailableSlotsByPhysician(lang, hospitaId, clinicId, physicianId, selectedDate);
-                    //}
-                    //else
-                    //{
-                    //    allAvailableSlots = availableSlotsApiCaller.GetAvailableSlotsByPhysician(lang, hospitaId, clinicId, physicianId, selectedDate);
-                    //    //if (pageno > -1)
-                    //    //{
-                    //    //    allAvailableSlots = allAvailableSlots.OrderBy(i => i.Id).Skip((pageno) * pagesize).Take(pagesize).ToList();
-                    //    //}
-                    //}
+                    if (hospitaId >= 301 && hospitaId < 400) /*for UAE BRANCHES*/
+                    {
+                        ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                        allAvailableSlots = _UAEApiCaller.GetDoctorSlotsOfDaysByApi_NewUAE_V5(lang, physicianId.ToString(), hospitaId, selectedDate, bIsvideo);
+                    }
+                    else if (hospitaId >= 201 && hospitaId < 300) /*for Eygpt BRANCHES*/
+                    {
+                        ApiCallerEygpt _EygptApiCaller = new ApiCallerEygpt();
+                        var allAvailableSlots_2 = _EygptApiCaller.GetDoctorSlotsOfDaysByApi_NewEygpt_V5(lang, physicianId.ToString(), hospitaId, selectedDate, clinicId.ToString(), bIsvideo);
+
+                        if (allAvailableSlots_2 != null && allAvailableSlots_2.Count > 0)
+                        {
+                            _resp.status = 1;
+                            _resp.msg = "Doctor Schedules are available for selected Date";
+                            _resp.response = allAvailableSlots_2;
+                        }
+                        else
+                        {
+                            _resp.status = 0;
+                            _resp.msg = "Doctor Schedules are Not available for selected Date";
+                        }
+                        return Ok(_resp);
+
+                    }
+                    else if (hospitaId == 9)
+                    {
+                        //var ClinicCode = "1390";
+                        var ClinicCode = "0";
+                        var allPhysician = _physicianDb.GetAllDoctorsProfile(lang, hospitaId.ToString(), null, null, physicianId.ToString());
+                        if (allPhysician != null)
+                        {
+                            if (allPhysician.DoctorDataList != null && allPhysician.DoctorDataList.Count > 0)
+                            {
+                                ClinicCode = allPhysician.DoctorDataList[0].DoctorProfile.ClinicCode.ToString();
+                            }
+                        }
+
+                        // Call dammam API Function fill list
+                        LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                        allAvailableSlots = _loginApiCaller.GetDoctorSlotsOfDaysByApi_NewDam(lang, physicianId.ToString(), ClinicCode, selectedDate);
+
+
+                    }
+                    else
+                    {
+                        allAvailableSlots = physicianDb.GetAvailableSlotsByPhysician(lang, hospitaId, clinicId, physicianId, selectedDate, ApiSource, IsVideo);
+                    }
+
                     if (allAvailableSlots != null && allAvailableSlots.Count > 0)
                     {
                         _resp.status = 1;
@@ -831,13 +972,10 @@ namespace SmartBookingService.Controllers
                 {
                     _resp.status = 0;
                     _resp.msg = "No data found";
-
                     var strregistrationNo = col["patient_reg_no"].ToString();
-
-                    //_resp.response = allPhysician;
+                    
                     ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
                     var returnFormatedStr = _UAEApiCaller.GetMyDoctorSlots_NewUAE(lang, hospitalId, strregistrationNo);
-
 
                     var allPhysician = _physicianDb.GetAllPhsiciansDataTable_UAE_MyDoctor(lang, hospitalId, returnFormatedStr, true);
                     if (allPhysician != null && allPhysician.Rows.Count > 0)
@@ -856,7 +994,11 @@ namespace SmartBookingService.Controllers
                     
 
                 }
-				else
+				else if (hospitalId >= 201 && hospitalId < 300)
+				{
+
+				}
+                else
 				{
                     var allPhysician = _physicianDb.GetAllPhsiciansDataTable(lang, hospitalId, clinicId, pageNo, pageSize, true, registrationNo);
                     if (allPhysician != null && allPhysician.Rows.Count > 0)

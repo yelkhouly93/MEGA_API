@@ -459,9 +459,7 @@ namespace DataLayer.Data
                 new SqlParameter("@MyDoctors", MyDoctors),
                 new SqlParameter("@Doctor_Code_N_NearestSlot2", Doc_Near),
                 new SqlParameter("@RegistrationNo", -1)
-                
             };
-
             var allPhysiciansModel = DB.ExecuteSPAndReturnDataTable("DBO.[Get_Doctors_SPV2]");
             return allPhysiciansModel;
 

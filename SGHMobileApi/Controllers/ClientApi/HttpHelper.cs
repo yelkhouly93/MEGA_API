@@ -13,6 +13,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Script.Serialization;
+using static iTextSharp.text.pdf.AcroFields;
 
 namespace RestClient
 {
@@ -422,7 +423,7 @@ namespace RestClient
 
                 if (response == null)
                 {
-                    
+
                     return null;
                 }
 
@@ -431,6 +432,12 @@ namespace RestClient
                 var streamReader = new StreamReader(response.GetResponseStream());
 
                 var responseContent = streamReader.ReadToEnd().Trim();
+
+                responseContent=responseContent.Replace("\"IsPaid\":\"0\"", "\"IsPaid\":\"false\"");
+                responseContent=responseContent.Replace("\"IsPaid\":\"1\"", "\"IsPaid\":\"true\"");
+
+                responseContent = responseContent.Replace("\"SystemFlag\":\"0\"", "\"SystemFlag\":\"false\"");
+                responseContent = responseContent.Replace("\"SystemFlag\":\"1\"", "\"SystemFlag\":\"true\"");
 
                 if (status== HttpStatusCode.OK)
 				{
@@ -514,6 +521,524 @@ namespace RestClient
                 }
               
                 
+                responseOut = resp2;
+
+                return null;
+            }
+
+        }
+
+
+       
+
+        public static string CleanBraces(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            // Remove one '{' if the string starts with "{{"
+            if (input.StartsWith("{{"))
+            {
+                input = input.Substring(1);
+            }
+
+            // Remove one '}' if the string ends with "}}"
+            if (input.EndsWith("}}"))
+            {
+                input = input.Substring(0, input.Length - 1);
+            }
+
+            return input;
+        }
+
+        static public object EYGPT_API_Calling_POST<T>(
+                                string url,
+                                Dictionary<string, string> formData,
+                                out GenericResponse responseOut
+            )
+        {
+            var resp = new GenericResponse();
+            responseOut = new GenericResponse();
+            resp.status = 0;
+            resp.msg = "";
+            //requestBodyObject = resp;
+
+            using (var client = new HttpClient())
+            {
+
+                var contentFD = new MultipartFormDataContent();
+                // Add form data to the content
+                foreach (var kvp in formData)
+                {
+                    contentFD.Add(new StringContent(kvp.Value), kvp.Key);
+                }
+
+
+
+                // Change to FormDATA
+                //// Serialize to JSON                
+                //var requestBody = JsonConvert.SerializeObject(requestBodyObject);
+
+                //// If the API expects a body, you can add it here
+                //var content = new StringContent(requestBody, Encoding.UTF8, "application/x-www-form-urlencoded");
+
+                try
+                {
+
+                    //client.DefaultRequestHeaders.UserAgent.ParseAdd("PostmanRuntime/7.32.2");
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("sadf");
+
+
+
+
+
+                    // Send POST request synchronously
+                    var response = client.PostAsync(url, contentFD).Result;
+                    response.EnsureSuccessStatusCode();
+
+                    // Read response synchronously
+                    string responseBody = response.Content.ReadAsStringAsync().Result;
+                    Console.WriteLine("Response from API:");
+                    Console.WriteLine(responseBody);
+
+
+
+                    //var Testresp = JsonConvert.DeserializeObject<GenericResponse_Testing>(responseBody);
+                    resp = JsonConvert.DeserializeObject<GenericResponse>(responseBody);
+
+                    responseOut = resp;
+
+                    if (resp.status == 1 || resp.status == 200 )
+                    {
+                        if (resp.response != null)
+						{
+                            string tempeee = resp.response.ToString();                            
+                            var jsonObject = JsonConvert.DeserializeObject<T>(resp.response.ToString());                            
+                            return jsonObject;
+                        }
+                    }
+                    else
+                    {
+                        var Errorresp = new ErrorResponse_ERROR();
+                        Errorresp = JsonConvert.DeserializeObject<ErrorResponse_ERROR>(responseBody);
+
+                        var respE = new GenericResponse();
+                        resp.status = (int)0;
+                        resp.msg = Errorresp.ToString();
+                        responseOut = respE;
+                    }
+
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine("Request error:");
+                    Console.WriteLine(e.Message);
+                }
+            }
+            
+            return null;
+        }
+        public static object CallAPI_Eygpt_FinalTesting<T>(string url, KeyValuePair<string, string>[] ObjFormCol)
+        {
+            using (var client = new HttpClient())
+            {
+
+                //var apiToken = ConfigurationManager.AppSettings["MobileApi_Token"].ToString();
+                // ahsan New Token Logic
+                //var apiToken = GetToken();
+
+
+                //client.DefaultRequestHeaders.Authorization =
+                //    new AuthenticationHeaderValue("Bearer", apiToken);
+
+                client.BaseAddress = new Uri(url);
+                var content = new FormUrlEncodedContent(ObjFormCol);
+                var result = client.PostAsync("",null).Result;
+                //var result = client.PostAsync("", content).Result;
+                string resultContent = result.Content.ReadAsStringAsync().Result;
+
+
+                var resp = new GenericResponse();
+
+                resp = JsonConvert.DeserializeObject<GenericResponse>(resultContent);
+                //var jsonObject = JsonConvert.DeserializeObject<T>(resp.response);
+                if (resp.status == 1)
+                {
+                    //var jsonObject = (T)resp.response;
+                    var jsonObject = JsonConvert.DeserializeObject<T>(resp.response.ToString());
+                    return jsonObject;
+                }
+                else
+                {
+                    var Errorresp = new ErrorResponse_ERROR();
+
+                    Errorresp = JsonConvert.DeserializeObject<ErrorResponse_ERROR>(resultContent);
+
+                    // AHSNA Comments as crashing and code not Completed
+                    //if (Errorresp.ERROR.Code == 401 || Errorresp.ERROR.Message == "The Token has expired")
+                    //{
+                    //    var srt = "Genrate the token and recall";
+
+                    //     srt = "Token Genetrated";
+                    //}
+
+                }
+
+                return null;
+
+            }
+
+        }
+
+
+
+
+       
+
+        public static object CallAPI_POST_EYGPT_NEW<T>(
+                                string url,
+                                MultipartFormDataContent requestBodyObject,
+                                out GenericResponse responseOut                                
+                ) where T : class
+        {
+            responseOut = new GenericResponse();
+
+            try
+            {
+
+
+    //            var client = new HttpClient();
+    //            var request = new HttpRequestMessage(HttpMethod.Post, "url");
+                
+    //            request.Content = requestBodyObject;
+    //            var response =  client.SendAsync(request);
+
+    //            var responseContent = response.Content.ReadAsStringAsync().Result;
+
+    //            if (responseContent != null)
+				//{
+    //                var result = JsonConvert.DeserializeObject<T>(responseContent);
+    //                return result;
+    //            }
+    //            return null;
+                
+
+
+
+
+                
+            }
+            catch (Exception ex)
+            {
+                var temp = ex.Message;
+                //responseOut.IsSuccess = false;
+                //responseOut.Message = $"Exception: {ex.Message}";
+            }
+
+            return null;
+        }
+
+
+        public static object CallAPI_POST_UAE_Payment<T>(string url, object requestBodyObject, out GenericResponse responseOut, bool IsForUAE = false) where T : class
+        {
+            try
+            {
+                responseOut = new GenericResponse();
+                // Initialize an HttpWebRequest for the current URL.
+                var webReq = (HttpWebRequest)WebRequest.Create(url);
+
+                webReq.Method = "POST";
+                webReq.Accept = "application/json";
+
+
+
+
+                if (IsForUAE)
+                {
+                    var apiToken = GetToken("UAE");
+
+                    if (apiToken != null)
+                    {
+                        webReq.Headers["Authorization"] = "Bearer " + apiToken;
+                    }
+                }
+
+
+
+                //Serialize request object as JSON and write to request body
+                if (requestBodyObject != null)
+                {
+
+                    var requestBody = JsonConvert.SerializeObject(requestBodyObject);
+
+                    webReq.ContentLength = requestBody.Length;
+                    webReq.ContentType = "application/json";
+
+                    var streamWriter = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII);
+                    streamWriter.Write(requestBody);
+                    streamWriter.Close();
+                }
+
+                responseOut = null;
+                var response = webReq.GetResponse();
+
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (response == null)
+                {
+
+                    return null;
+                }
+
+                status = ((HttpWebResponse)response).StatusCode;
+
+                var streamReader = new StreamReader(response.GetResponseStream());
+
+                var responseContent = streamReader.ReadToEnd().Trim();
+
+                responseContent = responseContent.Replace("\"IsPaid\":\"0\"", "\"IsPaid\":\"false\"");
+                responseContent = responseContent.Replace("\"IsPaid\":\"1\"", "\"IsPaid\":\"true\"");
+
+                responseContent = responseContent.Replace("\"SystemFlag\":\"0\"", "\"SystemFlag\":\"false\"");
+                responseContent = responseContent.Replace("\"SystemFlag\":\"1\"", "\"SystemFlag\":\"true\"");
+
+                if (status == HttpStatusCode.OK)
+                {
+
+                    //AHSAN NEW Change 
+                    var resp = new GenericResponse();
+
+                    resp = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
+                    //var jsonObject = JsonConvert.DeserializeObject<T>(resp.response);
+                    responseOut = resp;
+
+                    if (resp.status == 1)
+                    {
+                        //var jsonObject = (T)resp.response;
+                        //if (resp.response != null)
+                        //{
+                        //    var jsonObject2 = JsonConvert.DeserializeObject<T>(resp.response.ToString());
+                        //    return jsonObject2;
+                        //}
+                        return null;
+
+                    }
+                    else
+                    {
+                        //var Errorresp = new ErrorResponse_ERROR();
+
+                        //Errorresp = JsonConvert.DeserializeObject<ErrorResponse_ERROR>(resultContent);
+                        return null;
+
+                    }
+                }
+                else
+                {
+                    var resp = new GenericResponse();
+                    resp.status = (int)status;
+                    resp.msg = Msg;
+                    responseOut = resp;
+                }
+
+                return null;
+
+
+                //var jsonObject = JsonConvert.DeserializeObject<T>(responseContent);
+
+                //return jsonObject;
+            }
+            catch (WebException wex)
+            {
+                if (wex.Response != null)
+                {
+                    using (var errorResponse = (HttpWebResponse)wex.Response)
+                    {
+                        using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                        {
+                            string errorContennt = reader.ReadToEnd().Trim();
+                            var jsonObject = JsonConvert.DeserializeObject<PostResponse>(errorContennt);
+
+                            var status = ((System.Net.HttpWebResponse)(wex.Response)).StatusCode;
+                            Msg = jsonObject.errorMessage;
+                            var resp = new GenericResponse();
+                            resp.status = (int)status;
+                            resp.msg = Msg;
+                            responseOut = resp;
+                            //return jsonObject;
+                            return null;
+                        }
+                    }
+
+                }
+
+                //status = HttpStatusCode.InternalServerError;
+                var resp2 = new GenericResponse();
+                resp2.status = (int)HttpStatusCode.InternalServerError;
+                try
+                {
+                    resp2.msg = wex.Message;
+
+                }
+                catch (Exception ex)
+                {
+                    resp2.msg = "UAE InternalServerError";
+                }
+
+
+                responseOut = resp2;
+
+                return null;
+            }
+
+        }
+
+
+        public static object CallAPI_POST_UAE_Payment2(string url, object requestBodyObject, out GenericResponse responseOut, bool IsForUAE = false)
+        {
+            try
+            {
+                responseOut = new GenericResponse();
+                // Initialize an HttpWebRequest for the current URL.
+                var webReq = (HttpWebRequest)WebRequest.Create(url);
+
+                webReq.Method = "POST";
+                webReq.Accept = "application/json";
+
+
+
+
+                if (IsForUAE)
+                {
+                    var apiToken = GetToken("UAE");
+
+                    if (apiToken != null)
+                    {
+                        webReq.Headers["Authorization"] = "Bearer " + apiToken;
+                    }
+                }
+
+
+
+                //Serialize request object as JSON and write to request body
+                if (requestBodyObject != null)
+                {
+
+                    var requestBody = JsonConvert.SerializeObject(requestBodyObject);
+
+                    webReq.ContentLength = requestBody.Length;
+                    webReq.ContentType = "application/json";
+
+                    var streamWriter = new StreamWriter(webReq.GetRequestStream(), Encoding.ASCII);
+                    streamWriter.Write(requestBody);
+                    streamWriter.Close();
+                }
+
+                responseOut = null;
+                var response = webReq.GetResponse();
+
+                var status = ((HttpWebResponse)response).StatusCode;
+
+                if (response == null)
+                {
+
+                    return null;
+                }
+
+                status = ((HttpWebResponse)response).StatusCode;
+
+                var streamReader = new StreamReader(response.GetResponseStream());
+
+                var responseContent = streamReader.ReadToEnd().Trim();
+
+                responseContent = responseContent.Replace("\"IsPaid\":\"0\"", "\"IsPaid\":\"false\"");
+                responseContent = responseContent.Replace("\"IsPaid\":\"1\"", "\"IsPaid\":\"true\"");
+
+                responseContent = responseContent.Replace("\"SystemFlag\":\"0\"", "\"SystemFlag\":\"false\"");
+                responseContent = responseContent.Replace("\"SystemFlag\":\"1\"", "\"SystemFlag\":\"true\"");
+
+                if (status == HttpStatusCode.OK)
+                {
+
+                    //AHSAN NEW Change 
+                    var resp = new GenericResponse();
+
+                    resp = JsonConvert.DeserializeObject<GenericResponse>(responseContent);
+                    //var jsonObject = JsonConvert.DeserializeObject<T>(resp.response);
+                    responseOut = resp;
+
+                    if (resp.status == 1)
+                    {
+                        //var jsonObject = (T)resp.response;
+                        //if (resp.response != null)
+                        //{
+                        //    var jsonObject2 = JsonConvert.DeserializeObject<T>(resp.response.ToString());
+                        //    return jsonObject2;
+                        //}
+                        return null;
+
+                    }
+                    else
+                    {
+                        //var Errorresp = new ErrorResponse_ERROR();
+
+                        //Errorresp = JsonConvert.DeserializeObject<ErrorResponse_ERROR>(resultContent);
+                        return null;
+
+                    }
+                }
+                else
+                {
+                    var resp = new GenericResponse();
+                    resp.status = (int)status;
+                    resp.msg = Msg;
+                    responseOut = resp;
+                }
+
+                return null;
+
+
+                //var jsonObject = JsonConvert.DeserializeObject<T>(responseContent);
+
+                //return jsonObject;
+            }
+            catch (WebException wex)
+            {
+                if (wex.Response != null)
+                {
+                    using (var errorResponse = (HttpWebResponse)wex.Response)
+                    {
+                        using (var reader = new StreamReader(errorResponse.GetResponseStream()))
+                        {
+                            string errorContennt = reader.ReadToEnd().Trim();
+                            var jsonObject = JsonConvert.DeserializeObject<PostResponse>(errorContennt);
+
+                            var status = ((System.Net.HttpWebResponse)(wex.Response)).StatusCode;
+                            Msg = jsonObject.errorMessage;
+                            var resp = new GenericResponse();
+                            resp.status = (int)status;
+                            resp.msg = Msg;
+                            responseOut = resp;
+                            //return jsonObject;
+                            return null;
+                        }
+                    }
+
+                }
+
+                //status = HttpStatusCode.InternalServerError;
+                var resp2 = new GenericResponse();
+                resp2.status = (int)HttpStatusCode.InternalServerError;
+                try
+                {
+                    resp2.msg = wex.Message;
+
+                }
+                catch (Exception ex)
+                {
+                    resp2.msg = "UAE InternalServerError";
+                }
+
+
                 responseOut = resp2;
 
                 return null;

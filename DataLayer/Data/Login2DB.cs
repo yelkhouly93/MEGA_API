@@ -397,7 +397,7 @@ namespace DataLayer.Data
                         tempDR.PatientId = dtobj[i].PatientId.ToString();
 
                     tempDR.PatientName_EN = dtobj[i].PatientName_EN.ToString();
-
+                    
                     var tempPatienPhone = "****" + dtobj[i].PatientCellNo.Substring(dtobj[i].PatientCellNo.Length - 4);
                     tempDR.PatientCellNo = tempPatienPhone;
 

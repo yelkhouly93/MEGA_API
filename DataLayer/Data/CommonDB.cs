@@ -727,6 +727,16 @@ namespace DataLayer.Data
             };
             DB.ExecuteSP("[dbo].[ADD_UAE_SMSTEXT_SP]");
         }
+        public void Insert_EYG_SMSTABLE(string MobileNumber, string SMSTEXT)
+        {
+            DB.param = new SqlParameter[]
+            {
+                new SqlParameter("@MobileNumber", MobileNumber),
+                new SqlParameter("@SMSText", SMSTEXT)
+            };
+            DB.ExecuteSP("[dbo].[ADD_EYG_SMSTEXT_SP]");
+        }
+        
 
 
 

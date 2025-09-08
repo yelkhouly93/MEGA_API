@@ -100,10 +100,7 @@ namespace DataLayer.Data
                 new SqlParameter("@lng", lng),
                 new SqlParameter("@CallingArea", CallingArea),
                 new SqlParameter("@FOR_TEST", For_TEST)
-
             };
-
-
             string DB_SP_Name = "DBO.Get_Hospitals3_SP";
 
             //if (ApiSources.ToLower() == "saleforce")

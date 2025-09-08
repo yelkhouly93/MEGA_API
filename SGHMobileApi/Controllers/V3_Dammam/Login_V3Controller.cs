@@ -1298,18 +1298,21 @@ namespace SGHMobileApi.Controllers
                     }
 
                     ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
-                    var _EYGuserInfo = _EYGApiCaller.ValidateLoginUserByApi_EYGPT(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage);
+                    var Eygptresp = new GenericResponse();
+                    var _EYGuserInfo = _EYGApiCaller.ValidateLoginUserByApi_EYGPT(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage , out Eygptresp);
 
 
-                    if (_EYGuserInfo == null)
-                    {
-                        resp.status = 0;
-                        resp.msg = errMessage;
-                        return Ok(resp);
-                    }
+                    Eygptresp = resp;
+					//return Ok(resp);
+					if (_EYGuserInfo == null)
+					{
+						resp.status = 0;
+						resp.msg = errMessage;
 
+					}
+					//Eygptresp.response
 
-                    if (_EYGuserInfo.Count == 0)
+					if (_EYGuserInfo.Count == 0)
                     {
                         resp.status = 0;
                         resp.msg = errMessage;
@@ -1340,7 +1343,7 @@ namespace SGHMobileApi.Controllers
                         MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
                         //Util.SendTestSMS(PhoneNumber, MsgContent);
                         var CBC = new CommonDB();
-                        CBC.InsertUAESMSTABLE(PhoneNumber, MsgContent);
+                        CBC.Insert_EYG_SMSTABLE(PhoneNumber, MsgContent);
 
                         errStatus = 1; // Multiple Record Found
                     }
@@ -1430,6 +1433,19 @@ namespace SGHMobileApi.Controllers
                             errMessage = "No Record Found. Please Try Again Later.";
                         }
 
+                    }
+                    else if (userPwdInfo.BranchID >= 201 && userPwdInfo.BranchID < 300) /*for EYGPT BRANCHES*/
+					{
+                        try
+                        {
+                            ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();                            
+                            userInfo = _EYGApiCaller.GetPatientDataByApi_Eygpt(lang, userPwdInfo.RegId, userPwdInfo.BranchID, ref errStatus, ref errMessage);
+                        }
+                        catch
+                        {
+                            errStatus = 1;
+                            errMessage = "No Record Found. Please Try Again Later.";
+                        }
                     }
                     else if (userPwdInfo.BranchID == 9)
                     {
@@ -1647,7 +1663,7 @@ namespace SGHMobileApi.Controllers
         }
 
 
-        public RegistrationData_PatientAdd OpenPatientFile (RegisterPatientUAE PatientData)
+        public RegistrationData_PatientAdd OpenPatientFile (RegisterPatientUAE PatientData )
 		{
             var ObjectReturn = new RegistrationData_PatientAdd();
 
@@ -1704,6 +1720,56 @@ namespace SGHMobileApi.Controllers
 
 
             }
+            else if (PatientData.HospitaId >= 201 && PatientData.HospitaId < 300)
+			{
+                var registerPatientUAE = new RegisterPatientUAE();
+                registerPatientUAE.CurrentCity = PatientData.CurrentCity;
+                registerPatientUAE.HospitaId = PatientData.HospitaId;
+                registerPatientUAE.IdExpiry = PatientData.IdExpiry;
+                registerPatientUAE.IdType = PatientData.IdType;
+                registerPatientUAE.PatientAddress = PatientData.PatientAddress;
+                registerPatientUAE.PatientBirthday = PatientData.PatientBirthday;
+                registerPatientUAE.PatientEmail = PatientData.PatientEmail;
+                registerPatientUAE.PatientFamilyName = PatientData.PatientFamilyName;
+                registerPatientUAE.PatientFirstName = PatientData.PatientFirstName;
+                registerPatientUAE.PatientGender = PatientData.PatientGender;
+
+                if (!String.IsNullOrEmpty(PatientData.PatientId))
+                {
+                    registerPatientUAE.PatientId = PatientData.PatientId.ToString();
+                }
+                else
+                {
+                    registerPatientUAE.PatientId = null;
+
+                }
+
+
+                registerPatientUAE.PatientLastName = PatientData.PatientLastName;
+                registerPatientUAE.PatientMaritalStatusId = PatientData.PatientMaritalStatusId;
+                registerPatientUAE.PatientMiddleName = PatientData.PatientMiddleName;
+                registerPatientUAE.PatientNationalId = PatientData.PatientNationalId;
+                registerPatientUAE.PatientNationalityId = PatientData.PatientNationalityId;
+                registerPatientUAE.PatientPhone = PatientData.PatientPhone;
+                registerPatientUAE.PatientTitleId = PatientData.PatientTitleId;
+                registerPatientUAE.skipDuplicateCheck = false;
+
+                ApiCallerEygpt _EYGPTApiCaller = new ApiCallerEygpt();
+                RegistrationPostResponse ReturnObject;
+                var APiResilts = _EYGPTApiCaller.PatientAddApi_EYGPT(registerPatientUAE, out ReturnObject);
+
+
+
+                if (APiResilts && !string.IsNullOrEmpty(ReturnObject.Mrn))
+                {
+                    PatientMRN = ReturnObject.Mrn;
+                }
+                else
+                {
+                    return null;
+                }
+
+            }
             else  // Currently For KSA
             {
                 if (PatientData.HospitaId == 9)
@@ -1736,7 +1802,14 @@ namespace SGHMobileApi.Controllers
                     
                     if (status != 1)
                     {
-                        return null;
+                        ObjectReturn.BranchID = 0;
+                        ObjectReturn.PatientNationalID = null;
+                        ObjectReturn.PatientPhone = null;
+                        ObjectReturn.RegistrationID = null;
+                        ObjectReturn.msg = msg;
+
+                        return ObjectReturn;
+                        //return null;
                     }
                     else
 					{
@@ -1805,7 +1878,7 @@ namespace SGHMobileApi.Controllers
 						{
                             var PData = OpenPatientFile(PatientRegistrationData);
 
-                            if (PData != null)
+                            if (PData.RegistrationID != null)
 							{
                                 hospitalId = PData.BranchID;
                                 patientMrn = PData.RegistrationID;
@@ -1813,7 +1886,8 @@ namespace SGHMobileApi.Controllers
                             }
                             else
 							{
-                                resp.msg = "Failed, To Create File! Please try to Open File Again";
+                                resp.msg = PData.msg;
+                                //resp.msg = "Failed, To Create File! Please try to Open File Again";
                                 resp.status = 0;
                                 return Ok(resp);
                             }
@@ -1826,6 +1900,12 @@ namespace SGHMobileApi.Controllers
                             resp.status = 0;
                             return Ok(resp);
                         }                        
+                    }
+                    else
+					{
+                        resp.msg = "Failed! OTP not Verified";
+                        resp.status = 0;
+                        return Ok(resp);
                     }
 
                 }
@@ -1861,7 +1941,15 @@ namespace SGHMobileApi.Controllers
                         IdValue = patientMrn.ToString();
                         userInfo = _UAEApiCaller.GetPatientDataByApi_NewUAE(lang, IdValue, IdType, hospitalId, ref errStatus, ref errMessage);
                     }
-
+                    else if (Countryid == 4) /*for UAE BRANCHES*/
+                    {
+                        ApiCallerEygpt _EyGPApiCaller = new ApiCallerEygpt();
+                        var IdType = "";
+                        var IdValue = "";
+                        IdType = "MRN";
+                        IdValue = patientMrn.ToString();
+                        userInfo = _EyGPApiCaller.GetPatientDataByApi_Eygpt(lang, patientMrn.ToString(), hospitalId, ref errStatus, ref errMessage);
+                    }
                 }
 
 
@@ -2087,6 +2175,18 @@ namespace SGHMobileApi.Controllers
 
                         ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
                         var _NewData = _UAEApiCaller.UpdatePatientBasicData_NewUAE(hospitaId, CMRN, PDateOfBirth.ToString("dd-MM-yyyy"), Marital_Status, patient_Gender, PatientPhone, EMail, ref errStatus, ref errMessage);
+
+                        _resp.status = errStatus;
+                        _resp.msg = errMessage;
+                        return Ok(_resp);
+                    }
+                    else if (hospitaId >= 201 && hospitaId < 300)
+					{
+                        int errStatus = 0;
+                        string errMessage = "";
+
+                        ApiCallerEygpt _EYGPTApiCaller = new ApiCallerEygpt();
+                        var _NewData = _EYGPTApiCaller.UpdatePatientBasicData_NewUAE_EYGPT(hospitaId, CMRN, PDateOfBirth.ToString("yyyy-MM-dd"), Marital_Status, patient_Gender, PatientPhone, EMail, ref errStatus, ref errMessage);
 
                         _resp.status = errStatus;
                         _resp.msg = errMessage;
@@ -2396,6 +2496,94 @@ namespace SGHMobileApi.Controllers
                     resp.msg = "No record found";
                     return Ok(resp);
                 }
+                else if (CountryId == 4)
+				{
+
+                    var IdType = "";
+                    var IdValue = "";
+                    var BranchName = "";
+                    ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+
+                    if (!string.IsNullOrEmpty(PCell))
+                    {
+                        IdType = "Mobile";
+
+                        var TempPcell = PCell.ToString();
+
+                        // change the the Format to
+                        TempPcell = TempPcell.Replace("%2B20", "");
+                        TempPcell = TempPcell.Replace("%2B", "");
+                        TempPcell = TempPcell.Replace("+", "");
+
+                        if (TempPcell.Substring(0, 4) == "0020")
+                        {
+                            TempPcell = TempPcell.Substring(4, TempPcell.Length - 4);
+                        }
+                        if (TempPcell.Substring(0, 2) == "20")
+                        {
+                            TempPcell = TempPcell.Substring(2, TempPcell.Length - 2);
+                        }
+                        var FirstChar = TempPcell.Substring(0, 1);
+						if (FirstChar != "0")
+						{
+							TempPcell = "0" + TempPcell;
+						}
+
+
+						IdValue = TempPcell.ToString();
+                        var Eygptresp = new GenericResponse();
+                        var _EYGserInfo = _EYGApiCaller.ValidateLoginUserByApi_EYGPT(lang, IdValue, IdType,  0, ref errStatus, ref errMessage , out Eygptresp);
+                        if (_EYGserInfo.Count == 0)
+                        {
+                            resp.status = 0;
+                            resp.msg = errMessage;
+                            return Ok(resp);
+
+                        }
+                        else
+                        {
+                            resp.status = 1;
+                            // SENT OTP 
+                            int activationCode = 0;
+                            int ErrorCode = 0;
+                            LoginApiCaller _loginApiCaller = new LoginApiCaller();
+                            _loginApiCaller.GenerateOTP_V3(_EYGserInfo[0].BranchId, _EYGserInfo[0].PatientCellNo2, _EYGserInfo[0].Registrationno, _EYGserInfo[0].PatientId, Source, ref activationCode, ref errStatus, ref errMessage, 4);
+
+
+                            // Encrpt the Data here For condition if 1 record Found
+                            var PhoneNumber = _EYGserInfo[0].PatientCellNo2;
+                            _EYGserInfo[0].PatientCellNo2 = "";
+                            OTP = activationCode.ToString();
+                            string MsgContent = "";
+                            MsgContent = ConfigurationManager.AppSettings["SMS_InitalText_UAE"].ToString() + OTP + " ";
+                            MsgContent += ConfigurationManager.AppSettings["SMS_Signature"].ToString();
+
+                            var CBC = new CommonDB();
+                            CBC.Insert_EYG_SMSTABLE(PhoneNumber, MsgContent);
+
+                            errStatus = 1; // Multiple Record Found
+
+                            resp.status = 1;
+                            resp.msg = "OTP has been send ";
+                            return Ok(resp);
+
+
+
+                        }
+
+                        resp.status = 0;
+                        resp.msg = "No record found";
+                        return Ok(resp);
+
+                    }
+
+
+
+                    resp.status = 0;
+                    resp.msg = "No record found";
+                    return Ok(resp);
+
+                }
                 resp.status = 0;
                 resp.msg = "No record Found.";
                 return Ok(resp);
@@ -2452,13 +2640,30 @@ namespace SGHMobileApi.Controllers
                         TempPcell = TempPcell.Substring(3, TempPcell.Length - 3);
                     }
                     var FirstChar = TempPcell.Substring(0, 1);
-                    //if (FirstChar != "0")
-                    //{
-                    //    TempPcell = "0" + TempPcell;
-                    //}
-
-
                     patientPhone = TempPcell.ToString();
+                }
+                else if (Countryid == 4)
+                {
+                    var TempPcell = patientPhone;
+                    // change the the Format to
+                    TempPcell = TempPcell.Replace("%2B20", "");
+                    TempPcell = TempPcell.Replace("%2B", "");
+                    TempPcell = TempPcell.Replace("+", "");
+
+                    if (TempPcell.Substring(0, 4) == "0020")
+                    {
+                        TempPcell = TempPcell.Substring(4, TempPcell.Length - 4);
+                    }
+                    if (TempPcell.Substring(0, 2) == "20")
+                    {
+                        TempPcell = TempPcell.Substring(2, TempPcell.Length - 2);
+                    }
+                    var FirstChar = TempPcell.Substring(0, 1);
+                    patientPhone = TempPcell.ToString();
+                    if (FirstChar == "1")
+					{
+                        patientPhone = "0" + patientPhone;
+                    }
                 }
 
                 var patientDb = new PatientDB();
@@ -2577,6 +2782,55 @@ namespace SGHMobileApi.Controllers
                             //    Final_userInfo = loginDb.Encrpt_UserList_Obj(_UAEserInfo);
                             //else
                                 Final_userInfo = _UAEserInfo;
+                            resp.status = 1;
+                            resp.msg = errMessage;
+                            resp.response = Final_userInfo;
+                            return Ok(resp);
+
+                        }
+                    }
+                    else if (Countryid == 4) /*for UAE*/
+                    {
+                        var IdType = "";
+                        var IdValue = "";
+                        var BranchName = "";
+
+
+
+                        if (!string.IsNullOrEmpty(patientPhone))
+                        {
+                            IdType = "Mobile";
+
+                            var TempPcell = patientPhone.ToString();
+
+                            // change the the Format to
+                            TempPcell = TempPcell.Replace("%2B20", "");
+                            TempPcell = TempPcell.Replace("%2B", "");
+                            TempPcell = TempPcell.Replace("+", "");
+
+                            if (TempPcell.Substring(0, 4) == "0020")
+                            {
+                                TempPcell = TempPcell.Substring(4, TempPcell.Length - 4);
+                            }
+                            if (TempPcell.Substring(0, 2) == "20")
+                            {
+                                TempPcell = TempPcell.Substring(2, TempPcell.Length - 2);
+                            }
+                            var FirstChar = TempPcell.Substring(0, 1);
+
+
+                            IdValue = TempPcell.ToString();
+
+                            ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+                            var Eygptresp = new GenericResponse();
+                            var _UAEserInfo = _EYGApiCaller.ValidateLoginUserByApi_EYGPT(lang, IdValue, IdType, 0, ref errStatus, ref errMessage , out Eygptresp);
+
+                            var Final_userInfo = new List<login_check_modal>();
+
+                            //if (IsEncrypt)
+                            //    Final_userInfo = loginDb.Encrpt_UserList_Obj(_UAEserInfo);
+                            //else
+                            Final_userInfo = _UAEserInfo;
                             resp.status = 1;
                             resp.msg = errMessage;
                             resp.response = Final_userInfo;

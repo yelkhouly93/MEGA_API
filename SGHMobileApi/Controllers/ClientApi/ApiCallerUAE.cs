@@ -540,7 +540,8 @@ namespace SmartBookingService.Controllers.ClientApi
                         _TempModalObj.Id = Convert.ToInt32(_APIModal[i].appointmentNo);
                         
                         // New CHnages Video Call
-                        _TempModalObj.isPaid = _APIModal[i].isPaid;
+                        _TempModalObj.isPaid = _APIModal[i].isPaid;                        
+                        _TempModalObj.SystemFlag = _APIModal[i].SystemFlag;
 
                         if (_APIModal[i].slotTypeId == "16")
                             _TempModalObj.IsVideoCall = 1;
@@ -613,7 +614,9 @@ namespace SmartBookingService.Controllers.ClientApi
             
             if (StrID != null && StrID.id != null)
             {
-                VideoURL = StrID.DoctorURL + "?id=" + util.Encrypt(StrID.id, true);                
+                // Usering Direct Parameters as per HTML
+                //VideoURL = StrID.DoctorURL + "?id=" + util.Encrypt(StrID.id, true);
+                VideoURL = StrID.DoctorURL;
             }
             else
 			{
@@ -641,13 +644,15 @@ namespace SmartBookingService.Controllers.ClientApi
             Parameters += "&Paid_Amount=" + Paid_Amount.ToString();
             Parameters += "&Payment_Method=" + Payment_Method.ToString();
             Parameters += "&TracK_ID=" + TracK_ID.ToString();
-            //Parameters += "&VideoURL='" + VideoURL.ToString();
-
+            Parameters += "&VideoURL=" + HttpUtility.UrlEncode(VideoURL.ToString());
+            Parameters += "&BillNumber=" + "";
 
             //AppointmentPostResponse
             BaseAPIUrl = "https://app.saudigerman.com/Services/api/payment-confirmation" + Parameters;
+            
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<PaymentConfirmPostResponse>(BaseAPIUrl, content, out resp, true);
+
+            var _NewData = RestUtility.CallAPI_POST_UAE_Payment<object>(BaseAPIUrl, content, out resp, true);
 
             responseOut = resp;
 
@@ -670,6 +675,85 @@ namespace SmartBookingService.Controllers.ClientApi
             //return false;
 
         }
+
+
+        public bool SavePaymentConfirmation_NewUAE2(string appointmentID, int HospitalID, string OnlineTransaction_id
+            , string Paid_Amount, string Payment_Method, string TracK_ID, string VideoURL, string MRN,
+            out GenericResponse responseOut)
+        {
+            HttpStatusCode status;
+            string BaseAPIUrl = "";
+            var BranchName = GetBranchName(HospitalID);
+
+
+            MediaDB _MediaDB = new MediaDB();
+
+            var StrID = _MediaDB.GETVideoURL(appointmentID, HospitalID.ToString(), MRN);
+
+            if (StrID != null && StrID.id != null)
+            {
+                // Usering Direct Parameters as per HTML
+                //VideoURL = StrID.DoctorURL + "?id=" + util.Encrypt(StrID.id, true);
+                VideoURL = StrID.DoctorURL;
+            }
+            else
+            {
+                VideoURL = ConfigurationManager.AppSettings["UAE_VIDEO_URL"].ToString();
+            }
+
+            logs_Payment_Call(TracK_ID, OnlineTransaction_id);
+
+            var errStatus = 0;
+            var errMessage = "";
+
+            var content = new[]{
+                    new KeyValuePair<string, string>("appointment_id", appointmentID),
+                    new KeyValuePair<string, string>("hospital_id", BranchName),
+                    new KeyValuePair<string, string>("OnlineTransaction_id", OnlineTransaction_id),
+                    new KeyValuePair<string, string>("Paid_Amount", Paid_Amount),
+                    new KeyValuePair<string, string>("Payment_Method", Payment_Method),
+                    new KeyValuePair<string, string>("TracK_ID", TracK_ID),
+                    //new KeyValuePair<string, string>("VideoURL", VideoURL),
+
+            };
+            var Parameters = "?appointment_id=" + appointmentID.ToString();
+            Parameters += "&hospital_id=" + BranchName.ToString();
+            Parameters += "&OnlineTransaction_id=" + OnlineTransaction_id.ToString();
+            Parameters += "&Paid_Amount=" + Paid_Amount.ToString();
+            Parameters += "&Payment_Method=" + Payment_Method.ToString();
+            Parameters += "&TracK_ID=" + TracK_ID.ToString();
+            Parameters += "&VideoURL=" + HttpUtility.UrlEncode(VideoURL.ToString());
+            Parameters += "&BillNumber=" + "";
+
+            //AppointmentPostResponse
+            BaseAPIUrl = "https://app.saudigerman.com/Services/api/payment-confirmation" + Parameters;
+
+            var resp = new GenericResponse();
+
+            var _NewData = RestUtility.CallAPI_POST_UAE_Payment2(BaseAPIUrl, content, out resp, true);
+
+            responseOut = resp;
+
+            //for Testing return Successfull from UAE
+            logs_Payment_Invoice_Generated(TracK_ID);
+            return true;
+
+            //         if (resp.status == 1)
+            //{
+            //             logs_Payment_Invoice_Generated(TracK_ID );
+            //             return true;
+            //}
+
+
+            return false;
+
+            //if (status == HttpStatusCode.OK)
+            //    return true;
+
+            //return false;
+
+        }
+
 
         public bool SaveAppointmentApi_NewUAE(UAE_BookAppointment bookModel, out AppointmentPostResponse responseOut)
         {

@@ -64,6 +64,23 @@ namespace DataLayer.Model
 
 
     }
+    public class GenericResponse_Testing
+    {
+        public int status { get; set; }
+        public string msg { get; set; }
+        public UAE_Patient_Info response { get; set; }
+        public string error_type { get; set; }
+    }
+    public class ErrorResponse_ERROR
+    {
+        public ErrorResponse ERROR { get; set; }
+    }
+
+    public class ErrorResponse
+    {
+        public int Code { get; set; }
+        public string Message { get; set; }
+    }
     public class GenericResponse_New
     {
         public int status { get; set; }
@@ -362,6 +379,18 @@ namespace DataLayer.Model
     public class AvailableSlots
     {
         public int Id { get; set; }
+        public string time_to { get; set; }
+        public string time_from { get; set; }
+        public int slot_type_id { get; set; }
+        public string slot_type_name { get; set; }
+
+        public string Doctor_ClinicTime { get; set; }
+
+    }
+
+    public class AvailableSlots_v6
+    {
+        public string Id { get; set; }
         public string time_to { get; set; }
         public string time_from { get; set; }
         public int slot_type_id { get; set; }
@@ -1380,6 +1409,9 @@ namespace DataLayer.Model
         public string BranchName { get; set; }
         public string latitude { get; set; }
         public string longitude { get; set; }
+        public bool SystemFlag { get; set; }
+
+        public string ClinicID { get; set; }
     }
 
     public class Doctor_Schedule_days_Modal
@@ -1679,6 +1711,8 @@ namespace DataLayer.Model
         public int BranchID { get; set; }
         public string PatientPhone { get; set; }
         public string PatientNationalID { get; set; }
+
+        public string msg { get; set; }
 
     }
 

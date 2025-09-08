@@ -171,7 +171,26 @@ namespace SmartBookingService.Controllers
                 }
 
                 var _allPatientMedDT = new DataTable();
-                if (hospitaId == 9)
+                if (hospitaId >=  201 && hospitaId < 300)
+				{
+                    //ApiCallerEygpt _EYGPTApiCaller = new ApiCallerEygpt();
+                    //var StrpatientMrn = col["patient_reg_no"];
+                    //var PatientData = _EYGPTApiCaller.GetPatientVisitByApi_Eygpt(lang, hospitaId, StrpatientMrn.ToString(), ref errStatus, ref errMessage);
+                    //if (PatientData != null && PatientData.Count > 0)
+                    //{
+                    //    _resp.status = 1;
+                    //    _resp.msg = "Record(s) Found";
+                    //    _resp.response = PatientData;
+                    //}
+                    //else
+                    //{
+                    //    _resp.status = 0;
+                    //    _resp.msg = "No Record Found";
+                    //}
+                    
+                    //return Ok(_resp);
+                }
+                else if (hospitaId == 9)
 				{
 
                     LoginApiCaller _loginApiCaller = new LoginApiCaller();
@@ -840,7 +859,26 @@ namespace SmartBookingService.Controllers
                     //_resp.response = PatientData;
                     return Ok(_resp);
                 }
-				else if (hospitalId == 9)
+                else if (hospitalId >= 201 && hospitalId < 300) /*for EYGPT BRANCHES*/
+                {
+                    ApiCallerEygpt _EYGPTApiCaller = new ApiCallerEygpt();
+                    var StrpatientMrn = col["patient_reg_no"];
+                    var PatientData = _EYGPTApiCaller.GetPatientVisitByApi_Eygpt(lang, hospitalId, StrpatientMrn.ToString(), ref errStatus, ref errMessage);
+                    if (PatientData != null && PatientData.Count > 0)
+                    {
+                        _resp.status = 1;
+                        _resp.msg = "Record(s) Found";
+                        _resp.response = PatientData;
+                    }
+                    else
+                    {
+                        _resp.status = 0;
+                        _resp.msg = "No Record Found";
+                    }
+                    //_resp.response = PatientData;
+                    return Ok(_resp);
+                }
+                else if (hospitalId == 9)
                 {
                     _resp.status = 0;
                     _resp.msg = "No Record Found";
@@ -1239,9 +1277,25 @@ namespace SmartBookingService.Controllers
                             resp.response = _NewData;
                             return Ok(resp);
                         }
+                    }
+                    else if (hospitalId >= 201 && hospitalId < 300)
+					{
+                        if (hospitalId == BookinghospitalId)
+						{
+                            var UAEMRN = col["patient_reg_no"].ToString();
+                            ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+
+                            var _NewData = _EYGApiCaller.GetPatientFamilyListForBooking_EYGPT(lang, hospitalId, UAEMRN, BookinghospitalId, ref errStatus, ref errMessage);
+
+                            if (_NewData.Count > 0)
+                            {
+                                resp.status = 1;
+                                resp.msg = errMessage;
+                                resp.response = _NewData;
+                                return Ok(resp);
+                            }
+                        }
                         
-
-
 
                     }
                     else
@@ -2266,7 +2320,7 @@ namespace SmartBookingService.Controllers
 					{
                         // UAE Case By Pass
 					}
-                    else if (PatientNationalalID.Length != 10 || !Util.IsDigitsOnly(PatientNationalalID))
+                    else if ((hospitaId < 200 || hospitaId > 300) && (PatientNationalalID.Length != 10 || !Util.IsDigitsOnly(PatientNationalalID)))
                     {
                         _resp.status = 0;
                         _resp.msg = "Wrong Format! Invalid National ID Number.";

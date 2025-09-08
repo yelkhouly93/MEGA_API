@@ -11,6 +11,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Web;
 
 namespace SmartBookingService.Controllers.ClientApi
@@ -20,54 +21,106 @@ namespace SmartBookingService.Controllers.ClientApi
         CustomDBHelper DB = new CustomDBHelper("RECEPTION");
         private readonly EncryptDecrypt_New util = new EncryptDecrypt_New();
 
-        public List<login_check_modal> ValidateLoginUserByApi_EYGPT(string lang, string idValue, string IdType, int BranchID, ref int Er_Status, ref string Msg)
+        public List<login_check_modal> ValidateLoginUserByApi_EYGPT(string lang, string idValue, string IdType
+            , int BranchID, ref int Er_Status, ref string Msg
+            , out GenericResponse responseOut
+            )
         {
-                HttpStatusCode status;                
-                string RegistrationUrl = "130.7.1.27/mopile_app/public/api/SearchPatient";
+            HttpStatusCode status;
+            string RegistrationUrl = "http://130.7.1.68/mopile_app/public/api/SearchPatient";
 
-                var _patientData_EYG = new List<EYG_Patient_Info>();
-                 var resp = new GenericResponse();
+            var _patientData_EYG = new List<EYG_Patient_Info_Search>();
+            var resp = new GenericResponse();
 
             //_accData = new accountData_dam() { idValue = idValue, idType = IdType ,  };
-            if (!string.IsNullOrEmpty(BranchID.ToString()) )
+            if (!string.IsNullOrEmpty(BranchID.ToString()) && BranchID != 0)
             {
 
-                    var content = new[]{
-                        new KeyValuePair<string, string>(IdType, idValue)
-                    };
+                var formData = new Dictionary<string, string>
+                {
+                    { "patient_reg_no", idValue },
+                    { "hospital_id", BranchID.ToString() }
+                };
 
-                var _NewData = RestUtility.CallAPI_POST_UAE<List<UAE_Patient_Info>>(RegistrationUrl, content, out resp, false);
-                _patientData_EYG = _NewData as List<EYG_Patient_Info>;
-                    Msg = resp.msg;
+                var _NewData = RestUtility.EYGPT_API_Calling_POST<List<EYG_Patient_Info_Search>>(RegistrationUrl, formData, out resp);
+                responseOut = resp;
+                _patientData_EYG = _NewData as List<EYG_Patient_Info_Search>;
+                Msg = resp.msg;
             }
             else
             {
-                var content = new[]{
-                    new KeyValuePair<string, string>(IdType, idValue)
+
+                var formData = new Dictionary<string, string>
+                {
+                    { "patient_phone", idValue }
                 };
 
-                var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_Info>>(RegistrationUrl, content, out resp, true);
-                Msg = resp.msg;
-                _patientData_EYG = _NewData as List<EYG_Patient_Info>;
+                var _NewData = RestUtility.EYGPT_API_Calling_POST<List<EYG_Patient_Info_Search>>(RegistrationUrl, formData, out resp);
+                responseOut = resp;
+                _patientData_EYG = _NewData as List<EYG_Patient_Info_Search>;
 
             }
 
-            //var _userInfo = MapUserInfoModelToUserInf_NewUAE(_patientData_UAE, BranchID);
 
-            //return _userInfo;
-            return null;
-
-            //var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_Info>>(RegistrationUrl, content, out resp, true);
-
-            //var _patientData_UAE = new List<EYG_Patient_Info>();
-            
-
-            //var _userInfo = MapUserInfoModelToUserInf_NewEyGPT(_patientData_UAE, BranchID);
+            var _userInfo = MapUserInfoModelToUserInf_Eygpt(_patientData_EYG, BranchID);
 
 
+            return _userInfo;
         }
 
-        private List<login_check_modal> MapUserInfoModelToUserInf_NewUAE(List<UAE_Patient_Info> _userInfoModel , int BranchID)
+        private List<login_check_modal> MapUserInfoModelToUserInf_Eygpt(List<EYG_Patient_Info_Search> _userInfoModel, int BranchID)
+        {
+            List<login_check_modal> _userInfo = new List<login_check_modal>();
+
+            if (_userInfoModel != null && _userInfoModel.Count > 0)
+            {
+                for (var i = 0; i < _userInfoModel.Count; i++)
+                {
+                    login_check_modal _TempModalObj = new login_check_modal();
+
+                    if (_userInfoModel[i].registrationNo.ToString() != "" && _userInfoModel[i].registrationNo.ToString() != "0")
+                    {
+                        var NewBranchID = BranchID.ToString();
+                        //if (BranchID == 0)
+                        //{
+                        //    var Hospital_ID = Convert.ToInt32(_userInfoModel[i].branch_Id);
+                        //    NewBranchID = Hospital_ID.ToString();
+                        //    //BranchName = GetBranchFullName(Convert.ToInt32(Hospital_ID));
+                        //}
+
+
+                        _TempModalObj.BranchId = _userInfoModel[i].branch_Id.ToString();
+                        _TempModalObj.branchID = _userInfoModel[i].branch_Id.ToString();
+                        _TempModalObj.Branch_AR = _userInfoModel[i].branch_AR;
+                        _TempModalObj.Branch_EN = _userInfoModel[i].branch_EN;
+                        _TempModalObj.Registrationno = _userInfoModel[i].registrationNo.ToString();
+                        //_TempModalObj.DOB = _userInfoModel[i].birthday.ToString();
+                        _TempModalObj.DOB = _userInfoModel[i].dob;
+                        _TempModalObj.image_url = "";
+                        _TempModalObj.PatientCellNo = _userInfoModel[i].PPhone.ToString();
+                        _TempModalObj.PatientCellNo2 = _userInfoModel[i].pCellno.ToString();
+
+                        if (_TempModalObj.PatientCellNo == "")
+                            _TempModalObj.PatientCellNo = _TempModalObj.PatientCellNo2;
+                        else if (_TempModalObj.PatientCellNo2 == "")
+                            _TempModalObj.PatientCellNo2 = _TempModalObj.PatientCellNo;
+
+
+                        _TempModalObj.PatientFullName = MaskFullName(_userInfoModel[i].patientFullName.ToString());
+                        _TempModalObj.PatientId = _userInfoModel[i].registrationNo.ToString();
+                        _TempModalObj.PatientName_AR = _userInfoModel[i].patientFullName.ToString();
+                        _TempModalObj.PatientName_EN = MaskFullName(_userInfoModel[i].patientFullName.ToString());
+                        //_TempModalObj.PEMail = _userInfoModel[i].email.ToString();
+                        _TempModalObj.PEMail = "";
+                        _userInfo.Add(_TempModalObj);
+                    }
+
+                }
+            }
+            return _userInfo;
+        }
+
+        private List<login_check_modal> MapUserInfoModelToUserInf_NewUAE(List<UAE_Patient_Info> _userInfoModel, int BranchID)
         {
             List<login_check_modal> _userInfo = new List<login_check_modal>();
 
@@ -83,12 +136,12 @@ namespace SmartBookingService.Controllers.ClientApi
                     {
                         var NewBranchID = BranchID.ToString();
                         if (BranchID == 0)
-						{
+                        {
                             var Hospital_ID = GetBranchID(_userInfoModel[i].hospital_id);
                             NewBranchID = Hospital_ID;
-                            BranchName = GetBranchFullName(Convert.ToInt32( Hospital_ID));
+                            BranchName = GetBranchFullName(Convert.ToInt32(Hospital_ID));
                         }
-                            
+
 
                         _TempModalObj.BranchId = NewBranchID.ToString();
                         _TempModalObj.branchID = NewBranchID.ToString();
@@ -100,9 +153,9 @@ namespace SmartBookingService.Controllers.ClientApi
                         _TempModalObj.image_url = "";
                         _TempModalObj.PatientCellNo = _userInfoModel[i].phone.ToString();
                         _TempModalObj.PatientCellNo2 = _userInfoModel[i].phone.ToString();
-                        _TempModalObj.PatientFullName = MaskFullName (_userInfoModel[i].name.ToString());
+                        _TempModalObj.PatientFullName = MaskFullName(_userInfoModel[i].name.ToString());
                         _TempModalObj.PatientId = _userInfoModel[i].registration_no.ToString();
-                        _TempModalObj.PatientName_AR =  _userInfoModel[i].name_ar.ToString();
+                        _TempModalObj.PatientName_AR = _userInfoModel[i].name_ar.ToString();
                         _TempModalObj.PatientName_EN = MaskFullName(_userInfoModel[i].name.ToString());
                         //_TempModalObj.PEMail = _userInfoModel[i].email.ToString();
                         _TempModalObj.PEMail = "";
@@ -144,7 +197,7 @@ namespace SmartBookingService.Controllers.ClientApi
         {
             HttpStatusCode status;
             accountData_dam _accData = new accountData_dam();
-            string RegistrationUrl = "130.7.1.27/mopile_app/public/api/GetVitalSigns";
+            string RegistrationUrl = "http://130.7.1.68/mopile_app/public/api/GetVitalSigns";
 
             var content = new[]{
                     new KeyValuePair<string, string>("patient_reg_no", MRN.ToString())
@@ -153,7 +206,7 @@ namespace SmartBookingService.Controllers.ClientApi
 
             var resp = new GenericResponse();
             var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_Vital>>(RegistrationUrl, content, out resp, true);
-            
+
             var _patientData_UAE = new List<EYG_Patient_Vital>();
             _patientData_UAE = _NewData as List<EYG_Patient_Vital>;
             return _patientData_UAE;
@@ -164,89 +217,166 @@ namespace SmartBookingService.Controllers.ClientApi
         {
             HttpStatusCode status;
             accountData_dam _accData = new accountData_dam();
-            string RegistrationUrl = "http://130.7.1.27/mopile_app/public/api/GetPatient";
-
-            var content = new[]{
-                    new KeyValuePair<string, string>("patient_reg_no", MRN.ToString()),
-                    new KeyValuePair<string, string>("Hospital_id", BranchID.ToString())
-                    
-            };
-            
+            string RegistrationUrl = "http://130.7.1.68/mopile_app/public/api/GetPatient";
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_Info>>(RegistrationUrl, content, out resp, true);
+            var content = new[]{
+                    new KeyValuePair<string, string>(),
+                    new KeyValuePair<string, string>()
 
-            var _patientData_UAE = new List<EYG_Patient_Info>();
-            _patientData_UAE = _NewData as List<EYG_Patient_Info>;
+            };
+            var formData = new Dictionary<string, string>
+                {
+                    { "patient_reg_no", MRN.ToString() },
+                    { "Hospital_id", BranchID.ToString() }
+                };
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<EYG_Patient_Info_DATA>(RegistrationUrl, formData, out resp);
+            //var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_Info>>(RegistrationUrl, content, out resp, true);
 
-            var _userInfo = MapUserInfoModelToUserInf_NewEyGPT(_patientData_UAE, BranchID);
+            var _patientData_UAE = new EYG_Patient_Info_DATA();
+            _patientData_UAE = _NewData as EYG_Patient_Info_DATA;
 
-            
+            var _userInfo = MapUserInfoModelToUserInf_NewEyGPT_Modal(_patientData_UAE, BranchID);
+
+
             return _userInfo;
 
         }
 
-        private UserInfo_New MapUserInfoModelToUserInf_NewEyGPT(List<EYG_Patient_Info> userInfoModel , int BranchID)
+        //private UserInfo_New MapUserInfoModelToUserInf_NewEyGPT(List<EYG_Patient_Info> userInfoModel , int BranchID)
+        //{
+        //    var BranchFullName = GetBranchFullName(BranchID);
+
+        //    UserInfo_New userInfo = new UserInfo_New();
+        //    if (userInfoModel == null || userInfoModel.Count <= 0) return userInfo;
+        //    userInfo.address = userInfoModel[0].address;
+        //    try
+        //    {
+        //        if (userInfoModel[0].dob != "")
+        //            userInfo.birthday = DateTime.Parse(userInfoModel[0].dob);
+        //    }
+        //    catch (Exception e)
+        //    {
+
+        //    }
+
+
+        //    userInfo.CountryId = 4;
+
+        //    //userInfo.email = userInfoModel[0].email;
+        //    userInfo.family_name = userInfoModel[0].familyName;
+        //    userInfo.first_name = userInfoModel[0].firstName;
+        //    userInfo.gender = userInfoModel[0].gender;
+        //    userInfo.gender_ar = userInfoModel[0].gender;
+        //    userInfo.hospital_id = BranchID.ToString();
+        //    userInfo.id = userInfoModel[0].registrationNo;
+        //    userInfo.national_id = userInfoModel[0].nationalID;
+        //    userInfo.last_name = userInfoModel[0].lastName;
+        //    userInfo.marital_status_id = userInfoModel[0].maritalStatus;
+        //    userInfo.middle_name = userInfoModel[0].middleName;
+        //    userInfo.name = userInfoModel[0].patientFullName;
+        //    userInfo.phone = userInfoModel[0].PPhone;
+        //    userInfo.registration_no = userInfoModel[0].registrationNo;
+        //    userInfo.title_id = userInfoModel[0].title;
+        //    userInfo.name_ar = userInfoModel[0].patientFullName;
+
+        //    if (!String.IsNullOrEmpty(userInfoModel[0].familymembersCount))
+        //        userInfo.FamilyMembersCount = Convert.ToInt32( userInfoModel[0].familymembersCount);
+
+
+        //    userInfo.Age = userInfoModel[0].age;
+        //    userInfo.BloodGroup = userInfoModel[0].bloodGroup;
+        //    userInfo.Weight = userInfoModel[0].weight;
+        //    userInfo.Height = userInfoModel[0].height;
+
+
+        //    userInfo.NationalityId = userInfoModel[0].nationalityId;
+        //    userInfo.Nationality = userInfoModel[0].nationality;
+
+        //    if (userInfo.NationalityId == "")
+        //        userInfo.NationalityId = "0";
+
+
+        //    userInfo.image_url = "";
+
+        //    userInfo.IsCash = true;
+
+        //    userInfo.Branch_Id = BranchID.ToString();
+        //    userInfo.Branch_Name = userInfoModel[0].branch_EN;
+
+        //    userInfo.Branch_Name_ar = userInfoModel[0].branch_AR;
+
+        //    //userInfo.CurrentCity = userInfoModel[0].CurrentCity;
+        //    //userInfo.IdType = userInfoModel[0].IdType;
+        //    //userInfo.IdExpiry = userInfoModel[0].IdExpiry;        
+
+        //    return userInfo;
+        //}
+
+        private UserInfo_New MapUserInfoModelToUserInf_NewEyGPT_Modal(EYG_Patient_Info_DATA userInfoModel, int BranchID)
         {
             var BranchFullName = GetBranchFullName(BranchID);
 
             UserInfo_New userInfo = new UserInfo_New();
-            if (userInfoModel == null || userInfoModel.Count <= 0) return userInfo;
-            userInfo.address = userInfoModel[0].address;
+            if (userInfoModel == null || userInfoModel.registration_no == null) return userInfo;
+            userInfo.address = userInfoModel.Address;
             try
             {
-                if (userInfoModel[0].birthday != "")
-                    userInfo.birthday = DateTime.Parse(userInfoModel[0].birthday);
+                if (userInfoModel.birthday != "")
+                    userInfo.birthday = DateTime.Parse(userInfoModel.birthday);
             }
             catch (Exception e)
             {
 
             }
 
-            
+
             userInfo.CountryId = 4;
 
             //userInfo.email = userInfoModel[0].email;
-            userInfo.family_name = userInfoModel[0].family_name;
-            userInfo.first_name = userInfoModel[0].first_name;
-            userInfo.gender = userInfoModel[0].gender;
-            userInfo.gender_ar = userInfoModel[0].gender;
+            userInfo.family_name = userInfoModel.family_name;
+            userInfo.first_name = userInfoModel.first_name;
+            userInfo.gender = userInfoModel.gender;
+            userInfo.gender_ar = userInfoModel.gender;
             userInfo.hospital_id = BranchID.ToString();
-            userInfo.id = userInfoModel[0].registration_no;
-            userInfo.national_id = userInfoModel[0].id;
-            userInfo.last_name = userInfoModel[0].last_name;
-            userInfo.marital_status_id = userInfoModel[0].marital_status_id;
-            userInfo.middle_name = userInfoModel[0].middle_name;
-            userInfo.name = userInfoModel[0].name;
-            userInfo.phone = userInfoModel[0].phone;
-            userInfo.registration_no = userInfoModel[0].registration_no;
-            userInfo.title_id = userInfoModel[0].title_id;
-            userInfo.name_ar = userInfoModel[0].name_ar;
+            userInfo.id = userInfoModel.registration_no;
+            userInfo.national_id = userInfoModel.id;
+            userInfo.last_name = userInfoModel.last_name;
+            userInfo.marital_status_id = userInfoModel.marital_status_id;
+            userInfo.middle_name = userInfoModel.middle_name;
+            userInfo.name = userInfoModel.name;
+            userInfo.phone = userInfoModel.phone;
+            userInfo.registration_no = userInfoModel.registration_no;
+            userInfo.title_id = userInfoModel.title_id;
+            userInfo.name_ar = userInfoModel.name;
 
-            if (!String.IsNullOrEmpty(userInfoModel[0].familymembersCount))
-                userInfo.FamilyMembersCount = Convert.ToInt32( userInfoModel[0].familymembersCount);
-
-
-            userInfo.Age = userInfoModel[0].age;
-            userInfo.BloodGroup = userInfoModel[0].bloodGroup;
-            userInfo.Weight = userInfoModel[0].weight;
-            userInfo.Height = userInfoModel[0].height;
+            if (!String.IsNullOrEmpty(userInfoModel.familymembersCount))
+                userInfo.FamilyMembersCount = Convert.ToInt32(userInfoModel.familymembersCount);
 
 
-            userInfo.NationalityId = userInfoModel[0].nationalityId;
-            userInfo.Nationality = userInfoModel[0].nationality;
+            userInfo.Age = userInfoModel.age;
+            userInfo.BloodGroup = userInfoModel.bloodGroup;
+            userInfo.Weight = userInfoModel.weight;
+            userInfo.Height = userInfoModel.height;
+
+
+            userInfo.NationalityId = userInfoModel.nationality;
+            // Name of the nationality required form the Eygpt 
+            userInfo.Nationality = userInfoModel.nationality;
 
             if (userInfo.NationalityId == "")
                 userInfo.NationalityId = "0";
 
 
             userInfo.image_url = "";
-            
-            userInfo.IsCash = true;
+            if (userInfoModel.IsCash == "Insurance")
+                userInfo.IsCash = false;
+            else
+                userInfo.IsCash = true;
 
             userInfo.Branch_Id = BranchID.ToString();
-            userInfo.Branch_Name = userInfoModel[0].branch_EN;
+            userInfo.Branch_Name = userInfoModel.branch_EN;
 
-            userInfo.Branch_Name_ar = userInfoModel[0].branch_AR;
+            userInfo.Branch_Name_ar = userInfoModel.branch_AR;
 
             //userInfo.CurrentCity = userInfoModel[0].CurrentCity;
             //userInfo.IdType = userInfoModel[0].IdType;
@@ -322,7 +452,7 @@ namespace SmartBookingService.Controllers.ClientApi
             return _ListObj;
         }
 
-        public void GenerateOTP_V3(string hospitalID, string MOBILE_NO, string MRN, string NationalId, string Source, ref int activationNo, ref int Er_Status, ref string Msg , int ReasonCode = 1)
+        public void GenerateOTP_V3(string hospitalID, string MOBILE_NO, string MRN, string NationalId, string Source, ref int activationNo, ref int Er_Status, ref string Msg, int ReasonCode = 1)
         {
             DB.param = new SqlParameter[]
                 {
@@ -364,43 +494,41 @@ namespace SmartBookingService.Controllers.ClientApi
             NationalityID = Convert.ToInt32(DB.param[2].Value);
         }
 
-        public string GetNationalityCodeUAE_string(int hospitalID, int UnifiedID)
+        public string GetNationalityCode_EYGPT_string(int hospitalID, int UnifiedID)
         {
-            //DB.param = new SqlParameter[]
-            //    {
-            //        new SqlParameter("@BranchId", hospitalID),
-            //        new SqlParameter("@UnifiedID", UnifiedID),
-            //        new SqlParameter("@NationalityCode", SqlDbType.Int)
-            //    };
-            //DB.param[2].Direction = ParameterDirection.Output;
-            //DB.ExecuteSPAndReturnDataTable("dbo.Get_NationalityCode_FromUnifiedId_UAE_SP");
-
-            //NationalityID = DB.param[2].Value.ToString();
             if (hospitalID == 0)
                 return "";
 
             CustomDBHelper _DB = new CustomDBHelper("RECEPTION");
 
-            var SQL_Qry = "SELECT TOP 1 CONVERT (varchar(5), RIGHT(1000 + HIS_ID, 3)) FROM BAS_Nationality_TB with (nolock) WHERE Branch_Id = '"+ hospitalID .ToString()+ "' AND UnifiedID = '"+ UnifiedID.ToString() + "'  ";
+            var SQL_Qry = "SELECT TOP 1 HIS_ID FROM BAS_Nationality_TB with (nolock) WHERE Branch_Id = '" + hospitalID.ToString() + "' AND UnifiedID = '" + UnifiedID.ToString() + "'  ";
             var EmployeeCode = _DB.ExecuteSQLScalar(SQL_Qry);
             return EmployeeCode;
 
         }
 
         // Appointment
-        public List<Patient_Appointment_Modal_ForMobile> GetPatientAppointmentsByApi_EYGPT(string lang, string MRN , int BranchID)
-        {   
+        public List<Patient_Appointment_Modal_ForMobile> GetPatientAppointmentsByApi_EYGPT(string lang, string MRN, int BranchID)
+        {
 
             HttpStatusCode status;
-            string BaseAPIUrl = "https://130.7.1.68/mopile_app/public/api/GetAppointments";
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/GetAppointments";
+                        
+            var formData = new Dictionary<string, string>
+                {
+                    { "patient_reg_no", MRN },
+                    { "hospital_id", BranchID.ToString() }
+                };
 
-            var content = new[]{					
-					new KeyValuePair<string, string>("patient_reg_no", MRN)					
-			};
             var resp = new GenericResponse();
-            var _NewDataAPI = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_AppointmentList>>(BaseAPIUrl, content, out resp , true) as List<EYG_Patient_AppointmentList>;
+            var _NewDataAPI = RestUtility.EYGPT_API_Calling_POST<List<EYG_Patient_AppointmentList>>(BaseAPIUrl, formData, out resp) as List<EYG_Patient_AppointmentList>;
 
-            
+
+
+
+            //var _NewDataAPI = RestUtility.CallAPI_POST_UAE<List<EYG_Patient_AppointmentList>>(BaseAPIUrl, content, out resp , true) as List<EYG_Patient_AppointmentList>;
+
+
 
             var _NewData = MapPatientAppointments_Eygpt(_NewDataAPI, BranchID).OrderByDescending(o => o.IsUpComming).ThenBy(o => o.DurationLeft).ThenByDescending(o => o.AppDate).ToList();
 
@@ -408,18 +536,18 @@ namespace SmartBookingService.Controllers.ClientApi
         }
 
 
-        private List<Patient_Appointment_Modal_ForMobile> MapPatientAppointments_Eygpt(List<EYG_Patient_AppointmentList> _APIModal,int BranchID, string lang = "EN")
-        {   
-            var BranchINFO = GetBranchInfoName(BranchID , lang);
+        private List<Patient_Appointment_Modal_ForMobile> MapPatientAppointments_Eygpt(List<EYG_Patient_AppointmentList> _APIModal, int BranchID, string lang = "EN")
+        {
+            var BranchINFO = GetBranchInfoName(BranchID, lang);
 
             List<Patient_Appointment_Modal_ForMobile> _ListObj = new List<Patient_Appointment_Modal_ForMobile>();
-            
+
             if (_APIModal != null && _APIModal.Count > 0)
             {
                 for (var i = 0; i < _APIModal.Count; i++)
                 {
                     Patient_Appointment_Modal_ForMobile _TempModalObj = new Patient_Appointment_Modal_ForMobile();
-                    
+
                     try
                     {
 
@@ -432,10 +560,10 @@ namespace SmartBookingService.Controllers.ClientApi
                         _TempModalObj.Id = _APIModal[i].id;
 
                         DateTime tempDateTime;
-                        
+
                         if (!DateTime.TryParse(_APIModal[i].appDate, out tempDateTime))
                             continue;
-						
+
                         _TempModalObj.AppDate = tempDateTime;
 
                         _TempModalObj.AppointmentNo = Convert.ToInt32(_APIModal[i].appointmentNo);
@@ -445,11 +573,14 @@ namespace SmartBookingService.Controllers.ClientApi
                         else
                             _TempModalObj.BranchName = BranchINFO.BranchName;
 
-                        _TempModalObj.ClinicName = _APIModal[i].clinicName;                        
-                        _TempModalObj.ClinicName_AR = _APIModal[i].clinicName;                        
-                        _TempModalObj.DoctorName = _APIModal[i].doctorName;                        
+
+                        _TempModalObj.ClinicID = _APIModal[i].ClinicID;
+
+                        _TempModalObj.ClinicName = _APIModal[i].clinicName;
+                        _TempModalObj.ClinicName_AR = _APIModal[i].clinicName;
+                        _TempModalObj.DoctorName = _APIModal[i].doctorName;
                         _TempModalObj.DoctorName_AR = _APIModal[i].doctorName;
-                        
+
                         if (tempDateTime <= System.DateTime.Now.Date)
                         {
                             _TempModalObj.DurationLeft = 0;
@@ -506,200 +637,107 @@ namespace SmartBookingService.Controllers.ClientApi
 
         //}
 
-        public bool SaveAppointmentApi_NewUAE(UAE_BookAppointment bookModel, out AppointmentPostResponse responseOut)
+        public bool SaveAppointmentApi_NewEygpt(UAE_BookAppointment bookModel, out AppointmentPostResponse responseOut)
         {
             HttpStatusCode status;
-            string BaseAPIUrl = "";
-            var BranchName = GetBranchName(bookModel.BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(bookModel.BranchID, bookModel.PhysicanId.ToString());
+            var resp = new GenericResponse();
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/Reservation_add";
 
-            var errStatus = 0;
-            var errMessage = "";
-            var IdType = "MRN";
-            var IdValue = bookModel.PatientId;            
-            var userInfo = GetPatientDataByApi_Eygpt("EN", IdValue, 0, ref errStatus, ref errMessage);
+            var formData = new Dictionary<string, string>
+                {
+                    { "Date", bookModel.AppDate.ToString("yyyy-MM-dd") },
+                    { "patient_reg_no", bookModel.PatientId },
+                    { "physician_id", bookModel.PhysicanId.ToString() },
+                    { "time_from", bookModel.StartTime },
+                    { "time_to", bookModel.EndTime },
+                    { "Hospital_id", bookModel.BranchID.ToString() },
+                    { "doc_slotID", bookModel.SlotId }
+                };
 
-            var content = new[]{
-					new KeyValuePair<string, string>("Facility", BranchName),
-					new KeyValuePair<string, string>("AppDate", bookModel.AppDate.ToString("yyyy-MM-dd")),
-					new KeyValuePair<string, string>("StartTime", bookModel.StartTime),
-					new KeyValuePair<string, string>("EndTime", bookModel.EndTime),
-					new KeyValuePair<string, string>("DocId", UAEDoctorEmployeeCode),
-					new KeyValuePair<string, string>("PatientId", bookModel.PatientId),
-					new KeyValuePair<string, string>("PatientName", userInfo.name),
-					new KeyValuePair<string, string>("CreatedBy", bookModel.CreatedBy),
-					new KeyValuePair<string, string>("TransType", bookModel.TransType),
-					new KeyValuePair<string, string>("IsStandby", bookModel.IsStandby),
-					new KeyValuePair<string, string>("Remarks", bookModel.Remarks),
-                    new KeyValuePair<string, string>("MobileNumber", userInfo.phone)
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<AppointmentPostResponse>(BaseAPIUrl, formData, out resp) as AppointmentPostResponse;
 
-            };
-			var Parameters = "?Facility=" + BranchName.ToString();
-            Parameters += "&AppDate=" + bookModel.AppDate.ToString("yyyy-MM-dd");
-            Parameters += "&StartTime=" + bookModel.StartTime;
-            Parameters += "&EndTime=" + bookModel.EndTime;
-            Parameters += "&DocId=" + UAEDoctorEmployeeCode;
-            Parameters += "&PatientId=" + bookModel.PatientId;
-            Parameters += "&PatientName=" + userInfo.name;
-            Parameters += "&CreatedBy=" + bookModel.CreatedBy;
-            Parameters += "&TransType=" + bookModel.TransType;
-            Parameters += "&IsStandby=" + bookModel.IsStandby;
-            Parameters += "&Remarks=" + bookModel.Remarks;
-            Parameters += "&MobileNumber=" + userInfo.phone;
-
-            //AppointmentPostResponse
-            BaseAPIUrl = "https://app.saudigerman.com//Services/api/SlotTransactions" + Parameters;
-            var resp = new AppointmentPostResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE_Appointment<AppointmentPostResponse>(BaseAPIUrl, content, out resp, true);
-
-            responseOut = resp;
-
-            if (resp.Error.ToUpper() == "FALSE")
+            //AppointmentPostResponse            
+            //var resp = new AppointmentPostResponse();
+            //var _NewData = RestUtility.CallAPI_POST_UAE_Appointment<AppointmentPostResponse>(BaseAPIUrl, content, out resp, true);
+            responseOut = new AppointmentPostResponse();
+            if (resp.status == 1 || resp.status == 200)
+			{
+                responseOut.Message = "MobileApp Successfull";
+                responseOut.AppId = _NewData.id;
+                responseOut.AppStatus = "Successfull";
                 return true;
+            }
+            else
+			{
+                responseOut.Message = "MobileApp Failed";                
+                responseOut.AppStatus = "Failed";
 
+            }
             return false;
-
-            //if (status == HttpStatusCode.OK)
-            //    return true;
-
-            //return false;
-
+            
+            
         }
 
 
-        public bool CancelAppointmentApi_NewUAE(UAE_BookAppointment bookModel , out AppointmentPostResponse responseOut)
+        public bool CancelAppointmentApi_Eygpt(UAE_BookAppointment bookModel , out AppointmentPostResponse responseOut)
         {
             HttpStatusCode status;
-            string BaseAPIUrl = "";
-            var BranchName = GetBranchName(bookModel.BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(bookModel.BranchID, bookModel.PhysicanId.ToString());
+            var resp = new GenericResponse();
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/Reservation_Cancel";
 
-            var errStatus = 0;
-            var errMessage = "";
-            var IdType = "MRN";
-            var IdValue = bookModel.PatientId;
-            var userInfo = GetPatientDataByApi_Eygpt("EN", IdValue, 0,  ref errStatus, ref errMessage);
+            var formData = new Dictionary<string, string>
+                {   
+                    { "patient_reg_no", bookModel.PatientId },                    
+                    { "Hospital_id", bookModel.BranchID.ToString() },
+                    { "Appointment_Id", bookModel.AppId }
+                };
 
-
-
-            var content = new[]{
-					new KeyValuePair<string, string>("Facility", BranchName),
-                    new KeyValuePair<string, string>("AppDate", bookModel.AppDate.ToString("yyyy-MM-dd")),
-                    new KeyValuePair<string, string>("StartTime", bookModel.StartTime),
-                    new KeyValuePair<string, string>("EndTime", bookModel.EndTime),
-                    new KeyValuePair<string, string>("DocId", UAEDoctorEmployeeCode),
-                    new KeyValuePair<string, string>("PatientId", bookModel.PatientId),
-                    new KeyValuePair<string, string>("PatientName", userInfo.name),
-                    new KeyValuePair<string, string>("CreatedBy", bookModel.CreatedBy),
-                    new KeyValuePair<string, string>("TransType", "Cancel"),
-					new KeyValuePair<string, string>("IsStandby", bookModel.IsStandby),
-					new KeyValuePair<string, string>("Remarks", "M"),
-					new KeyValuePair<string, string>("AppId", bookModel.AppId),
-                    new KeyValuePair<string, string>("MobileNumber", userInfo.phone),
-                    new KeyValuePair<string, string>("CancelReason", "Mobile"),
-                    
-            };
-			//AppointmentPostResponse
-			var Parameters = "?Facility=" + BranchName.ToString();
-            Parameters += "&AppDate=" + bookModel.AppDate.ToString("yyyy-MM-dd");
-            Parameters += "&StartTime=" + bookModel.StartTime;
-            Parameters += "&EndTime=" + bookModel.EndTime;
-            Parameters += "&DocId=" + UAEDoctorEmployeeCode;
-            Parameters += "&PatientId=" + bookModel.PatientId;
-            Parameters += "&PatientName=" + userInfo.name;
-            Parameters += "&CreatedBy=" + bookModel.CreatedBy;
-            Parameters += "&TransType=" + "Cancel";
-            Parameters += "&IsStandby=" + bookModel.IsStandby;
-            Parameters += "&Remarks=" + "M";
-            Parameters += "&AppId=" + bookModel.AppId;
-            Parameters += "&MobileNumber=" + userInfo.phone;
-            Parameters += "&CancelReason=" + "Mobile";
-
-            //AppointmentPostResponse
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/SlotTransactions" + Parameters;
-            var resp = new AppointmentPostResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE_Appointment<AppointmentPostResponse>(BaseAPIUrl, content, out resp, true);
-
-
-            responseOut = resp;
-
-            if (resp.Error.ToUpper() == "FALSE" && resp.AppId != null)
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<AppointmentPostResponse>(BaseAPIUrl, formData, out resp);
+            
+            
+            responseOut = new AppointmentPostResponse();
+            responseOut.Message = resp.msg;
+            if (resp.status == 1 || resp.status == 200)			                
                 return true;
+
 
             return false;
 
-            //if (status == HttpStatusCode.OK)
-            //    return true;
 
-            //return false;
 
         }
 
-        public bool ReschduleAppointmentApi_NewUAE(UAE_BookAppointment bookModel, out AppointmentPostResponse responseOut)
+        public bool ReschulesAppointmentApi_Eygpt(UAE_BookAppointment bookModel, out AppointmentPostResponse responseOut)
         {
             HttpStatusCode status;
-            string BaseAPIUrl = "";
-            var BranchName = GetBranchName(bookModel.BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(bookModel.BranchID, bookModel.PhysicanId.ToString());
+            var resp = new GenericResponse();
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/Reservation_Reschedule";
 
-            var errStatus = 0;
-            var errMessage = "";
-            var IdType = "MRN";
-            var IdValue = bookModel.PatientId;
-            var userInfo = GetPatientDataByApi_Eygpt("EN", IdValue, 0,  ref errStatus, ref errMessage);
+            var formData = new Dictionary<string, string>
+                {
+                    { "Date", bookModel.AppDate.ToString("yyyy-MM-dd") },
+                    { "patient_reg_no", bookModel.PatientId },
+                    { "physician_id", bookModel.PhysicanId.ToString() },
+                    { "time_from", bookModel.StartTime },
+                    { "time_to", bookModel.EndTime },
+                    { "Hospital_id", bookModel.BranchID.ToString() },
+                    { "doc_slotID", bookModel.SlotId },
+                    { "appointment_id", bookModel.AppId }
+                };
 
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<AppointmentPostResponse>(BaseAPIUrl, formData, out resp) as AppointmentPostResponse;
+            
+            responseOut = new AppointmentPostResponse();
+            responseOut.Message = resp.msg;
 
-
-
-            var content = new[]{
-                    new KeyValuePair<string, string>("Facility", BranchName),
-                    new KeyValuePair<string, string>("AppDate", bookModel.AppDate.ToString("dd-MM-yyyy")),
-                    new KeyValuePair<string, string>("StartTime", bookModel.StartTime),
-                    new KeyValuePair<string, string>("EndTime", bookModel.EndTime),
-                    new KeyValuePair<string, string>("DocId", UAEDoctorEmployeeCode),
-                    new KeyValuePair<string, string>("PatientId", bookModel.PatientId),
-                    new KeyValuePair<string, string>("PatientName", userInfo.name),
-                    new KeyValuePair<string, string>("CreatedBy", bookModel.CreatedBy),
-                    new KeyValuePair<string, string>("TransType", "ReSchedule"),
-                    new KeyValuePair<string, string>("IsStandby", bookModel.IsStandby),
-                    new KeyValuePair<string, string>("Remarks", "M"),
-                    new KeyValuePair<string, string>("AppId", bookModel.AppId),
-                    new KeyValuePair<string, string>("MobileNumber", userInfo.phone)
-            };
-
-            //AppointmentPostResponse
-            var Parameters = "?Facility=" + BranchName.ToString();
-            Parameters += "&AppDate=" + bookModel.AppDate.ToString("yyyy-MM-dd");
-            Parameters += "&StartTime=" + bookModel.StartTime;
-            Parameters += "&EndTime=" + bookModel.EndTime;
-            Parameters += "&DocId=" + UAEDoctorEmployeeCode;
-            Parameters += "&PatientId=" + bookModel.PatientId;
-            Parameters += "&PatientName=" + userInfo.name;
-            Parameters += "&CreatedBy=" + bookModel.CreatedBy;
-            Parameters += "&TransType=" + "ReSchedule";
-            Parameters += "&IsStandby=" + bookModel.IsStandby;
-            Parameters += "&Remarks=" + "M";
-            Parameters += "&AppId=" + bookModel.AppId;
-            Parameters += "&MobileNumber=" + userInfo.phone;
-
-            //AppointmentPostResponse
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/SlotTransactions" + Parameters;
-
-            var resp = new AppointmentPostResponse();
-
-            var _NewData = RestUtility.CallAPI_POST_UAE_Appointment<AppointmentPostResponse>(BaseAPIUrl, content, out resp, true);
-
-            responseOut = resp;
-
-            if (resp.Error.ToUpper() == "FALSE")
+            if (resp.status ==1 || resp.status == 200)
+			{                
+                responseOut.AppId = _NewData.id;
+                responseOut.AppStatus = "Successfull";
                 return true;
-
+            }
+            
             return false;
-
-            //if (status == HttpStatusCode.OK)
-            //    return true;
-
-            //return false;
 
         }
 
@@ -730,13 +768,10 @@ namespace SmartBookingService.Controllers.ClientApi
 
         //}
 
-        public bool PatientAddApi_NewUAE(RegisterPatientUAE registerPatientUAE, out RegistrationPostResponse ReturnObject)
+        public bool PatientAddApi_EYGPT(RegisterPatientUAE registerPatientUAE, out RegistrationPostResponse ReturnObject)
         {
             HttpStatusCode status;
-
-            //ReturnObject = new PostResponse();
-             
-            var NationalityCode = GetNationalityCodeUAE_string(registerPatientUAE.HospitaId, registerPatientUAE.PatientNationalityId);
+            var NationalityCode = GetNationalityCode_EYGPT_string(registerPatientUAE.HospitaId, registerPatientUAE.PatientNationalityId);
 
             if (NationalityCode == "")
                 NationalityCode = registerPatientUAE.PatientNationalityId.ToString();
@@ -745,81 +780,62 @@ namespace SmartBookingService.Controllers.ClientApi
             var TempPcell = registerPatientUAE.PatientPhone.ToString();
 
             // change the the Format to
-            TempPcell = TempPcell.Replace("%2B971", "");
+            TempPcell = TempPcell.Replace("%2B20", "");
             TempPcell = TempPcell.Replace("+", "");
 
             //TempPcell = TempPcell.Substring(0,3).Replace("966", "");                            
-            if (TempPcell.Substring(0, 5) == "00971")
+            if (TempPcell.Substring(0, 4) == "0020")
             {
-                TempPcell = TempPcell.Substring(5, TempPcell.Length - 5);
+                TempPcell = TempPcell.Substring(4, TempPcell.Length - 4);
             }
-            if (TempPcell.Substring(0, 3) == "971")
+            if (TempPcell.Substring(0, 2) == "20")
             {
-                TempPcell = TempPcell.Substring(3, TempPcell.Length - 3);
+                TempPcell = TempPcell.Substring(2, TempPcell.Length - 2);
             }
             var FirstChar = TempPcell.Substring(0, 1);
-            //if (FirstChar != "0")
-            //{
-            //    TempPcell = "0" + TempPcell;
-            //}
+            
             string DOB = registerPatientUAE.PatientBirthday.ToString("yyyy-MM-dd");
-
             string IDExpirydate  = registerPatientUAE.IdExpiry.ToString("yyyy-MM-dd");
 
             var PGENDER = 1;
             if (registerPatientUAE.PatientGender == 1)
                 PGENDER = 2;
-            
-            string BaseAPIUrl = "";
-            var BranchName = GetBranchName(registerPatientUAE.HospitaId);
 
-			var content = new[]{
-					new KeyValuePair<string, string>("FirstName", BranchName),
-					new KeyValuePair<string, string>("LastName", registerPatientUAE.PatientLastName),
-					new KeyValuePair<string, string>("Gender", PGENDER.ToString()),
-					new KeyValuePair<string, string>("BirthDate", DOB),
-					new KeyValuePair<string, string>("CurrentCity", registerPatientUAE.CurrentCity),
-					new KeyValuePair<string, string>("Address", registerPatientUAE.PatientAddress),
-					new KeyValuePair<string, string>("NationalityId", NationalityCode.ToString()),
-					new KeyValuePair<string, string>("IdType", registerPatientUAE.IdType.ToString()),
-					new KeyValuePair<string, string>("IdNumber", registerPatientUAE.PatientNationalId.ToString()),
-					new KeyValuePair<string, string>("IdExpiry", IDExpirydate),
-					new KeyValuePair<string, string>("Mobile", TempPcell),
-					new KeyValuePair<string, string>("FacilityId", BranchName)
-			};
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/Create_Patient";
 
-			var Parameters = "?FacilityId=" + BranchName.ToString();
-            Parameters += "&Mobile=" + TempPcell;
-            Parameters += "&IdExpiry=" + IDExpirydate;
-            Parameters += "&IdNumber=" + registerPatientUAE.PatientNationalId.ToString();
-            Parameters += "&IdType=" + registerPatientUAE.IdType;
-            Parameters += "&NationalityId=" + NationalityCode;
-            Parameters += "&Address=" + registerPatientUAE.PatientAddress;
-            Parameters += "&CurrentCity=" + registerPatientUAE.CurrentCity;
-            Parameters += "&BirthDate=" + DOB;
-            Parameters += "&Gender=" + PGENDER.ToString();
-            Parameters += "&LastName=" + registerPatientUAE.PatientLastName;
-            Parameters += "&FirstName=" + registerPatientUAE.PatientFirstName;
-            
+            var resp = new GenericResponse();
+            var formData = new Dictionary<string, string>
+                {
+                    { "Hospital_id", registerPatientUAE.HospitaId.ToString() },
+                    { "patient_first_name", registerPatientUAE.PatientFirstName },
+                    { "patient_middle_name", registerPatientUAE.PatientMiddleName },
+                    { "patient_last_name", registerPatientUAE.PatientLastName },
+                    { "patient_phone", TempPcell },
+                    { "patient_national_id", registerPatientUAE.PatientNationalId.ToString() },
+                    { "patient_birthday", DOB.ToString() },
+                    { "patient_gender", PGENDER.ToString() },
+                    { "patient_nationality_id", NationalityCode },
+                    { "patient_marital_status_id", registerPatientUAE.PatientMaritalStatusId.ToString() }
+                };
 
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<EygptRegistration>(BaseAPIUrl, formData, out resp) ;
 
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/Patient-add" + Parameters;
-            var resp = new GenericResponse_NEWUAE_registration();
-            var _NewData = RestUtility.CallAPI_POST_UAE_Add_Patient<RegistrationPostResponse>(BaseAPIUrl, content, out resp, true);
-            
+            //var _Data_UAE = new List<EYG_Doctors_Days>();
+            //_Data_UAE = _NewData as List<EYG_Doctors_Days>;
+
+            var tempReg = new EygptRegistration();
+            tempReg = _NewData as EygptRegistration;
+
             ReturnObject = new RegistrationPostResponse();
-            //ReturnObject = resp as RegistrationPostResponse;
+
+            ReturnObject.Mrn = "244099";
+
+
             ReturnObject.Error = 0;
-            if (resp.Error)
-            ReturnObject.Error =  1;
-            ReturnObject.Message = resp.Message;
-            ReturnObject.Mrn = resp.Mrn;
+            
+            
 
-
-            if (resp.Error == false)
-                return true;
-
-            return false;           
+            return true;
 
         }
 
@@ -838,94 +854,31 @@ namespace SmartBookingService.Controllers.ClientApi
 
         // doctor Schule days
         //Doctor_Schedule_days_Modal
-        public List<Doctor_Schedule_days_Modal_ForMobile> GetDoctorSchduleDaysByApi_NewUAE(string lang, string DoctorID, int BranchID, DateTime selectedDate)
-        {
-            HttpStatusCode status;            
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/";
-
-            var BranchName = "";
-            BranchName = GetBranchName(BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(BranchID, DoctorID);
-            DateTime firstDayOfMonth;
-            DateTime lastDayOfMonth;
-
-            GetMonthBoundaries(selectedDate,out firstDayOfMonth,out lastDayOfMonth);
-
-            //var string 
-			var content = new[]{
-					new KeyValuePair<string, string>("hospital_id", BranchName),
-					new KeyValuePair<string, string>("StartDate", firstDayOfMonth.ToString("dd-MM-yyyy")+"T00:00:00"),
-					new KeyValuePair<string, string>("EndDate", lastDayOfMonth.ToString("dd-MM-yyyy")+"T00:00:00"),
-					new KeyValuePair<string, string>("physician_id", UAEDoctorEmployeeCode),
-					new KeyValuePair<string, string>("Lang", lang)
-			};
-
-			var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&StartDate=" + firstDayOfMonth.ToString("yyyy-MM-dd")+"T00:00:00";
-            Parameters += "&EndDate=" + lastDayOfMonth.ToString("yyyy-MM-dd") + "T00:00:00";
-            Parameters += "&physician_id=" + UAEDoctorEmployeeCode;
-            Parameters += "&Lang=" + lang.ToUpper();
-
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/doctor-days-get" + Parameters;
-            var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<UAE_Doctor_Days>>(BaseAPIUrl, content, out resp, true);
-
-            var _Data_UAE = new List<UAE_Doctor_Days>();
-            _Data_UAE = _NewData as List<UAE_Doctor_Days>;
-
-            var _NewDataForMobile = MapDoctorSchduleDays_NewUAE(_Data_UAE , BranchID, DoctorID);
-            return _NewDataForMobile;
-        }
-
-        public List<Doctor_Schedule_days_Modal_ForMobile> GetDoctorSchduleDaysByApi_NewUAE_V5(string lang, string DoctorID, int BranchID, DateTime selectedDate, bool IsVideo = false)
+        
+        public List<Doctor_Schedule_days_Modal_ForMobile> GetDoctorSchduleDaysByApi_NewEYGPT_V5(string lang, string DoctorID, int BranchID, DateTime selectedDate,string ClinicID, bool IsVideo = false)
         {
             HttpStatusCode status;
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/";
-
-            var BranchName = "";
-            BranchName = GetBranchName(BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(BranchID, DoctorID);
-            DateTime firstDayOfMonth;
-            DateTime lastDayOfMonth;
-
-            GetMonthBoundaries(selectedDate, out firstDayOfMonth, out lastDayOfMonth);
-
-            var SlotType = "Inclinic";
-            if (IsVideo)
-                SlotType = "Video";
-
-            //var string 
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName),
-                    new KeyValuePair<string, string>("StartDate", firstDayOfMonth.ToString("dd-MM-yyyy")+"T00:00:00"),
-                    new KeyValuePair<string, string>("EndDate", lastDayOfMonth.ToString("dd-MM-yyyy")+"T00:00:00"),
-                    new KeyValuePair<string, string>("physician_id", UAEDoctorEmployeeCode),
-                    new KeyValuePair<string, string>("SoltType", SlotType),
-                    new KeyValuePair<string, string>("Lang", lang)
-            };
-
-            if (string.IsNullOrEmpty(lang))
-                lang = "EN";
-
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&StartDate=" + firstDayOfMonth.ToString("yyyy-MM-dd") + "T00:00:00";
-            Parameters += "&EndDate=" + lastDayOfMonth.ToString("yyyy-MM-dd") + "T00:00:00";
-            Parameters += "&physician_id=" + UAEDoctorEmployeeCode;
-            Parameters += "&SoltType=" + SlotType;
-            Parameters += "&Lang=" + lang.ToUpper();
-
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/doctor-days-get" + Parameters;
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/DoctorFreeDays";
+            
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<UAE_Doctor_Days>>(BaseAPIUrl, content, out resp, true);
+            //var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Doctors_Days>>(BaseAPIUrl, content, out resp, true);
+            var formData = new Dictionary<string, string>
+                {
+                    { "startdate", selectedDate.ToString("yyyy-MM-dd") },
+                    { "physician_id", DoctorID },
+                    { "clinic_id", ClinicID },
+                };
 
-            var _Data_UAE = new List<UAE_Doctor_Days>();
-            _Data_UAE = _NewData as List<UAE_Doctor_Days>;
+                var _NewData = RestUtility.EYGPT_API_Calling_POST<List<EYG_Doctors_Days>>(BaseAPIUrl, formData, out resp);
+                
+                var _Data_UAE = new List<EYG_Doctors_Days>();
+                _Data_UAE = _NewData as List<EYG_Doctors_Days>;
 
-            var _NewDataForMobile = MapDoctorSchduleDays_NewUAE(_Data_UAE, BranchID, DoctorID);
+            var _NewDataForMobile = MapDoctorSchduleDays_NewEygpt(_Data_UAE, BranchID, DoctorID);
             return _NewDataForMobile;
         }
 
-        private List<Doctor_Schedule_days_Modal_ForMobile> MapDoctorSchduleDays_NewUAE(List<UAE_Doctor_Days> _APIModal, int BranchID , string DoctorId , bool IsVideo = false)
+        private List<Doctor_Schedule_days_Modal_ForMobile> MapDoctorSchduleDays_NewEygpt(List<EYG_Doctors_Days> _APIModal, int BranchID , string DoctorId , bool IsVideo = false)
         {
             List<Doctor_Schedule_days_Modal_ForMobile> _ListObj = new List<Doctor_Schedule_days_Modal_ForMobile>();
             //Doctor_Schedule_days_Modal_ForMobile
@@ -934,20 +887,20 @@ namespace SmartBookingService.Controllers.ClientApi
                 for (var i = 0; i < _APIModal.Count; i++)
                 {
                     Doctor_Schedule_days_Modal_ForMobile _TempModalObj = new Doctor_Schedule_days_Modal_ForMobile();
-                    _TempModalObj.AvailableSlots = _APIModal[i].AvailableSlots;
+                    _TempModalObj.AvailableSlots = _APIModal[i].availableSlots;
                     
-                    _TempModalObj.DepartmentID = _APIModal[i].DepartmentID;
+                    _TempModalObj.DepartmentID = _APIModal[i].departmentID;
                     _TempModalObj.Doctor_Id = Convert.ToInt32(DoctorId);
-                    _TempModalObj.FromTime = _APIModal[i].Fromtime;
-                    _TempModalObj.Id = _APIModal[i].Id;                    
+                    _TempModalObj.FromTime = _APIModal[i].fromTime;
+                    _TempModalObj.Id = _APIModal[i].id;                    
                     
                     
-                    _TempModalObj.Scheduled_Day = _APIModal[i].Scheduled_day;
+                    _TempModalObj.Scheduled_Day = _APIModal[i].scheduled_Day;
                     
                     //var currentDateTime = DateTime.Now.Date;
                     //var TodayDate = currentDateTime.Date;
 
-                    if (_APIModal[i].Scheduled_day.Date < DateTime.Now.Date)
+                    if (_APIModal[i].scheduled_Day.Date < DateTime.Now.Date)
 					{
                         _TempModalObj.NoSchedules = 1;
                         _TempModalObj.DayBooked = 1;
@@ -955,7 +908,7 @@ namespace SmartBookingService.Controllers.ClientApi
                     else
 					{
                         _TempModalObj.NoSchedules = _APIModal[i].noSchedules;
-                        _TempModalObj.DayBooked = _APIModal[i].DayBooked;
+                        _TempModalObj.DayBooked = _APIModal[i].dayBooked;
                     }
 
 
@@ -973,13 +926,13 @@ namespace SmartBookingService.Controllers.ClientApi
                     }
                     else
 					{
-                        _TempModalObj.SlotTypeId = _APIModal[i].SlotTypeId;
-                        _TempModalObj.SlotTypeName = _APIModal[i].SlotTypeName;
+                        _TempModalObj.SlotTypeId = _APIModal[i].slotTypeId;
+                        _TempModalObj.SlotTypeName = _APIModal[i].slotTypeName;
 
                     }
 
                     _TempModalObj.TotalSlotCount = _APIModal[i].totalSlotCount;
-                    _TempModalObj.ToTime = _APIModal[i].ToTime;
+                    _TempModalObj.ToTime = _APIModal[i].toTime;
                     
 
                     //_TempModalObj.Schedule_2_To = _APIModal[i].Schedule_2_To;
@@ -994,52 +947,6 @@ namespace SmartBookingService.Controllers.ClientApi
         }
 
         
-        public string GetDeptDoctorSlots_NewUAE(string lang, int BranchID, string DepartmentID , string SpecialityName)
-        {
-            //HttpStatusCode status;
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/";
-
-            var BranchName = "";
-            var DpartmentCode= "";
-            BranchName = GetBranchName(BranchID);
-
-            if (!string.IsNullOrEmpty(DepartmentID))
-                DpartmentCode = GetDeptCode(DepartmentID, BranchID);
-
-
-            if (string.IsNullOrEmpty(DpartmentCode))
-                DpartmentCode = GetDeptCode_By_SpcialityName(SpecialityName , BranchID);
-
-                var content = new[]{
-                    new KeyValuePair<string, string>("Facility", BranchName),
-                    new KeyValuePair<string, string>("DeptId", DpartmentCode)
-            };
-
-
-            var Parameters = "?Facility=" + BranchName.ToString();
-            Parameters += "&DeptId=" + DpartmentCode.ToString();
-
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/DoctorsListMobile-Get" + Parameters;
-            //var resp = new GenericResponse();
-            var resp = new GetDoctorPostResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE_Doctors<List<Doctors_UAE>>(BaseAPIUrl, content, out resp, true);
-           
-
-            //var ReturntOject =  MapMyDoctorModel_NewUAE(_NewData);
-            if (_NewData != null)
-            {
-                var _Data_UAE = new List<Doctors_UAE>();
-                _Data_UAE = _NewData as List<Doctors_UAE>;
-
-                var ReturntStr = MapDeptDoctorModel_NewUAE(_Data_UAE);
-                return ReturntStr;
-            }
-            return "";
-
-
-
-        }
-
 
         public string GetMyDoctorSlots_NewUAE(string lang, int BranchID, string Registration)
         {
@@ -1126,72 +1033,54 @@ namespace SmartBookingService.Controllers.ClientApi
 
         //AvailableSlots
         // doctor Schule days
-        //Doctor_Schedule_days_Modal
-        public List<AvailableSlots> GetDoctorSlotsOfDaysByApi_NewUAE(string lang, string DoctorID, int BranchID, DateTime startDate)
+      
+        public List<AvailableSlots_v6> GetDoctorSlotsOfDaysByApi_NewEygpt_V5(string lang, string DoctorID, int BranchID, DateTime startDate ,string ClinicID, bool IsVideo = false)
         {
             HttpStatusCode status;
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/";
-
-            var BranchName = "";
-            BranchName = GetBranchName(BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(BranchID, DoctorID);
-            
-
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName),
-                    new KeyValuePair<string, string>("Date", startDate.ToString("yyyy-MM-dd")+ "T00:00:00"),                    
-                    new KeyValuePair<string, string>("physician_id", UAEDoctorEmployeeCode)
-                    //new KeyValuePair<string, string>("Lang", lang)
-            };
-
-
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&Date=" + startDate.ToString("yyyy-MM-dd")+ "T00:00:00";            
-            Parameters += "&physician_id=" + UAEDoctorEmployeeCode;
-          
-
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/doctor-slots-get" + Parameters;
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/DoctorFreeSlots";
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<AvailableSlots>>(BaseAPIUrl, content, out resp, true) as List<AvailableSlots>;
+            //var content = new[]{
+            //        new KeyValuePair<string, string>("hospital_id", BranchID.ToString()),
+            //        new KeyValuePair<string, string>("date", startDate.ToString("yyyy-MM-dd")),
+            //        new KeyValuePair<string, string>("physician_id", DoctorID),
+            //        new KeyValuePair<string, string>("clinic_id", ClinicID)
+            //};
+            var formData = new Dictionary<string, string>
+                {
+                    { "hospital_id", BranchID.ToString() },
+                    { "date", startDate.ToString("yyyy-MM-dd") },
+                    { "physician_id", DoctorID },
+                    { "clinic_id", ClinicID }                    
+                };
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<List<EYG_Doctors_Slots>>(BaseAPIUrl, formData, out resp);
+            //var _NewData = RestUtility.CallAPI_POST_UAE<List<EYG_Doctors_Slots>>(BaseAPIUrl, content, out resp, true) as List<AvailableSlots>;
 
-            
-            return _NewData;
+
+            var _Data_Eygpt = new List<EYG_Doctors_Slots>();
+            _Data_Eygpt = _NewData as List<EYG_Doctors_Slots>;
+
+            var _NewDataForMobile = MapDoctorSlots_NewEygpt(_Data_Eygpt, BranchID, DoctorID);
+            return _NewDataForMobile;
         }
-
-        public List<AvailableSlots> GetDoctorSlotsOfDaysByApi_NewUAE_V5(string lang, string DoctorID, int BranchID, DateTime startDate , bool IsVideo = false)
+        private List<AvailableSlots_v6> MapDoctorSlots_NewEygpt(List<EYG_Doctors_Slots> _APIModal, int BranchID, string DoctorId, bool IsVideo = false)
         {
-            HttpStatusCode status;
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/";
+            List<AvailableSlots_v6> _ListObj = new List<AvailableSlots_v6>();
+            //Doctor_Schedule_days_Modal_ForMobile
+            if (_APIModal != null && _APIModal.Count > 0)
+            {
+                for (var i = 0; i < _APIModal.Count; i++)
+                {
+                    AvailableSlots_v6 _TempModalObj = new AvailableSlots_v6();
+                    _TempModalObj.time_to = _APIModal[i].time_to;
 
-            var BranchName = "";
-            BranchName = GetBranchName(BranchID);
-            var UAEDoctorEmployeeCode = GetDoctorUAEEmployeeCode(BranchID, DoctorID);
-            var SoltType = "Inclinic";
-            if (IsVideo)
-                SoltType = "Video";
-
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName),
-                    new KeyValuePair<string, string>("Date", startDate.ToString("yyyy-MM-dd")+ "T00:00:00"),
-                    new KeyValuePair<string, string>("physician_id", UAEDoctorEmployeeCode),
-                    new KeyValuePair<string, string>("SoltType", SoltType)
-                    //new KeyValuePair<string, string>("Lang", lang)
-            };
-
-
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&Date=" + startDate.ToString("yyyy-MM-dd") + "T00:00:00";
-            Parameters += "&physician_id=" + UAEDoctorEmployeeCode;
-            Parameters += "&SoltType=" + SoltType;
-
-
-
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/doctor-slots-get" + Parameters;
-            var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<AvailableSlots>>(BaseAPIUrl, content, out resp, true) as List<AvailableSlots>;
-
-
-            return _NewData;
+                    _TempModalObj.time_from = _APIModal[i].time_from;
+                    _TempModalObj.slot_type_name = _APIModal[i].slot_type_name;
+                    _TempModalObj.slot_type_id = _APIModal[i].slot_type_id;
+                    _TempModalObj.Id = _APIModal[i].id;
+                    _ListObj.Add(_TempModalObj);
+                }
+            }
+            return _ListObj;
         }
 
 
@@ -1261,73 +1150,53 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
         // For Family Listing
-
-        public List<PatientFamilyList> GetPatientFamilyListForBooking_NewUAE(string lang, int hospitalID, string MRN,int BookingFor, ref int Er_Status, ref string Msg)
+        public List<PatientFamilyList> GetPatientFamilyListForBooking_EYGPT(string lang, int hospitalID, string MRN,int BookingFor, ref int Er_Status, ref string Msg)
         {
 
             HttpStatusCode status;
+            var resp = new GenericResponse();
+            string RegistrationUrl = "http://130.7.1.68/mopile_app/public/api/SearchPatient";
 
-            var BranchName = GetBranchName(hospitalID);
-            var BranchNameBookingFor = GetBranchName(BookingFor);
-
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/BookingPatientFamily-list-get";
-            
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
-                    new KeyValuePair<string, string>("patient_reg_no", MRN),
-                    new KeyValuePair<string, string>("Booking_hospital_id", BranchNameBookingFor.ToString())
+            var _patientData_EYG = new List<EYG_Patient_Info_Search>();            
+            var formData = new Dictionary<string, string>
+            {
+                { "patient_reg_no", MRN },
+                { "hospital_id", hospitalID.ToString() }
             };
 
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&patient_reg_no=" + MRN;
-            Parameters += "&Booking_hospital_id=" + BranchNameBookingFor;
-           
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<List<EYG_Patient_Info_Search>>(RegistrationUrl, formData, out resp);                
+            _patientData_EYG = _NewData as List<EYG_Patient_Info_Search>;
 
-            //AppointmentPostResponse
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/BookingPatientFamily-list-get" + Parameters;
-
-            
-            
-            var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<UAE_Patient_Info>>(BaseAPIUrl, content, out resp, true);
-
-
-            var _patientData_Dam = new List<UAE_Patient_Info>();
-            _patientData_Dam = _NewData as List<UAE_Patient_Info>;
-
-            var _userInfo = MapPatientListToFamilyList_BookingFor(_patientData_Dam,hospitalID, BookingFor, lang);
+            var _userInfo = MapPatientListToFamilyList_BookingFor_EYGP(_patientData_EYG, hospitalID, BookingFor, lang);
             return _userInfo;
 
         }
-        public List<PatientFamilyList> MapPatientListToFamilyList_BookingFor(List<UAE_Patient_Info> _InputData,int BranchID , int BookFor_BranchID, string lang = "EN")
+        public List<PatientFamilyList> MapPatientListToFamilyList_BookingFor_EYGP(List<EYG_Patient_Info_Search> _InputData,int BranchID , int BookFor_BranchID, string lang = "EN")
         {
-            var BranchFullName = GetBranchFullName(BranchID);
-            var BranchNameBookingFor = GetBranchFullName(BookFor_BranchID);
-
             var NewData = new List<PatientFamilyList>();
 
             if (_InputData != null && _InputData.Count > 0)
             {
                 for (var i = 0; i < _InputData.Count; i++)
                 {
-                    if (_InputData[i].registration_no != "" && _InputData[i].registration_no != "0")
+                    if (_InputData[i].registrationNo != "" && _InputData[i].registrationNo != "0")
                     {
                             PatientFamilyList _TempModalObj = new PatientFamilyList();
                             _TempModalObj.CountryId = 3;
                         _TempModalObj.BranchId = BookFor_BranchID.ToString(); 
                         _TempModalObj.Age = _InputData[i].age;
                         if (lang == "AR" || lang == "ar")
-                            _TempModalObj.BranchName = BranchNameBookingFor;
+                            _TempModalObj.BranchName = _InputData[i].branch_AR;
                         else
-                            _TempModalObj.BranchName = BranchNameBookingFor;
-                        _TempModalObj.DOB = _InputData[i].birthday;
-                        _TempModalObj.FamilyName = _InputData[i].family_name;
-                        _TempModalObj.FirstName = _InputData[i].first_name;
+                            _TempModalObj.BranchName = _InputData[i].branch_EN;
+                        _TempModalObj.DOB = _InputData[i].dob;
+                        _TempModalObj.FamilyName = _InputData[i].familyName;
+                        _TempModalObj.FirstName = _InputData[i].firstName;
                         _TempModalObj.Gender = _InputData[i].gender;
                         _TempModalObj.image_url = "";
-                        _TempModalObj.LastName = _InputData[i].last_name;
+                        _TempModalObj.LastName = _InputData[i].lastName;
                         _TempModalObj.MaritalStatus = "";
-                        _TempModalObj.MiddleName = _InputData[i].middle_name;
+                        _TempModalObj.MiddleName = _InputData[i].middleName;
                         _TempModalObj.Nationality = _InputData[i].nationality;
                         try
                         {
@@ -1339,12 +1208,12 @@ namespace SmartBookingService.Controllers.ClientApi
                         }
 
 
-                        _TempModalObj.PatientFullName = _InputData[i].name;
-                        _TempModalObj.PatientId = _InputData[i].national_id;
-                        _TempModalObj.PCellno = _InputData[i].phone;
-                        _TempModalObj.RegistrationNo = _InputData[i].registration_no;
+                        _TempModalObj.PatientFullName = _InputData[i].patientFullName;
+                        _TempModalObj.PatientId = _InputData[i].nationalID;
+                        _TempModalObj.PCellno = _InputData[i].PPhone;
+                        _TempModalObj.RegistrationNo = _InputData[i].registrationNo;
 
-                        _TempModalObj.Email = _InputData[i].email;
+                        _TempModalObj.Email = "";
 
                         NewData.Add(_TempModalObj);
                     }
@@ -1460,7 +1329,7 @@ namespace SmartBookingService.Controllers.ClientApi
         }
 
 
-        private List<PatientVisit_UAE> MapPatientVisitModel_NewUAE(List<PatientVisit_UAE> _APIModal, string MRN)
+        private List<PatientVisit_UAE> MapPatientVisitModel_EYG(List<EYG_PatientVisit> _APIModal, string MRN , int BranchID)
         {
             string formatString = "yyyy-MM-dd";
             List<PatientVisit_UAE> _ListObj = new List<PatientVisit_UAE>();
@@ -1488,8 +1357,7 @@ namespace SmartBookingService.Controllers.ClientApi
                     _TempModalObj.episodeType = _APIModal[i].episodeType;
 
                     _TempModalObj.episodeStatus = _APIModal[i].episodeStatus;
-                    var intBranchID = GetBranchID(_APIModal[i].branchId.ToString());
-                    _TempModalObj.branchId= intBranchID;
+                    _TempModalObj.branchId= BranchID.ToString();
 
                     _ListObj.Add(_TempModalObj);
                 }
@@ -1498,30 +1366,68 @@ namespace SmartBookingService.Controllers.ClientApi
         }
 
 
-        public List<PatientVisit_UAE> GetPatientVisitByApi_NewUAE(string lang, int hospitalID, string MRN, ref int Er_Status, ref string Msg)
+
+        private List<Medical_Perscription_modal> MapPerscriptionINfoModel_EYGPT(List<Medical_Perscription_EYGPT> _APIModal)
+        {
+            string formatString = "yyyyMMddHHmmss";
+
+
+            List<Medical_Perscription_modal> _ListObj = new List<Medical_Perscription_modal>();
+
+            if (_APIModal != null && _APIModal.Count > 0)
+            {
+                for (var i = 0; i < _APIModal.Count; i++)
+                {
+                    Medical_Perscription_modal _TempModalObj = new Medical_Perscription_modal();
+                    _TempModalObj.Active = 0; // FOr Dammam Fixed
+                    _TempModalObj.Age = " ";// FOr Dammam Fixed
+                    _TempModalObj.Company = " ";// FOr Dammam Fixed
+                    _TempModalObj.Doctor_Name = " ";
+                    _TempModalObj.Dosage = _APIModal[i].orders[0].dose + " " + _APIModal[i].orders[0].dispensingUnit;
+                    //_TempModalObj.DrugId = _APIModal[i].orders[0].drugCode;
+                    _TempModalObj.DrugId = Convert.ToInt32(_APIModal[i].orders[0].orderNo);
+
+
+                    _TempModalObj.Drug_Name = _APIModal[i].orders[0].drugName;
+                    _TempModalObj.Duration = _APIModal[i].orders[0].duration + " " + _APIModal[i].orders[0].durationUom;
+                    _TempModalObj.Frequency = _APIModal[i].orders[0].frequency + " / " + _APIModal[i].orders[0].frequencyUom;
+                    _TempModalObj.Instructions = " ";
+                    _TempModalObj.PrescriptionId = Convert.ToInt32(_APIModal[i].visit_Id);
+                    DateTime dt = DateTime.ParseExact(_APIModal[i].orders[0].requestDate, formatString, null);
+
+                    _TempModalObj.Prescription_Date = dt.ToString("yyyy-MM-dd");
+                    _TempModalObj.Remarks = " ";
+                    _TempModalObj.Route = " ";
+                    _TempModalObj.Strength = " ";
+                    _TempModalObj.UNIFIED_DEPT_NAME = " ";
+                    _TempModalObj.Visit_Id = Convert.ToInt32(_APIModal[i].orders[0].orderNo);
+
+                    _ListObj.Add(_TempModalObj);
+                }
+            }
+            return _ListObj;
+        }
+
+
+        public List<PatientVisit_UAE> GetPatientVisitByApi_Eygpt(string lang, int hospitalID, string MRN, ref int Er_Status, ref string Msg)
         {
             HttpStatusCode status;
-            var BranchName = GetBranchName(hospitalID);
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/Patient-InsuranceInfo-get";
+            
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/GetVisits";
+            
+            var resp = new GenericResponse();            
+            var formData = new Dictionary<string, string>
+                {                    
+                    { "patient_reg_no", MRN },
+                    { "hospital_id", hospitalID.ToString() }
+                };
 
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
-                    new KeyValuePair<string, string>("patient_reg_no", MRN)
-            };
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<List<EYG_PatientVisit>>(BaseAPIUrl, formData, out resp);
 
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&patient_reg_no=" + MRN;
-
-            //AppointmentPostResponse
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/patient-visits-get" + Parameters;
-
-            var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<PatientVisit_UAE>>(BaseAPIUrl, content, out resp, true);
-
-
-
-            var _patientData_UAE = _NewData as List<PatientVisit_UAE>;
-            var _MapDATA = MapPatientVisitModel_NewUAE(_patientData_UAE, MRN);
+            var _Data_UAE = new List<EYG_PatientVisit>();
+            _Data_UAE = _NewData as List<EYG_PatientVisit>;
+            var _MapDATA = MapPatientVisitModel_EYG(_Data_UAE, MRN , hospitalID);
+            
 
             return _MapDATA;
 
@@ -1820,61 +1726,39 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
 
-        public bool UpdatePatientBasicData_NewUAE(int hospitalID, string MRN, string DOB, string MaritalStatus,string Gender,string patient_phone,string patient_Email, ref int Er_Status, ref string Msg)
+        public bool UpdatePatientBasicData_NewUAE_EYGPT(int hospitalID, string MRN, string DOB, string MaritalStatus,string Gender,string patient_phone,string patient_Email, ref int Er_Status, ref string Msg)
         {
-
-
             var TempPcell = patient_phone.ToString();
-
             // change the the Format to
-            TempPcell = TempPcell.Replace("%2B971", "");
+            TempPcell = TempPcell.Replace("%2B20", "");
             TempPcell = TempPcell.Replace("+", "");
-
             //TempPcell = TempPcell.Substring(0,3).Replace("966", "");                            
-            if (TempPcell.Substring(0, 5) == "00971")
+            if (TempPcell.Substring(0, 4) == "0020")
             {
-                TempPcell = TempPcell.Substring(5, TempPcell.Length - 5);
+                TempPcell = TempPcell.Substring(4, TempPcell.Length - 4);
             }
-            if (TempPcell.Substring(0, 3) == "971")
+            if (TempPcell.Substring(0, 2) == "20")
             {
-                TempPcell = TempPcell.Substring(3, TempPcell.Length - 3);
+                TempPcell = TempPcell.Substring(2, TempPcell.Length - 2);
             }
             var FirstChar = TempPcell.Substring(0, 1);
-			//if (FirstChar != "0")
-			//{
-			//	TempPcell = "0" + TempPcell;
-			//}
-
-
 
 			HttpStatusCode status;
-
-            var BranchName = GetBranchName(hospitalID);
-
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/Patient-BasicData-update";
-
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
-                    new KeyValuePair<string, string>("patient_reg_no", MRN),
-                    new KeyValuePair<string, string>("patient_phone", TempPcell),
-                    new KeyValuePair<string, string>("patient_DOB", DOB),
-                    new KeyValuePair<string, string>("patient_Gender", Gender),
-                    new KeyValuePair<string, string>("Marital_Status", MaritalStatus)
-                    //new KeyValuePair<string, string>("patient_Email", MRN)
-
-            };
-
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&patient_reg_no=" + MRN;
-            Parameters += "&patient_phone=" + TempPcell;
-            Parameters += "&patient_DOB=" + DOB;
-            Parameters += "&patient_Gender=" + Gender;
-            Parameters += "&Marital_Status=" + MaritalStatus;
-
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/Patient-BasicData-update" + Parameters;
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<GenericResponse>(BaseAPIUrl, content, out resp, true);
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/UpdatePatient";
 
+            
+
+
+            var formData = new Dictionary<string, string>
+                {
+                    { "patient_reg_no", MRN },
+                    { "Hospital_id", hospitalID.ToString() },
+                    { "patient_phone", TempPcell },
+                    { "patient_DOB", DOB}                    
+                };
+
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<GenericResponse>(BaseAPIUrl, formData, out resp);            
             Er_Status = 0;
             Msg = "Updated Failed. Please try again later.";
             if (resp != null)
@@ -1889,38 +1773,25 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
 
-        public List<PateintTests_New_V4> GetPatientTestList_NewUAE(string lang, int hospitalID, string MRN, ref int Er_Status, ref string Msg)
+        public List<PateintTests_New_V4> GetPatientTestList_NewEYG(string lang, int hospitalID, string MRN, ref int Er_Status, ref string Msg)
         {
             HttpStatusCode status;
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/GetInvestigations";
 
-            var BranchName = GetBranchName(hospitalID);
-
-            string BaseAPIUrl = "https://app.saudigerman.com/Services/api/Test-List-Get";
-
-            var content = new[]{
-                    new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
-                    new KeyValuePair<string, string>("patient_reg_no", MRN)
-            };
-
-            var Parameters = "?hospital_id=" + BranchName.ToString();
-            Parameters += "&patient_reg_no=" + MRN;
-
-            //AppointmentPostResponse
-            BaseAPIUrl = "https://app.saudigerman.com/Services/api/Test-List-Get" + Parameters;
+            var formData = new Dictionary<string, string>
+                {
+                    { "patient_reg_no", MRN },
+                    { "hospital_id", hospitalID.ToString() }
+                };
 
             var resp = new GenericResponse();
-            var _NewData = RestUtility.CallAPI_POST_UAE<List<LabTest_List_Modal>>(BaseAPIUrl, content, out resp, true);
-
-
-            var _patientData_Dam = new List<LabTest_List_Modal>();
-            _patientData_Dam = _NewData as List<LabTest_List_Modal>;
-
-            var _userInfo = MapLabRadioINfoModel_NewUAE(_patientData_Dam, hospitalID).OrderByDescending(o => o.report_date).ToList(); ;
+            var _NewDataAPI = RestUtility.EYGPT_API_Calling_POST<List<EYG_Patient_LabList>>(BaseAPIUrl, formData, out resp) as List<EYG_Patient_LabList>;
+            var _userInfo = MapLabRadioINfoModel_NewEYGPT(_NewDataAPI, hospitalID).OrderByDescending(o => o.report_date).ToList(); ;
             return _userInfo;
 
         }
 
-        private List<PateintTests_New_V4> MapLabRadioINfoModel_NewUAE(List<LabTest_List_Modal> _APIModal, int BranchID)
+        private List<PateintTests_New_V4> MapLabRadioINfoModel_NewEYGPT(List<EYG_Patient_LabList> _APIModal, int BranchID)
         {
             string formatString = "yyyy-MM-dd";
             List<PateintTests_New_V4> _ListObj = new List<PateintTests_New_V4>();
@@ -1938,9 +1809,9 @@ namespace SmartBookingService.Controllers.ClientApi
 					_TempModalObj.test_id = _APIModal[i].test_id; 
 					_TempModalObj.test_name = _APIModal[i].test_name;
 
-					//DateTime dt = DateTime.ParseExact(_APIModal[i].report_date, formatString, null);
                     DateTime ReportdateTime = DateTime.Parse(_APIModal[i].report_date.ToString());
                     _TempModalObj.report_date = ReportdateTime;
+                    
                     _TempModalObj.ftp_path = _APIModal[i].ftp_path;
 
 
@@ -1953,28 +1824,11 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
 
-		public TestResultMain GetPatientTestResultsList_NewUAE(string lang, int hospitalID, string TestID, ref int Er_Status, ref string Msg)
+		public TestResultMain GetPatientTestResultsList_NewEYG(string lang, int hospitalID, string TestID, ref int Er_Status, ref string Msg)
 		{
 			HttpStatusCode status;
 
-			var BranchName = GetBranchName(hospitalID);
-
-			string BaseAPIUrl = "";
-
-			var content = new[]{
-					new KeyValuePair<string, string>("hospital_id", BranchName.ToString()),
-					new KeyValuePair<string, string>("test_id", TestID)
-			};
-
-			var Parameters = "?hospital_id=" + BranchName.ToString();
-			Parameters += "&test_id=" + TestID;
-
-			//AppointmentPostResponse
-			BaseAPIUrl = "https://app.saudigerman.com/Services/api/test-resultdetails-get" + Parameters;
-
-			var resp = new GenericResponse();
-			var _NewData = RestUtility.CallAPI_POST_UAE<List<TestResult_details_UAE>>(BaseAPIUrl, content, out resp, true);
-
+			
 
 			var _patientData_Dam = new List<TestResult_details_UAE>();
 			_patientData_Dam = _NewData as List<TestResult_details_UAE>;
@@ -2384,6 +2238,30 @@ namespace SmartBookingService.Controllers.ClientApi
             return _patientData_Dam;
 
         }
+
+        public void SendSMS_EYGPT (string hospitalId, string PhoneNumber , string SmsBody)
+		{
+            HttpStatusCode status;
+            var resp = new GenericResponse();
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/Reservation_Reschedule";
+
+            var formData = new Dictionary<string, string>
+                {
+                    { "Hospital_id", hospitalId },
+                    { "mobile", PhoneNumber },
+                    { "body", SmsBody }                    
+                };
+
+            var _NewData = RestUtility.EYGPT_API_Calling_POST<Eyg_sms_Resp>(BaseAPIUrl, formData, out resp) as Eyg_sms_Resp;
+
+            if (resp.status == 1)
+			{
+                var sms = "Successfull";
+			}
+        }
+
+
+
 
 
 

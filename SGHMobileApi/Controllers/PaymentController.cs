@@ -15,6 +15,7 @@ using System.Configuration;
 using RestClient;
 using System.Net;
 using SmartBookingService.Controllers.ClientApi;
+using NLog.Fluent;
 
 namespace SGHMobileApi.Controllers
 {
@@ -23,6 +24,8 @@ namespace SGHMobileApi.Controllers
     [AuthenticationFilter]
     public class PaymentController : ApiController
     {
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+
         private PaymentDB _paymentDb = new PaymentDB();
         private GenericResponse _resp = new GenericResponse()
         {
@@ -735,9 +738,10 @@ namespace SGHMobileApi.Controllers
         [ResponseType(typeof(List<GenericResponse>))]
         public IHttpActionResult PaymentConfirmation_V5(FormDataCollection col)
         {
+            log.Info("step0");
             _resp = new GenericResponse();
             CommonDB CDB = new CommonDB();
-
+            //log.Info("step1");
             if (!string.IsNullOrEmpty(col["appointment_id"])
                 && !string.IsNullOrEmpty(col["bill_type"])
                 && !string.IsNullOrEmpty(col["hospital_id"])
@@ -746,7 +750,7 @@ namespace SGHMobileApi.Controllers
                 && !string.IsNullOrEmpty(col["Payment_Status"])
                 )
             {
-
+                //log.Info("step2");
                 var appointment_id = Convert.ToInt32(col["appointment_id"]);
                 var hospitalID = Convert.ToInt32(col["hospital_id"]);
                 var BillType = col["bill_type"];
@@ -776,19 +780,20 @@ namespace SGHMobileApi.Controllers
 
                 if (hospitalID >= 301 && hospitalID < 400) /*for UAE BRANCHES*/
                 {
+                    //log.Info("step3");
                     // NEw Development For Video Call
                     ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
                     GenericResponse responseOut = new GenericResponse();
 
                     var VideoURLUAE = "";
                     
-                    var userDataInfo = _UAEApiCaller.SavePaymentConfirmation_NewUAE(appointment_id.ToString(), hospitalID
+                    var userDataInfo = _UAEApiCaller.SavePaymentConfirmation_NewUAE2(appointment_id.ToString(), hospitalID
                         ,OnlineTrasactionID, PaidAmount,PaymentMethod, TrackID.ToString(), VideoURLUAE , "",
                         out responseOut);
-
+                    //log.Info("step4");
                     _resp.status = responseOut.status;
                     // For Testin UAE not working
-                    _resp.status = 1;
+                    //_resp.status = 1;
 
                     if (_resp.status ==1 )
                         _resp.msg = "Payment Save Successfully";
@@ -803,7 +808,7 @@ namespace SGHMobileApi.Controllers
                     //_resp.msg = "Sorry this service not available";
                     return Ok(_resp);
                 }
-
+                log.Info("step5");
 
 
                 var Status = 0;

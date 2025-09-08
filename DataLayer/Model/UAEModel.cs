@@ -120,11 +120,11 @@ namespace DataLayer.Model
 		public string slotTypeId { get; set; }
 		public string slotTypeName { get; set; }
 
+        public bool SystemFlag { get; set; }
 
 
 
-
-	}
+    }
 
 	public class UAE_Doctor_Days
 	{
@@ -177,6 +177,9 @@ namespace DataLayer.Model
 		public string MobileNumber { set; get; }
 		public string Remarks { set; get; }
 		public int isVideo { set; get; }
+
+		// For EYGPT
+		public string SlotId { get; set; }
 	}
 
 	public class AppointmentPostResponse
@@ -185,6 +188,7 @@ namespace DataLayer.Model
 		public string Message { get; set; }
 		public string AppId { get; set; }
 		public string AppStatus { get; set; }
+		public string id { get; set; }
 	}
 
 	public class PaymentConfirmPostResponse

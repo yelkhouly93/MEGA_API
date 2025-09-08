@@ -300,6 +300,26 @@ namespace SGHMobileApi.Controllers
                     }
                     return Ok(resp);
                 }
+                else if (hospitaId > 200 && hospitaId < 300)
+                {
+                    // EYGPT
+                    var EYGPTMRN = col["patient_reg_no"].ToString();
+                    ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+                    var _NewData = _EYGApiCaller.GetPatientTestList_NewEYG(lang, hospitaId, EYGPTMRN, ref errStatus, ref errMessage);
+
+                    if (_NewData != null && _NewData.Count > 0)
+                    {
+                        resp.status = 1;
+                        resp.msg = errMessage;
+                        resp.response = _NewData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = errMessage;
+                    }
+                    return Ok(resp);
+                }
                 else if (hospitaId == 9)
                 {
                     LoginApiCaller _loginApiCaller = new LoginApiCaller();
@@ -355,9 +375,6 @@ namespace SGHMobileApi.Controllers
         public IHttpActionResult GetTestResultDetail_V4(FormDataCollection col)
         {
             var resp = new GenericResponse();
-            //if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"])
-
-            //    )
 
             if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]) && !string.IsNullOrEmpty(col["Report_type"]))
             {
@@ -424,6 +441,126 @@ namespace SGHMobileApi.Controllers
 				}
                 else
 				{
+                    allPatientResults = apiCaller.GetPatientLabResultsByApi_V4(lang, hospitaId, testId, ref errStatus, ref errMessage);
+                }
+
+                //var allPatientResults = apiCaller.GetPatientLabResultsByApi(lang, hospitaId, testId, ref errStatus, ref errMessage);
+
+                if (allPatientResults != null)
+                {
+                    resp.status = 1;
+                    resp.msg = errMessage;
+                    resp.response = allPatientResults;
+
+                }
+                else
+                {
+                    resp.status = 0;
+                    resp.msg = "Resutls Empty";
+                }
+            }
+            else
+            {
+                resp.status = 0;
+                resp.msg = "Missing Parameter.";
+            }
+
+
+            return Ok(resp);
+        }
+
+        [HttpPost]
+        [Route("v5/test-resultdetails-get")]
+        [ResponseType(typeof(List<GenericResponse>))]
+        public IHttpActionResult GetTestResultDetail_V5(FormDataCollection col)
+        {
+            var resp = new GenericResponse();
+            
+            if (!string.IsNullOrEmpty(col["test_id"]) && !string.IsNullOrEmpty(col["hospital_id"]) 
+                && !string.IsNullOrEmpty(col["Report_type"])
+                && !string.IsNullOrEmpty(col["patient_reg_no"])
+                )
+            {
+                var lang = col["lang"];
+                var hospitaId = Convert.ToInt32(col["hospital_id"]);
+
+                var MRN= Convert.ToInt32(col["patient_reg_no"]).ToString();
+                var testId = col["test_id"].ToString();
+
+                var ReportType = "Lab";
+                if (!string.IsNullOrEmpty(col["Report_type"]))
+                    ReportType = col["Report_type"].ToString();
+
+
+
+                int errStatus = 0;
+                string errMessage = "";
+
+                var patientDb = new PatientDB();
+                var apiCaller = new PatientLabResultsApiCaller();
+
+
+                var allPatientResults = new TestResultMain();
+
+                if (hospitaId > 300 && hospitaId < 400)
+                {
+
+                    ApiCallerUAE _UAEApiCaller = new ApiCallerUAE();
+                    var _NewData = _UAEApiCaller.GetPatientTestResultsList_NewUAE(lang, hospitaId, testId, ref errStatus, ref errMessage);
+                    
+                    if (_NewData != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Data Found";
+                        resp.response = _NewData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No data Found.";
+                    }
+                    return Ok(resp);
+                }
+                else if (hospitaId > 200 && hospitaId < 300)
+                {
+
+                    ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
+                    var _NewData = _EYGApiCaller.GetPatientTestResultsList_NewEYG(lang, hospitaId, testId, ref errStatus, ref errMessage);
+
+                    if (_NewData != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Data Found";
+                        resp.response = _NewData;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No data Found.";
+                    }
+                    return Ok(resp);
+                }
+                else if (hospitaId == 9)
+                {
+                    ORACLECS_DB _OraDb = new ORACLECS_DB();
+                    string OraSQL = "";
+
+                    var dataResults = _OraDb.GetPatientLabResultsByApi_Dam(testId.ToString(), ReportType);
+                    if (dataResults != null)
+                    {
+                        resp.status = 1;
+                        resp.msg = "Data Found";
+                        resp.response = dataResults;
+                    }
+                    else
+                    {
+                        resp.status = 0;
+                        resp.msg = "No data Found.";
+                    }
+                    return Ok(resp);
+                }
+                else
+                {
                     allPatientResults = apiCaller.GetPatientLabResultsByApi_V4(lang, hospitaId, testId, ref errStatus, ref errMessage);
                 }
 
