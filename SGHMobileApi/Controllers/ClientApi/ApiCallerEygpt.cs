@@ -378,6 +378,11 @@ namespace SmartBookingService.Controllers.ClientApi
 
             userInfo.Branch_Name_ar = userInfoModel.branch_AR;
 
+            if (userInfoModel.gender == "Male")            
+                userInfo.image_url = "https://cxmw.sghgroup.net/DoctorsProfile/CAI/EYG_FEMALE_PATIENT.png";
+            else
+                userInfo.image_url = "https://cxmw.sghgroup.net/DoctorsProfile/CAI/EYG_MALE_PATIENT.png";
+
             //userInfo.CurrentCity = userInfoModel[0].CurrentCity;
             //userInfo.IdType = userInfoModel[0].IdType;
             //userInfo.IdExpiry = userInfoModel[0].IdExpiry;        
@@ -1824,115 +1829,130 @@ namespace SmartBookingService.Controllers.ClientApi
 
 
 
-		public TestResultMain GetPatientTestResultsList_NewEYG(string lang, int hospitalID, string TestID, ref int Er_Status, ref string Msg)
+		public TestResultMain GetPatientTestResultsList_NewEYG(string lang, int hospitalID,string MRN, string TestID, ref int Er_Status, ref string Msg)
 		{
 			HttpStatusCode status;
 
-			
 
-			var _patientData_Dam = new List<TestResult_details_UAE>();
-			_patientData_Dam = _NewData as List<TestResult_details_UAE>;
+            string BaseAPIUrl = "http://130.7.1.68/mopile_app/public/api/getLabDetails";
+
+            var formData = new Dictionary<string, string>
+                {
+                    { "patient_reg_no", MRN },
+                    { "hospital_id", hospitalID.ToString() },
+                    { "hash", TestID }
+                    
+                };
+
+            var resp = new GenericResponse();
+            var _NewDataAPI = RestUtility.EYGPT_API_Calling_POST<EYG_TestResult_Details>(BaseAPIUrl, formData, out resp) as EYG_TestResult_Details;
+
+
+   //         var _patientData_Dam = new List<TestResult_details_UAE>();
+			//_patientData_Dam = _NewData as List<TestResult_details_UAE>;
 
 			
-            var _userInfo = MapTestResultModelToTestResultMain_UAE(_patientData_Dam);           
+            var _userInfo = MapTestResultModelToTestResultMain_EYG(_NewDataAPI);           
 
             return _userInfo;
 
 		}
 
-        private TestResultMain MapTestResultModelToTestResultMain_UAE(List<TestResult_details_UAE> testOrders)
+        private TestResultMain MapTestResultModelToTestResultMain_EYG(EYG_TestResult_Details testOrders)
         {  
 
             TestResultMain testResultMain = new TestResultMain();
             List<TestResultParameter> testParameters = new List<TestResultParameter>();
 
-            testResultMain.testCode = testOrders[0].testCode;
-            testResultMain.testName = testOrders[0].testName;
-            testResultMain.section = testOrders[0].section;
+            testResultMain.testCode = testOrders.testCode;
+            testResultMain.testName = testOrders.testName;
+            testResultMain.section = testOrders.section;
 
-            testResultMain.sample_name = testOrders[0].sample_name;
-            testResultMain.collected_date = testOrders[0].collected_date;
+            testResultMain.sample_name = testOrders.sample_name;
+            testResultMain.collected_date = testOrders.collected_date;
 
 
             // For Testing
-            var icount = testOrders[0].parameters.Count();
+            var icount = testOrders.parameters.Count();
             //var itst = 1;
 
-            if (testOrders.Count > 0)
+            if (icount > 0)
 			{
-                foreach (var testParam in testOrders)
-				{
-                    if (testParam.parameters.Count > 0 )
-					{
+                foreach (var param in testOrders.parameters)
+                {
 
-                        foreach (var param in testParam.parameters)
+                    TestResultParameter parameter = new TestResultParameter();
+
+                    if (param.parameter_name == "Sendout File Result")
+                    {
+                        continue;
+                    }
+
+
+                    parameter.parameter_name = param.parameter_name ?? "";
+                    parameter.result = param.result ?? "";
+                    parameter.unit = param.unit ?? "";
+                    parameter.range = param.range ?? "";
+                    parameter.ResultValueCategory = param.resultValueCategory ?? "N";
+
+                    //parameter.severityID = "N";
+                    parameter.rating = param.rating;
+                    parameter.severityID = param.severityID;
+
+                    if (parameter.result != "")
+                    {
+                        var tempResult = parameter.result;
+
+                        if (tempResult.Substring(0, 1) == ".")
                         {
-
-                            TestResultParameter parameter = new TestResultParameter();
-
-                            if (param.parameter_name == "Sendout File Result")
-                            {
-                                continue;
-                            }
-
-
-                            parameter.parameter_name = param.parameter_name ?? "";
-                            parameter.result = param.result ?? "";
-                            parameter.unit = param.unit ?? "";
-                            parameter.range = param.range ?? "";
-                            parameter.ResultValueCategory = param.resultValueCategory ?? "N";
-
-                            //parameter.severityID = "N";
-                            parameter.rating = param.rating;
-                            parameter.severityID = param.severityID;
-
-                            if (parameter.result != "")
-                            {
-                                var tempResult = parameter.result;
-
-                                if (tempResult.Substring(0, 1) == ".")
-                                {
-                                    parameter.result = "0" + tempResult;
-                                }
-                                else if (tempResult.EndsWith("."))
-                                {
-                                    parameter.result = tempResult + "0";
-                                }
-                            }
-
-
-
-                            if (param.severityID == null || param.severityID.Trim() == "")
-                                parameter.severityID = "N";
-
-                            parameter.Weightage = 0;
-
-                            if (parameter.severityID == "N")
-                                parameter.Weightage = 0;
-                            else if (parameter.severityID == "H")
-                                parameter.Weightage = 50;
-                            else if (parameter.severityID == "L")
-                                parameter.Weightage = 50;
-                            else if (parameter.severityID == "P")
-                                parameter.Weightage = 100;
-
-
-                            if (parameter.parameter_name == "RAD. REPORT")
-                                parameter.parameter_name = "RADIOLOGY REPORT";
-
-                            parameter.parameter_name = parameter.parameter_name.Replace(":", "").Replace(".", "");
-
-
-
-
-                            testParameters.Add(parameter);
-
-                            //itst += 1;
-
+                            parameter.result = "0" + tempResult;
+                        }
+                        else if (tempResult.EndsWith("."))
+                        {
+                            parameter.result = tempResult + "0";
                         }
                     }
-				}                    
-			}
+
+
+
+                    if (param.severityID == null || param.severityID.Trim() == "")
+                        parameter.severityID = "N";
+
+                    parameter.Weightage = 0;
+
+                    if (parameter.severityID == "N")
+                        parameter.Weightage = 0;
+                    else if (parameter.severityID == "H")
+                        parameter.Weightage = 50;
+                    else if (parameter.severityID == "L")
+                        parameter.Weightage = 50;
+                    else if (parameter.severityID == "P")
+                        parameter.Weightage = 100;
+
+
+                    if (parameter.parameter_name == "RAD. REPORT")
+                        parameter.parameter_name = "RADIOLOGY REPORT";
+
+                    parameter.parameter_name = parameter.parameter_name.Replace(":", "").Replace(".", "");
+
+
+
+
+                    testParameters.Add(parameter);
+
+                    //itst += 1;
+
+                }
+
+                //            foreach (var testParam in testOrders)
+                //{
+                //                if (testParam.parameters.Count > 0 )
+                //	{
+
+
+                //                }
+                //}                    
+            }
             
 
             testParameters = testParameters.OrderByDescending(o => o.Weightage).ToList();

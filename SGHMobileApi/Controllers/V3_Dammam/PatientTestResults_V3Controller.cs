@@ -525,7 +525,8 @@ namespace SGHMobileApi.Controllers
                 {
 
                     ApiCallerEygpt _EYGApiCaller = new ApiCallerEygpt();
-                    var _NewData = _EYGApiCaller.GetPatientTestResultsList_NewEYG(lang, hospitaId, testId, ref errStatus, ref errMessage);
+                    var MRNEYGPT = col["patient_reg_no"].ToString();
+                    var _NewData = _EYGApiCaller.GetPatientTestResultsList_NewEYG(lang, hospitaId, MRNEYGPT, testId, ref errStatus, ref errMessage);
 
                     if (_NewData != null)
                     {
@@ -601,7 +602,7 @@ namespace SGHMobileApi.Controllers
             {
                 var lang = col["lang"];
                 var hospitaId = Convert.ToInt32(col["hospital_id"]);
-                var testId = col["test_id"];
+                var testId = col["test_id"].ToString();
 
                 var MRN = "";
                 if (!string.IsNullOrEmpty(col["patient_reg_no"]))
@@ -665,6 +666,31 @@ namespace SGHMobileApi.Controllers
                     resp.msg = "No Result found";                    
                     return Ok(resp);
                 }
+                else if (hospitaId > 200 && hospitaId < 300)
+                {
+
+                    if (string.IsNullOrEmpty(MRN))
+                    {
+                        resp.status = 0;
+                        resp.msg = "Wrong MRN.";
+                        return Ok(resp);
+                    }
+
+                    int errStatus = 0;
+                    string errMessage = "";
+
+                    var tmpobj = new TestResultPDF();
+                    var BranchName = "EYGPT_RESULTPDF_" + hospitaId.ToString();
+
+                    tmpobj.ReportUrl = ConfigurationManager.AppSettings[BranchName].ToString() + testId.ToString();
+
+                    resp.status = 1;
+                    resp.msg = "Result found";
+                    resp.response = tmpobj;
+                    return Ok(resp);
+
+                }
+
                 else if (hospitaId == 9)
 				{
                     var tmpobj = new TestResultPDF();
